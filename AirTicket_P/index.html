@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>항공권 통합 조회 도구</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 650px;
+            margin: auto;
+            border: 1px solid #ccc;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .trip-type-group {
+            display: flex;
+            gap: 1.25rem;
+            flex-wrap: nowrap;
+            align-items: center;
+            width: 100%;
+            justify-content: flex-start;
+            white-space: nowrap;
+        }
+
+        .trip-type-group label {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: normal;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .airport-dropdown {
+            position: relative;
+            max-height: 240px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-top: none;
+            background-color: #fff;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+            z-index: 100;
+            display: none;
+        }
+
+        .airport-dropdown.visible {
+            display: block;
+        }
+
+        .airport-item {
+            padding: 10px;
+            border-bottom: 1px solid #f1f1f1;
+            cursor: pointer;
+        }
+
+        .airport-item:last-child {
+            border-bottom: none;
+        }
+
+        .airport-item:hover {
+            background-color: #f0f8ff;
+        }
+
+        .airport-code {
+            font-weight: 700;
+            margin-right: 8px;
+        }
+
+        .airport-details {
+            color: #555;
+            font-size: 0.95em;
+        }
+
+        .info {
+            font-size: 0.85em;
+            color: #666;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <H3><u> <center> <b> <font color="red" align="center">반드시 Chrome을 '시크릿 창'으로  띄우고 하기 값 진행.</font> </b> </center></u></H3>
+        <h2>✈️ 항공권 통합 조회</h2>
+
+        <div class="input-group">
+            <label>출발지 (IATA 코드 또는 공항명 검색)</label>
+            <input type="text" id="origin" placeholder="공항명, 도시, IATA 코드로 검색" autocomplete="off" value="SEL">
+            <div class="airport-dropdown" id="originDropdown"></div>
+        </div>
+
+        <div class="input-group">
+            <label>도착지 (IATA 코드 또는 공항명 검색)</label>
+            <input type="text" id="destination" placeholder="공항명, 도시, IATA 코드로 검색" autocomplete="off">
+            <div class="airport-dropdown" id="destinationDropdown"></div>
+        </div>
+
+        <div class="input-group">
+            <label>여정 선택</label>
+            <div class="trip-type-group">
+                <label><input type="checkbox" id="roundtrip" checked> 왕복</label>
+                <label><input type="checkbox" id="oneway"> 편도</label>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label>가는 날</label>
+            <input type="date" id="depDate">
+        </div>
+
+        <div class="input-group">
+            <label>오는 날</label>
+            <input type="date" id="retDate">
+        </div>
+
+        <button onclick="searchFlights()">모든 사이트에서 조회하기</button>
+
+        <p class="info">* 성인 1명, 직항 조건이 자동으로 적용됩니다.<br>
+            * 브라우저 팝업 차단 해제가 필요할 수 있습니다.</p>
+    </div>
+
+    <script>
+        const airports = [
+            { code: 'ICN', name: 'Incheon International Airport', koName: '인천국제공항', city: 'Seoul', koCity: '서울', country: 'South Korea' },
+            { code: 'GMP', name: 'Gimpo International Airport', koName: '김포국제공항', city: 'Seoul', koCity: '서울', country: 'South Korea' },
+            { code: 'PUS', name: 'Gimhae International Airport', koName: '김해국제공항', city: 'Busan', koCity: '부산', country: 'South Korea' },
+            { code: 'CJU', name: 'Jeju International Airport', koName: '제주국제공항', city: 'Jeju', koCity: '제주', country: 'South Korea' },
+            { code: 'NRT', name: 'Narita International Airport', koName: '나리타국제공항', city: 'Tokyo', koCity: '도쿄', country: 'Japan' },
+            { code: 'HND', name: 'Tokyo Haneda Airport', koName: '하네다공항', city: 'Tokyo', koCity: '도쿄', country: 'Japan' },
+            { code: 'HKG', name: 'Hong Kong International Airport', koName: '홍콩국제공항', city: 'Hong Kong', koCity: '홍콩', country: 'China' },
+            { code: 'TPE', name: 'Taiwan Taoyuan International Airport', koName: '타이완 타오위안 국제공항', city: 'Taipei', koCity: '타이베이', country: 'Taiwan' },
+            { code: 'SIN', name: 'Singapore Changi Airport', koName: '싱가포르 창이공항', city: 'Singapore', koCity: '싱가포르', country: 'Singapore' },
+            { code: 'BKK', name: 'Suvarnabhumi Airport', koName: '수완나품공항', city: 'Bangkok', koCity: '방콕', country: 'Thailand' },
+            { code: 'KUL', name: 'Kuala Lumpur International Airport', koName: '쿠알라룸푸르 국제공항', city: 'Kuala Lumpur', koCity: '쿠알라룸푸르', country: 'Malaysia' },
+            { code: 'DXB', name: 'Dubai International Airport', koName: '두바이 국제공항', city: 'Dubai', koCity: '두바이', country: 'United Arab Emirates' },
+            { code: 'DOH', name: 'Hamad International Airport', koName: '하마드 국제공항', city: 'Doha', koCity: '도하', country: 'Qatar' },
+            { code: 'IST', name: 'Istanbul Airport', koName: '이스탄불공항', city: 'Istanbul', koCity: '이스탄불', country: 'Turkey' },
+            { code: 'LHR', name: 'Heathrow Airport', koName: '히드로공항', city: 'London', koCity: '런던', country: 'United Kingdom' },
+            { code: 'LGW', name: 'Gatwick Airport', koName: '게트윅공항', city: 'London', koCity: '런던', country: 'United Kingdom' },
+            { code: 'CDG', name: 'Charles de Gaulle Airport', koName: '샤를드골공항', city: 'Paris', koCity: '파리', country: 'France' },
+            { code: 'ORY', name: 'Orly Airport', koName: '오를리공항', city: 'Paris', koCity: '파리', country: 'France' },
+            { code: 'AMS', name: 'Amsterdam Airport Schiphol', koName: '스키폴공항', city: 'Amsterdam', koCity: '암스테르담', country: 'Netherlands' },
+            { code: 'FRA', name: 'Frankfurt Airport', koName: '프랑크푸르트공항', city: 'Frankfurt', koCity: '프랑크푸르트', country: 'Germany' },
+            { code: 'MUC', name: 'Munich Airport', koName: '뮌헨공항', city: 'Munich', koCity: '뮌헨', country: 'Germany' },
+            { code: 'ZRH', name: 'Zurich Airport', koName: '취리히공항', city: 'Zurich', koCity: '취리히', country: 'Switzerland' },
+            { code: 'VIE', name: 'Vienna International Airport', koName: '비엔나 국제공항', city: 'Vienna', koCity: '빈', country: 'Austria' },
+            { code: 'BCN', name: 'Barcelona–El Prat Airport', koName: '엘프라트공항', city: 'Barcelona', koCity: '바르셀로나', country: 'Spain' },
+            { code: 'MAD', name: 'Adolfo Suárez Madrid–Barajas Airport', koName: '마드리드 바라하스공항', city: 'Madrid', koCity: '마드리드', country: 'Spain' },
+            { code: 'FCO', name: 'Leonardo da Vinci–Fiumicino Airport', koName: '피우미치노공항', city: 'Rome', koCity: '로마', country: 'Italy' },
+            { code: 'MXP', name: 'Malpensa Airport', koName: '말펜사공항', city: 'Milan', koCity: '밀라노', country: 'Italy' },
+            { code: 'ARN', name: 'Stockholm Arlanda Airport', koName: '알란다공항', city: 'Stockholm', koCity: '스톡홀름', country: 'Sweden' },
+            { code: 'OSL', name: 'Oslo Gardermoen Airport', koName: '오슬로공항', city: 'Oslo', koCity: '오슬로', country: 'Norway' },
+            { code: 'CPH', name: 'Copenhagen Airport', koName: '코펜하겐공항', city: 'Copenhagen', koCity: '코펜하겐', country: 'Denmark' },
+            { code: 'HEL', name: 'Helsinki Airport', koName: '헬싱키공항', city: 'Helsinki', koCity: '헬싱키', country: 'Finland' },
+            { code: 'DUB', name: 'Dublin Airport', koName: '더블린공항', city: 'Dublin', koCity: '더블린', country: 'Ireland' },
+            { code: 'JFK', name: 'John F. Kennedy International Airport', koName: '존 F. 케네디 국제공항', city: 'New York', koCity: '뉴욕', country: 'USA' },
+            { code: 'EWR', name: 'Newark Liberty International Airport', koName: '뉴어크공항', city: 'Newark', koCity: '뉴어크', country: 'USA' },
+            { code: 'LGA', name: 'LaGuardia Airport', koName: '라과디아공항', city: 'New York', koCity: '뉴욕', country: 'USA' },
+            { code: 'BOS', name: 'Logan International Airport', koName: '로건공항', city: 'Boston', koCity: '보스턴', country: 'USA' },
+            { code: 'ORD', name: 'O\'Hare International Airport', koName: '오헤어 국제공항', city: 'Chicago', koCity: '시카고', country: 'USA' },
+            { code: 'ATL', name: 'Hartsfield–Jackson Atlanta International Airport', koName: '하츠필드잭슨 애틀란타 국제공항', city: 'Atlanta', koCity: '애틀란타', country: 'USA' },
+            { code: 'DFW', name: 'Dallas/Fort Worth International Airport', koName: '달라스 포트워스 국제공항', city: 'Dallas', koCity: '댈러스', country: 'USA' },
+            { code: 'LAX', name: 'Los Angeles International Airport', koName: '로스앤젤레스 국제공항', city: 'Los Angeles', koCity: '로스앤젤레스', country: 'USA' },
+            { code: 'SFO', name: 'San Francisco International Airport', koName: '샌프란시스코 국제공항', city: 'San Francisco', koCity: '샌프란시스코', country: 'USA' },
+            { code: 'SEA', name: 'Seattle–Tacoma International Airport', koName: '시애틀 타코마 국제공항', city: 'Seattle', koCity: '시애틀', country: 'USA' },
+            { code: 'MIA', name: 'Miami International Airport', koName: '마이애미 국제공항', city: 'Miami', koCity: '마이애미', country: 'USA' },
+            { code: 'YYZ', name: 'Toronto Pearson International Airport', koName: '토론토 피어슨 국제공항', city: 'Toronto', koCity: '토론토', country: 'Canada' },
+            { code: 'YVR', name: 'Vancouver International Airport', koName: '밴쿠버 국제공항', city: 'Vancouver', koCity: '밴쿠버', country: 'Canada' },
+            { code: 'GRU', name: 'São Paulo–Guarulhos International Airport', koName: '상파울루 구아룰료스 국제공항', city: 'São Paulo', koCity: '상파울로', country: 'Brazil' },
+            { code: 'EZE', name: 'Ministro Pistarini International Airport', koName: '부에노스아이레스 미니스트로 피스타리니 국제공항', city: 'Buenos Aires', koCity: '부에노스아이레스', country: 'Argentina' },
+            { code: 'JNB', name: 'O. R. Tambo International Airport', koName: '요한네스버그 탐보 국제공항', city: 'Johannesburg', koCity: '요하네스버그', country: 'South Africa' },
+            { code: 'CPT', name: 'Cape Town International Airport', koName: '케이프타운 국제공항', city: 'Cape Town', koCity: '케이프타운', country: 'South Africa' },
+            { code: 'SYD', name: 'Sydney Kingsford Smith Airport', koName: '시드니공항', city: 'Sydney', koCity: '시드니', country: 'Australia' },
+            { code: 'MEL', name: 'Melbourne Airport', koName: '멜버른공항', city: 'Melbourne', koCity: '멜버른', country: 'Australia' },
+            { code: 'BNE', name: 'Brisbane Airport', koName: '브리즈번공항', city: 'Brisbane', koCity: '브리즈번', country: 'Australia' },
+            { code: 'AKL', name: 'Auckland Airport', koName: '오클랜드공항', city: 'Auckland', koCity: '오클랜드', country: 'New Zealand' },
+            { code: 'DEL', name: 'Indira Gandhi International Airport', koName: '인디라 간디 국제공항', city: 'Delhi', koCity: '델리', country: 'India' },
+            { code: 'BOM', name: 'Chhatrapati Shivaji Maharaj International Airport', koName: '뭄바이 국제공항', city: 'Mumbai', koCity: '뭄바이', country: 'India' },
+            { code: 'BLR', name: 'Kempegowda International Airport', koName: '벵갈루루 국제공항', city: 'Bengaluru', koCity: '벵갈루루', country: 'India' },
+            { code: 'MAA', name: 'Chennai International Airport', koName: '첸나이 국제공항', city: 'Chennai', koCity: '첸나이', country: 'India' },
+            { code: 'SHJ', name: 'Sharjah International Airport', koName: '샤르자 국제공항', city: 'Sharjah', koCity: '샤르자', country: 'United Arab Emirates' },
+            { code: 'PEK', name: 'Beijing Capital International Airport', koName: '베이징 서우두 국제공항', city: 'Beijing', koCity: '베이징', country: 'China' },
+            { code: 'PVG', name: 'Shanghai Pudong International Airport', koName: '상하이 푸둥 국제공항', city: 'Shanghai', koCity: '상하이', country: 'China' },
+            { code: 'CAN', name: 'Guangzhou Baiyun International Airport', koName: '광저우 바이윤 국제공항', city: 'Guangzhou', koCity: '광저우', country: 'China' },
+            { code: 'SZX', name: 'Shenzhen Bao\'an International Airport', koName: '선전 바오안 국제공항', city: 'Shenzhen', koCity: '선전', country: 'China' },
+            { code: 'KIX', name: 'Kansai International Airport', koName: '간사이 국제공항', city: 'Osaka', koCity: '오사카', country: 'Japan' },
+            { code: 'NGO', name: 'Chubu Centrair International Airport', koName: '나고야 주부 센트레어 국제공항', city: 'Nagoya', koCity: '나고야', country: 'Japan' },
+            { code: 'FUK', name: 'Fukuoka Airport', koName: '후쿠오카공항', city: 'Fukuoka', koCity: '후쿠오카', country: 'Japan' },
+            { code: 'CTS', name: 'New Chitose Airport', koName: '신치토세공항', city: 'Sapporo', koCity: '삿포로', country: 'Japan' },
+            { code: 'ITM', name: 'Osaka International Airport', koName: '오사카 국제공항', city: 'Osaka', koCity: '오사카', country: 'Japan' },
+            { code: 'NKG', name: 'Nanjing Lukou International Airport', koName: '난징 루커우 국제공항', city: 'Nanjing', koCity: '난징', country: 'China' },
+            { code: 'TSA', name: 'Taipei Songshan Airport', koName: '타이베이 송산공항', city: 'Taipei', koCity: '타이베이', country: 'Taiwan' },
+            { code: 'KHH', name: 'Kaohsiung International Airport', koName: '가오슝 국제공항', city: 'Kaohsiung', koCity: '가오슝', country: 'Taiwan' },
+            { code: 'CGK', name: 'Soekarno-Hatta International Airport', koName: '자카르타 수카르노하타 국제공항', city: 'Jakarta', koCity: '자카르타', country: 'Indonesia' },
+            { code: 'DPS', name: 'Ngurah Rai International Airport', koName: '응우라라이공항 (발리)', city: 'Denpasar', koCity: '덴파사르', country: 'Indonesia' },
+            { code: 'MNL', name: 'Ninoy Aquino International Airport', koName: '니노이 아키노 국제공항', city: 'Manila', koCity: '마닐라', country: 'Philippines' },
+            { code: 'CEB', name: 'Mactan–Cebu International Airport', koName: '막탄 세부 국제공항', city: 'Cebu', koCity: '세부', country: 'Philippines' },
+            { code: 'SGN', name: 'Tan Son Nhat International Airport', koName: '탄손냣 국제공항', city: 'Ho Chi Minh City', koCity: '호치민', country: 'Vietnam' },
+            { code: 'HAN', name: 'Noi Bai International Airport', koName: '노이바이 국제공항', city: 'Hanoi', koCity: '하노이', country: 'Vietnam' },
+            { code: 'DAD', name: 'Da Nang International Airport', koName: '다낭 국제공항', city: 'Da Nang', koCity: '다낭', country: 'Vietnam' },
+            { code: 'KTM', name: 'Tribhuvan International Airport', koName: '트리부반 국제공항', city: 'Kathmandu', koCity: '카트만두', country: 'Nepal' },
+            { code: 'CCU', name: 'Netaji Subhas Chandra Bose International Airport', koName: '콜카타 국제공항', city: 'Kolkata', koCity: '콜카타', country: 'India' },
+            { code: 'HYD', name: 'Rajiv Gandhi International Airport', koName: '하이데라바드 국제공항', city: 'Hyderabad', koCity: '하이데라바드', country: 'India' },
+            { code: 'AMD', name: 'Sardar Vallabhbhai Patel International Airport', koName: '아메다바드 국제공항', city: 'Ahmedabad', koCity: '아메다바드', country: 'India' },
+            { code: 'RUH', name: 'King Khalid International Airport', koName: '리야드 킹 칼리드 국제공항', city: 'Riyadh', koCity: '리야드', country: 'Saudi Arabia' },
+            { code: 'JED', name: 'King Abdulaziz International Airport', koName: '제다 킹 압둘아지즈 국제공항', city: 'Jeddah', koCity: '제다', country: 'Saudi Arabia' },
+            { code: 'AUH', name: 'Abu Dhabi International Airport', koName: '아부다비 국제공항', city: 'Abu Dhabi', koCity: '아부다비', country: 'United Arab Emirates' },
+            { code: 'BAH', name: 'Bahrain International Airport', koName: '바레인 국제공항', city: 'Manama', koCity: '마나마', country: 'Bahrain' },
+            { code: 'KWI', name: 'Kuwait International Airport', koName: '쿠웨이트 국제공항', city: 'Kuwait City', koCity: '쿠웨이트시티', country: 'Kuwait' },
+            { code: 'TBS', name: 'Tbilisi International Airport', koName: '트빌리시 국제공항', city: 'Tbilisi', koCity: '트빌리시', country: 'Georgia' },
+            { code: 'SVO', name: 'Sheremetyevo International Airport', koName: '셰레메티예보 국제공항', city: 'Moscow', koCity: '모스크바', country: 'Russia' },
+            { code: 'DME', name: 'Domodedovo International Airport', koName: '도모데도보 국제공항', city: 'Moscow', koCity: '모스크바', country: 'Russia' },
+            { code: 'LED', name: 'Pulkovo Airport', koName: '풀코보공항', city: 'Saint Petersburg', koCity: '상트페테르부르크', country: 'Russia' },
+            { code: 'KZN', name: 'Kazan International Airport', koName: '카잔 국제공항', city: 'Kazan', koCity: '카잔', country: 'Russia' },
+            { code: 'BOG', name: 'El Dorado International Airport', koName: '엘도라도 국제공항', city: 'Bogotá', koCity: '보고타', country: 'Colombia' },
+            { code: 'MEX', name: 'Mexico City International Airport', koName: '멕시코시티 국제공항', city: 'Mexico City', koCity: '멕시코시티', country: 'Mexico' },
+            { code: 'LIM', name: 'Jorge Chávez International Airport', koName: '호르헤 차베스 국제공항', city: 'Lima', koCity: '리마', country: 'Peru' },
+            { code: 'SCL', name: 'Comodoro Arturo Merino Benítez International Airport', koName: '산티아고 국제공항', city: 'Santiago', koCity: '산티아고', country: 'Chile' },
+            { code: 'GIG', name: 'Rio de Janeiro–Galeão International Airport', koName: '리우데자네이루 국제공항', city: 'Rio de Janeiro', koCity: '리우데자네이루', country: 'Brazil' },
+            { code: 'SJO', name: 'Juan Santamaría International Airport', koName: '산 호세 국제공항', city: 'San José', koCity: '산 호세', country: 'Costa Rica' },
+            { code: 'PTY', name: 'Tocumen International Airport', koName: '토쿠멘 국제공항', city: 'Panama City', koCity: '파나마시티', country: 'Panama' },
+            { code: 'SAL', name: 'Monseñor Óscar Arnulfo Romero International Airport', koName: '산살바도르 국제공항', city: 'San Salvador', koCity: '산살바도르', country: 'El Salvador' },
+            { code: 'CCS', name: 'Simón Bolívar International Airport', koName: '시몬 볼리바르 국제공항', city: 'Caracas', koCity: '카라카스', country: 'Venezuela' },
+            { code: 'HAV', name: 'José Martí International Airport', koName: '호세 마르티 국제공항', city: 'Havana', koCity: '아바나', country: 'Cuba' },
+            { code: 'IAD', name: 'Washington Dulles International Airport', koName: '워싱턴 덜레스 국제공항', city: 'Washington, D.C.', koCity: '워싱턴 D.C.', country: 'USA' },
+            { code: 'DCA', name: 'Ronald Reagan Washington National Airport', koName: '워싱턴 내셔널 공항', city: 'Washington, D.C.', koCity: '워싱턴 D.C.', country: 'USA' },
+            { code: 'MDW', name: 'Midway International Airport', koName: '미드웨이 국제공항', city: 'Chicago', koCity: '시카고', country: 'USA' },
+            { code: 'IAH', name: 'George Bush Intercontinental Airport', koName: '휴스턴 조지 부시 국제공항', city: 'Houston', koCity: '휴스턴', country: 'USA' },
+            { code: 'DEN', name: 'Denver International Airport', koName: '덴버 국제공항', city: 'Denver', koCity: '덴버', country: 'USA' },
+            { code: 'PHX', name: 'Phoenix Sky Harbor International Airport', koName: '피닉스 스카이 하버 국제공항', city: 'Phoenix', koCity: '피닉스', country: 'USA' },
+            { code: 'LAS', name: 'Harry Reid International Airport', koName: '라스베이거스 국제공항', city: 'Las Vegas', koCity: '라스베이거스', country: 'USA' },
+            { code: 'SAN', name: 'San Diego International Airport', koName: '샌디에이고 국제공항', city: 'San Diego', koCity: '샌디에이고', country: 'USA' },
+            { code: 'PHL', name: 'Philadelphia International Airport', koName: '필라델피아 국제공항', city: 'Philadelphia', koCity: '필라델피아', country: 'USA' },
+            { code: 'MSP', name: 'Minneapolis–Saint Paul International Airport', koName: '미니애폴리스 국제공항', city: 'Minneapolis', koCity: '미니애폴리스', country: 'USA' },
+            { code: 'DTW', name: 'Detroit Metropolitan Airport', koName: '디트로이트 메트로폴리탄공항', city: 'Detroit', koCity: '디트로이트', country: 'USA' },
+            { code: 'BWI', name: 'Baltimore/Washington International Thurgood Marshall Airport', koName: '볼티모어 워싱턴 국제공항', city: 'Baltimore', koCity: '볼티모어', country: 'USA' },
+            { code: 'FLL', name: 'Fort Lauderdale–Hollywood International Airport', koName: '포트로더데일 국제공항', city: 'Fort Lauderdale', koCity: '포트로더데일', country: 'USA' },
+            { code: 'TPA', name: 'Tampa International Airport', koName: '탐파 국제공항', city: 'Tampa', koCity: '탐파', country: 'USA' },
+            { code: 'YUL', name: 'Montréal–Trudeau International Airport', koName: '몬트리올 트뤼도 국제공항', city: 'Montreal', koCity: '몬트리올', country: 'Canada' },
+            { code: 'YYC', name: 'Calgary International Airport', koName: '캘거리 국제공항', city: 'Calgary', koCity: '캘거리', country: 'Canada' },
+            { code: 'YOW', name: 'Ottawa Macdonald–Cartier International Airport', koName: '오타와 국제공항', city: 'Ottawa', koCity: '오타와', country: 'Canada' },
+            { code: 'YWG', name: 'Winnipeg James Armstrong Richardson International Airport', koName: '위니펙 국제공항', city: 'Winnipeg', koCity: '위니펙', country: 'Canada' },
+            { code: 'PER', name: 'Perth Airport', koName: '퍼스공항', city: 'Perth', koCity: '퍼스', country: 'Australia' },
+            { code: 'ADL', name: 'Adelaide Airport', koName: '애들레이드공항', city: 'Adelaide', koCity: '애들레이드', country: 'Australia' },
+            { code: 'CNS', name: 'Cairns Airport', koName: '케언즈공항', city: 'Cairns', koCity: '케언즈', country: 'Australia' },
+            { code: 'CHC', name: 'Christchurch Airport', koName: '크라이스트처치공항', city: 'Christchurch', koCity: '크라이스트처치', country: 'New Zealand' },
+            { code: 'WLG', name: 'Wellington Airport', koName: '웰링턴공항', city: 'Wellington', koCity: '웰링턴', country: 'New Zealand' },
+            { code: 'NAN', name: 'Nadi International Airport', koName: '나디 국제공항', city: 'Nadi', koCity: '나디', country: 'Fiji' },
+            { code: 'CAI', name: 'Cairo International Airport', koName: '카이로 국제공항', city: 'Cairo', koCity: '카이로', country: 'Egypt' },
+            { code: 'NBO', name: 'Jomo Kenyatta International Airport', koName: '요모 케냐타 국제공항', city: 'Nairobi', koCity: '나이로비', country: 'Kenya' },
+            { code: 'ADD', name: 'Addis Ababa Bole International Airport', koName: '아디스아바바 볼레 국제공항', city: 'Addis Ababa', koCity: '아디스아바바', country: 'Ethiopia' },
+            { code: 'LOS', name: 'Murtala Muhammed International Airport', koName: '무르탈라 무함마드 국제공항', city: 'Lagos', koCity: '라고스', country: 'Nigeria' },
+            { code: 'ACC', name: 'Kotoka International Airport', koName: '코토카 국제공항', city: 'Accra', koCity: '아크라', country: 'Ghana' },
+            { code: 'DAR', name: 'Julius Nyerere International Airport', koName: '줄리어스 니에레레 국제공항', city: 'Dar es Salaam', koCity: '다르에살람', country: 'Tanzania' },
+            { code: 'CMN', name: 'Mohammed V International Airport', koName: '무함마드 5세 국제공항', city: 'Casablanca', koCity: '카사블랑카', country: 'Morocco' },
+            { code: 'TUN', name: 'Tunis–Carthage International Airport', koName: '튀니스 카르타고 국제공항', city: 'Tunis', koCity: '튀니스', country: 'Tunisia' },
+            { code: 'DUR', name: 'King Shaka International Airport', koName: '킹 샤카 국제공항', city: 'Durban', koCity: '더반', country: 'South Africa' },
+            { code: 'MSA', name: 'Muscat International Airport', koName: '무스카트 국제공항', city: 'Muscat', koCity: '무스카트', country: 'Oman' },
+            { code: 'BEG', name: 'Belgrade Nikola Tesla Airport', koName: '베오그라드 니콜라 테슬라공항', city: 'Belgrade', koCity: '베오그라드', country: 'Serbia' },
+            { code: 'ZAG', name: 'Zagreb Airport', koName: '자그레브공항', city: 'Zagreb', koCity: '자그레브', country: 'Croatia' },
+            { code: 'WAW', name: 'Warsaw Chopin Airport', koName: '바르샤바 쇼팽공항', city: 'Warsaw', koCity: '바르샤바', country: 'Poland' },
+            { code: 'ATH', name: 'Eleftherios Venizelos Airport', koName: '아테네 국제공항', city: 'Athens', koCity: '아테네', country: 'Greece' },
+            { code: 'OTP', name: 'Henri Coandă International Airport', koName: '부카레스트 앙리 코안다 국제공항', city: 'Bucharest', koCity: '부카레스트', country: 'Romania' },
+            { code: 'SKG', name: 'Thessaloniki Airport', koName: '테살로니키공항', city: 'Thessaloniki', koCity: '테살로니키', country: 'Greece' },
+            { code: 'BKI', name: 'Kota Kinabalu International Airport', koName: '코타키나발루 국제공항', city: 'Kota Kinabalu', koCity: '코타키나발루', country: 'Malaysia' },
+            { code: 'PEN', name: 'Penang International Airport', koName: '페낭 국제공항', city: 'Penang', koCity: '페낭', country: 'Malaysia' },
+            { code: 'REP', name: 'Siem Reap International Airport', koName: '시엠립 국제공항', city: 'Siem Reap', koCity: '시엠립', country: 'Cambodia' },
+            { code: 'UBN', name: 'Ulaanbaatar Chinggis Khaan International Airport', koName: '울란바토르 국제공항', city: 'Ulaanbaatar', koCity: '울란바토르', country: 'Mongolia' },
+            { code: 'SXJ', name: 'Srinagar International Airport', koName: '스리나가르 국제공항', city: 'Srinagar', koCity: '스리나가르', country: 'India' },
+            { code: 'LUX', name: 'Luxembourg Airport', koName: '룩셈부르크공항', city: 'Luxembourg', koCity: '룩셈부르크', country: 'Luxembourg' },
+            { code: 'BER', name: 'Berlin Brandenburg Airport', koName: '베를린 브란덴부르크공항', city: 'Berlin', koCity: '베를린', country: 'Germany' },
+            { code: 'PRG', name: 'Václav Havel Airport Prague', koName: '프라하 공항', city: 'Prague', koCity: '프라하', country: 'Czech Republic' },
+            { code: 'BUD', name: 'Budapest Ferenc Liszt International Airport', koName: '부다페스트 국제공항', city: 'Budapest', koCity: '부다페스트', country: 'Hungary' },
+            { code: 'MFM', name: 'Macau International Airport', koName: '마카오 국제공항', city: 'Macau', koCity: '마카오', country: 'China' },
+            { code: 'ZYL', name: 'Zhengzhou Xinzheng International Airport', koName: '정저우 신정 국제공항', city: 'Zhengzhou', koCity: '정저우', country: 'China' },
+            { code: 'WUH', name: 'Wuhan Tianhe International Airport', koName: '우한 국제공항', city: 'Wuhan', koCity: '우한', country: 'China' },
+            { code: 'XIY', name: 'Xian Xianyang International Airport', koName: '시안 국제공항', city: 'Xian', koCity: '시안', country: 'China' },
+            { code: 'KMG', name: 'Kunming Changshui International Airport', koName: '쿤밍 국제공항', city: 'Kunming', koCity: '쿤밍', country: 'China' },
+            { code: 'CTU', name: 'Chengdu Shuangliu International Airport', koName: '청두 국제공항', city: 'Chengdu', koCity: '청두', country: 'China' },
+            { code: 'CNX', name: 'Chiang Mai International Airport', koName: '치앙마이 국제공항', city: 'Chiang Mai', koCity: '치앙마이', country: 'Thailand' },
+            { code: 'VTE', name: 'Wattay International Airport', koName: '비엔티안 국제공항', city: 'Vientiane', koCity: '비엔티안', country: 'Laos' },
+            { code: 'RGN', name: 'Yangon International Airport', koName: '양곤 국제공항', city: 'Yangon', koCity: '양곤', country: 'Myanmar' },
+            { code: 'MDL', name: 'Mandalay International Airport', koName: '만달레이 국제공항', city: 'Mandalay', koCity: '만달레이', country: 'Myanmar' }
+        ];
+
+        function createAirportLabel(airport) {
+            const koInfo = airport.koName ? `${airport.koName} (${airport.koCity})` : '';
+            const enInfo = `${airport.name} (${airport.city}, ${airport.country})`;
+            return koInfo ? `${airport.code} · ${koInfo} / ${enInfo}` : `${airport.code} · ${enInfo}`;
+        }
+
+        function searchAirports(query) {
+            const normalized = query.trim().toUpperCase();
+            if (!normalized) {
+                return airports.slice(0, 12);
+            }
+            return airports.filter(airport => {
+                return airport.code.includes(normalized)
+                    || airport.name.toUpperCase().includes(normalized)
+                    || airport.city.toUpperCase().includes(normalized)
+                    || airport.country.toUpperCase().includes(normalized)
+                    || (airport.koName && airport.koName.includes(query))
+                    || (airport.koCity && airport.koCity.includes(query));
+            }).slice(0, 20);
+        }
+
+        function renderDropdown(inputId, dropdownId, query) {
+            const dropdown = document.getElementById(dropdownId);
+            const results = searchAirports(query);
+            dropdown.innerHTML = '';
+
+            if (results.length === 0) {
+                const item = document.createElement('div');
+                item.className = 'airport-item';
+                item.textContent = '검색 결과가 없습니다.';
+                dropdown.appendChild(item);
+                dropdown.classList.add('visible');
+                return;
+            }
+
+            results.forEach(airport => {
+                const item = document.createElement('div');
+                item.className = 'airport-item';
+                const koInfo = airport.koName ? `<span style="color: #333;">${airport.koName} (${airport.koCity})</span><br>` : '';
+                const enInfo = `<span style="color: #666; font-size: 0.9em;">${airport.city}, ${airport.country} — ${airport.name}</span>`;
+                item.innerHTML = `
+                    <span class="airport-code">${airport.code}</span>
+                    <span class="airport-details">${koInfo}${enInfo}</span>
+                `;
+                item.addEventListener('mousedown', function (event) {
+                    event.preventDefault();
+                    selectAirport(inputId, airport.code);
+                });
+                dropdown.appendChild(item);
+            });
+            dropdown.classList.add('visible');
+        }
+
+        function selectAirport(inputId, code) {
+            const input = document.getElementById(inputId);
+            input.value = code;
+            const dropdown = document.getElementById(inputId + 'Dropdown');
+            if (dropdown) dropdown.classList.remove('visible');
+            input.focus();
+        }
+
+        function closeDropdown(dropdownId) {
+            const dropdown = document.getElementById(dropdownId);
+            if (dropdown) dropdown.classList.remove('visible');
+        }
+
+        function attachAirportSearch(inputId, dropdownId) {
+            const input = document.getElementById(inputId);
+            const dropdown = document.getElementById(dropdownId);
+
+            input.addEventListener('focus', () => {
+                renderDropdown(inputId, dropdownId, input.value);
+            });
+
+            input.addEventListener('input', () => {
+                renderDropdown(inputId, dropdownId, input.value);
+            });
+
+            input.addEventListener('blur', () => {
+                setTimeout(() => closeDropdown(dropdownId), 150);
+            });
+
+            input.addEventListener('keydown', event => {
+                if (event.key === 'Escape') {
+                    closeDropdown(dropdownId);
+                }
+            });
+        }
+
+        function getAirportCode(value) {
+            const normalized = value.trim();
+            const codeMatch = normalized.toUpperCase().match(/^[A-Z]{3}$/);
+            if (codeMatch) {
+                return codeMatch[0];
+            }
+            const found = airports.find(airport => createAirportLabel(airport).toUpperCase().startsWith(normalized.toUpperCase()));
+            if (found) {
+                return found.code;
+            }
+            const partial = airports.find(airport => createAirportLabel(airport).toUpperCase().includes(normalized.toUpperCase()));
+            return partial ? partial.code : '';
+        }
+
+        function updateTripTypeState(type) {
+            const roundtripCheckbox = document.getElementById('roundtrip');
+            const onewayCheckbox = document.getElementById('oneway');
+            const retDateInput = document.getElementById('retDate');
+
+            if (type === 'oneway') {
+                roundtripCheckbox.checked = false;
+                onewayCheckbox.checked = true;
+                retDateInput.disabled = true;
+                retDateInput.value = '';
+            } else {
+                roundtripCheckbox.checked = true;
+                onewayCheckbox.checked = false;
+                retDateInput.disabled = false;
+            }
+        }
+
+        // Chrome 시크릿창은 웹페이지 자바스크립트로 강제 실행할 수 없습니다.
+        // 대신 새 탭으로 열도록 설정합니다.
+        function searchFlights() {
+            const originValue = document.getElementById('origin').value;
+            const destValue = document.getElementById('destination').value;
+            const origin = getAirportCode(originValue);
+            const dest = getAirportCode(destValue);
+            const depDate = document.getElementById('depDate').value;
+            const retDate = document.getElementById('retDate').value;
+            const tripType = document.getElementById('oneway').checked ? 'ONEWAY' : 'ROUNDTRIP';
+            const tripTypeLower = tripType === 'ROUNDTRIP' ? 'roundtrip' : 'oneway';
+
+            if (!origin || !dest || !depDate || (tripType === 'ROUNDTRIP' && !retDate)) {
+                alert('모든 정보를 입력해주세요. 공항 검색 결과에서 공항을 선택하거나 IATA 코드를 입력하세요.');
+                return;
+            }
+
+            const depDateYYYYMMDD = depDate.replace(/-/g, '');
+            const depDateYYMMDD = depDateYYYYMMDD.slice(2);
+            const retDateYYYYMMDD = retDate ? retDate.replace(/-/g, '') : '';
+
+            console.log('검색 정보:', { origin, dest, depDate, retDate, tripType });
+
+            const skyscannerUrl = tripType === 'ROUNDTRIP'
+                ? `https://www.skyscanner.co.kr/transport/flights/${origin.toLowerCase()}/${dest.toLowerCase()}/${depDateYYMMDD}/?adultsv2=1&cabinclass=economy&childrenv2=&inboundaltsenabled=false&outboundaltsenabled=false&preferdirects=true&rtn=1#/results`
+                : `https://www.skyscanner.co.kr/transport/flights/${origin.toLowerCase()}/${dest.toLowerCase()}/${depDateYYMMDD}/?adultsv2=1&cabinclass=economy&childrenv2=&inboundaltsenabled=false&outboundaltsenabled=false&preferdirects=true&rtn=0#/results`;
+            console.log('스카이스캐너:', skyscannerUrl);
+            window.open(skyscannerUrl, '_blank', 'noopener,noreferrer');
+
+            const bookingUrl = tripType === 'ROUNDTRIP'
+                ? `https://flights.booking.com/flights/${origin}.CITY-${dest}.AIRPORT/?type=ROUNDTRIP&adults=1&cabinClass=ECONOMY&children=&from=${origin}.CITY&to=${dest}.AIRPORT&stops=0&depart=${depDate}&return=${retDate}&sort=CHEAPEST&travelPurpose=leisure`
+                : `https://flights.booking.com/flights/${origin}.CITY-${dest}.AIRPORT/?type=ONEWAY&adults=1&cabinClass=ECONOMY&children=&from=${origin}.CITY&to=${dest}.AIRPORT&stops=0&depart=${depDate}&sort=CHEAPEST&travelPurpose=leisure`;
+            console.log('부킹닷컴:', bookingUrl);
+            window.open(bookingUrl, '_blank', 'noopener,noreferrer');
+
+            const naverUrl = tripType === 'ROUNDTRIP'
+                ? `https://flight.naver.com/flights/international/${origin}:city-${dest}:city-${depDateYYYYMMDD}/${dest}:city-${origin}:city-${retDateYYYYMMDD}?adult=1&isDirect=true&fareType=Y`
+                : `https://flight.naver.com/flights/international/${origin}:city-${dest}:city-${depDateYYYYMMDD}?adult=1&isDirect=true&fareType=Y`;
+            console.log('네이버:', naverUrl);
+            window.open(naverUrl, '_blank', 'noopener,noreferrer');
+
+            const googleUrl = tripType === 'ROUNDTRIP'
+                ? 'https://www.google.com/travel/flights/search?tfs=CBwQAholEgoyMDI2LTA1LTIyKABqDAgCEggvbS8waHNxZnIHCAESA0NHSxolEgoyMDI2LTA1LTMxKABqBwgBEgNDR0tyDAgCEggvbS8waHNxZkABSAFwAYIBCwj___________8BmAEB&tfu=EgYIAhAAGAA&hl=ko&gl=KR'
+                : `https://www.google.com/travel/flights/search?hl=ko&gl=KR&tfu=EgYIAhAAGAA&q=${encodeURIComponent(`cheapest direct flights from ${origin} to ${dest} on ${depDate}`)}`;
+            console.log('구글:', googleUrl);
+            window.open(googleUrl, '_blank', 'noopener,noreferrer');
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            attachAirportSearch('origin', 'originDropdown');
+            attachAirportSearch('destination', 'destinationDropdown');
+
+            document.getElementById('roundtrip').addEventListener('change', function () {
+                if (this.checked) {
+                    updateTripTypeState('roundtrip');
+                } else if (!document.getElementById('oneway').checked) {
+                    updateTripTypeState('roundtrip');
+                }
+            });
+
+            document.getElementById('oneway').addEventListener('change', function () {
+                if (this.checked) {
+                    updateTripTypeState('oneway');
+                } else if (!document.getElementById('roundtrip').checked) {
+                    updateTripTypeState('roundtrip');
+                }
+            });
+
+            updateTripTypeState('roundtrip');
+        });
+    </script>
+
+</body>
+
+</html>

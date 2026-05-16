@@ -1,0 +1,1366 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>ETF 주가 현황</title>
+
+<style>
+  body {
+    font-family: Arial, "맑은 고딕", sans-serif;
+    margin: 20px;
+    background: #f7f8fa;
+    color: #222;
+  }
+
+  h2 {
+    margin-bottom: 12px;
+  }
+
+  .toolbar {
+    background: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 16px;
+  }
+
+  select {
+    padding: 7px;
+    font-size: 14px;
+    margin-right: 12px;
+  }
+
+  button {
+    padding: 7px 14px;
+    font-size: 14px;
+    cursor: pointer;
+  }
+
+  .hint {
+    color: #666;
+    font-size: 12px;
+    margin-top: 8px;
+    line-height: 1.5;
+  }
+
+  .status {
+    margin: 10px 0 14px 0;
+    font-size: 13px;
+    color: #333;
+  }
+
+  .summaryTableWrap {
+    background: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    padding: 12px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+    overflow-x: auto;
+  }
+
+  .summaryTitle {
+    font-size: 15px;
+    font-weight: bold;
+    margin-bottom: 8px;
+  }
+
+  .summaryTable {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    min-width: 980px;
+  }
+
+  .summaryTable th {
+    background: #f3f6fb;
+    border: 1px solid #dfe6ef;
+    padding: 8px;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .summaryTable td {
+    border: 1px solid #e5e5e5;
+    padding: 7px 8px;
+    white-space: nowrap;
+  }
+
+  .summaryTable tfoot td {
+    background: #fffaf0;
+    border-top: 2px solid #d9b86c;
+    font-weight: bold;
+  }
+
+  .summaryTable .tdName {
+    text-align: left;
+    font-weight: 600;
+  }
+
+  .summaryTable .tdNumber {
+    text-align: right;
+  }
+
+  .summaryTable .tdTotalLabel {
+    text-align: right;
+    color: #333;
+  }
+
+  .summaryNameLink {
+    color: #0066cc;
+    cursor: pointer;
+    text-decoration: none;
+    font-weight: 600;
+  }
+
+  .summaryNameLink:hover {
+    text-decoration: underline;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+    gap: 16px;
+  }
+
+  .card {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    padding: 12px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    transition: all 0.15s ease;
+  }
+
+  .card:hover {
+    border-color: #0b66c3;
+    box-shadow: 0 4px 12px rgba(0,102,204,0.18);
+    transform: translateY(-2px);
+  }
+
+  .cardFocus {
+    border-color: #d9a600 !important;
+    box-shadow: 0 0 0 3px rgba(217,166,0,0.22), 0 4px 12px rgba(0,102,204,0.18) !important;
+  }
+
+  .title {
+    font-weight: bold;
+    font-size: 15px;
+    margin-bottom: 4px;
+    color: #111;
+  }
+
+  .metaRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+
+  .code {
+    font-size: 12px;
+    color: #777;
+  }
+
+  .detailLink {
+    font-size: 12px;
+    color: #0066cc;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .detailLink:hover {
+    text-decoration: underline;
+  }
+
+  .chart {
+    width: 100%;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    background: #fafafa;
+    display: block;
+    cursor: pointer;
+  }
+
+  .inputBox {
+    margin-top: 10px;
+    padding: 9px 10px;
+    background: #fffaf0;
+    border: 1px solid #f0dfb8;
+    border-radius: 8px;
+    font-size: 13px;
+  }
+
+  .inputRow {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .inputRow label {
+    color: #555;
+  }
+
+  .buyInput {
+    width: 85px;
+    padding: 6px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 13px;
+  }
+
+  .qtyInput {
+    width: 60px;
+    padding: 6px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 13px;
+  }
+
+  .saveBtn {
+    padding: 6px 10px;
+    font-size: 12px;
+    border: 1px solid #bbb;
+    border-radius: 6px;
+    background: #fff;
+    cursor: pointer;
+  }
+
+  .saveBtn:hover {
+    background: #f2f2f2;
+  }
+
+  .saveStatus {
+    font-size: 12px;
+    color: #0b66c3;
+  }
+
+  .summaryBox {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px dashed #e0cfa3;
+    font-size: 13px;
+    line-height: 1.7;
+  }
+
+  .summaryLabel {
+    color: #555;
+    margin-right: 6px;
+  }
+
+  .summaryValue {
+    font-weight: bold;
+  }
+
+  .profitPlus {
+    color: #d60000;
+    font-weight: bold;
+  }
+
+  .profitMinus {
+    color: #0054d6;
+    font-weight: bold;
+  }
+
+  .profitFlat {
+    color: #555;
+    font-weight: bold;
+  }
+
+  .separator {
+    color: #999;
+    margin: 0 8px;
+  }
+
+  .priceBox {
+    margin-top: 10px;
+    padding: 9px 10px;
+    background: #f3f6fb;
+    border: 1px solid #e1e7f0;
+    border-radius: 8px;
+    font-size: 14px;
+  }
+
+  .priceLabel {
+    color: #555;
+    margin-right: 6px;
+  }
+
+  .priceValue {
+    font-weight: bold;
+    color: #111;
+  }
+
+  .priceLoading {
+    color: #777;
+  }
+
+  .priceError {
+    color: #c00000;
+    font-size: 13px;
+  }
+
+  .compareUp {
+    color: #d60000;
+    font-weight: bold;
+    margin-left: 8px;
+  }
+
+  .compareDown {
+    color: #0054d6;
+    font-weight: bold;
+    margin-left: 8px;
+  }
+
+  .compareFlat {
+    color: #555;
+    font-weight: bold;
+    margin-left: 8px;
+  }
+
+  .summaryCurrentPrice {
+    font-weight: bold;
+    color: #111;
+  }
+
+  .summaryCurrentCompare {
+    display: inline-block;
+  }
+
+  .error {
+    color: #c00000;
+    font-size: 12px;
+    margin-top: 8px;
+  }
+</style>
+
+<script src="./MyDCIRP_DATA.js"></script>
+</head>
+
+<body>
+
+<h2>ETF 주가 현황 (1주일 차트)</h2>
+
+<div class="toolbar">
+  <label>
+    구분:
+    <select id="category"></select>
+  </label>
+
+  <label>
+    차트 종류:
+    <select id="chartType">
+      <option value="area">라인(면적)</option>
+      <option value="candle">봉차트</option>
+    </select>
+  </label>
+
+  <button onclick="render()">조회</button>
+  <button onclick="downloadDataFile()">MyDCIRP_DATA.js 내보내기</button>
+
+  <div class="hint">
+    ※ 종목 목록은 <b>MyDCIRP_DATA.js</b> 파일에서 관리합니다.<br>
+    ※ 매수가/주식수는 저장 버튼을 누르면 브라우저에 저장되고, 갱신된 MyDCIRP_DATA.js 파일을 내보낼 수 있습니다.<br>
+    ※ 매수가는 최대 100,000 / 주식수는 최대 9,999까지만 입력 가능합니다.<br>
+    ※ 총 매입액 = 매수가 × 주식수 | 총수익 = (현재가 - 매수가) × 주식수<br>
+    ※ 총수익이 플러스면 빨간색, 마이너스면 파란색으로 표시합니다.<br>
+    ※ 보유 현황 요약표의 종목명을 클릭하면 해당 종목 카드로 자동 이동합니다.<br>
+    ※ <b>차트 이미지를 클릭했을 때만</b> 네이버증권 해당 종목 페이지가 새창으로 열립니다.
+  </div>
+</div>
+
+<div id="status" class="status">로딩 중...</div>
+<div id="summaryTableWrap" class="summaryTableWrap"></div>
+<div id="list" class="grid"></div>
+
+<script>
+var GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyD9CC-N6eQC1EkZI50uOjpt0o756ZTLafGNpZs9lkN-W0CeYhpvGcI-jEv2tCyNNm0Qw/exec";
+
+var AUTO_DOWNLOAD_ON_SAVE = false;
+
+function getData() {
+  if (window.MyDCIRP_DATA) {
+    return window.MyDCIRP_DATA;
+  }
+
+  if (window.ETF_DATA) {
+    return window.ETF_DATA;
+  }
+
+  return {};
+}
+
+function initCategoryCombo() {
+  var categorySelect = document.getElementById("category");
+  var data = getData();
+
+  categorySelect.innerHTML = "";
+
+  var firstValue = "";
+
+  for (var key in data) {
+    if (data.hasOwnProperty(key)) {
+      var option = document.createElement("option");
+      option.value = key;
+      option.appendChild(document.createTextNode(key));
+      categorySelect.appendChild(option);
+
+      if (firstValue === "") {
+        firstValue = key;
+      }
+    }
+  }
+
+  if (firstValue !== "") {
+    categorySelect.value = firstValue;
+  }
+}
+
+function getChartUrl(code, chartType) {
+  var sid = new Date().getTime();
+
+  return "https://ssl.pstatic.net/imgfinance/chart/item/" +
+         chartType +
+         "/week/" +
+         encodeURIComponent(code) +
+         ".png?sidcode=" +
+         sid;
+}
+
+function getDetailUrl(code) {
+  return "https://finance.naver.com/item/main.naver?code=" + encodeURIComponent(code);
+}
+
+function openNaverStock(code) {
+  window.open(getDetailUrl(code), "_blank");
+}
+
+function toNumber(value) {
+  if (value === null || value === undefined || value === "") {
+    return NaN;
+  }
+
+  return Number(
+    String(value)
+      .replace(/,/g, "")
+      .replace(/\+/g, "")
+      .replace(/원/g, "")
+      .replace(/주/g, "")
+      .replace(/%/g, "")
+      .trim()
+  );
+}
+
+function formatNumber(value) {
+  if (value === null || value === undefined || value === "") {
+    return "-";
+  }
+
+  var num = toNumber(value);
+
+  if (isNaN(num)) {
+    return value;
+  }
+
+  return Math.round(num).toLocaleString("ko-KR");
+}
+
+function formatPlainNumberWithComma(value) {
+  if (value === null || value === undefined || value === "") {
+    return "";
+  }
+
+  var num = toNumber(value);
+
+  if (isNaN(num)) {
+    return "";
+  }
+
+  return Math.round(num).toLocaleString("ko-KR");
+}
+
+function formatWon(value) {
+  if (value === null || value === undefined || value === "" || isNaN(value)) {
+    return "-";
+  }
+
+  return Math.round(value).toLocaleString("ko-KR") + "원";
+}
+
+function formatSignedWon(value) {
+  if (value === null || value === undefined || value === "" || isNaN(value)) {
+    return "-";
+  }
+
+  var rounded = Math.round(value);
+  var absText = Math.abs(rounded).toLocaleString("ko-KR") + "원";
+
+  if (rounded > 0) {
+    return "+" + absText;
+  }
+
+  if (rounded < 0) {
+    return "-" + absText;
+  }
+
+  return "0원";
+}
+
+function getCompareClass(compareValue) {
+  if (compareValue === null || compareValue === undefined || compareValue === "") {
+    return "compareFlat";
+  }
+
+  var text = String(compareValue);
+
+  if (text.indexOf("-") === 0) {
+    return "compareDown";
+  }
+
+  if (text === "0" || text === "0.00" || text === "+0") {
+    return "compareFlat";
+  }
+
+  return "compareUp";
+}
+
+function getComparePrefix(compareValue) {
+  if (compareValue === null || compareValue === undefined || compareValue === "") {
+    return "";
+  }
+
+  var text = String(compareValue);
+
+  if (text.indexOf("-") === 0 || text.indexOf("+") === 0) {
+    return "";
+  }
+
+  if (text === "0" || text === "0.00") {
+    return "";
+  }
+
+  return "+";
+}
+
+function formatRateText(rate, compareValue) {
+  if (rate === null || rate === undefined || rate === "") {
+    return "";
+  }
+
+  var rateText = String(rate).replace(/%/g, "");
+  var prefix = getComparePrefix(compareValue);
+
+  if (rateText.indexOf("-") === 0 || rateText.indexOf("+") === 0) {
+    return rateText + "%";
+  }
+
+  return prefix + rateText + "%";
+}
+
+function buildCurrentDisplayHtml(now, compare, rate, forSummary) {
+  if (now === null || now === undefined || now === "") {
+    return "-";
+  }
+
+  var html = "";
+
+  if (forSummary) {
+    html += '<span class="summaryCurrentPrice">' + formatNumber(now) + "원</span>";
+  } else {
+    html += '<span class="priceLabel">현재가</span>';
+    html += '<span class="priceValue">' + formatNumber(now) + "원</span>";
+
+    if (compare !== undefined && compare !== null && compare !== "") {
+      html += buildChangeDisplayHtml(compare, rate, false);
+    }
+  }
+
+  return html;
+}
+
+function buildChangeDisplayHtml(compare, rate, forSummary) {
+  if (compare === null || compare === undefined || compare === "") {
+    return "-";
+  }
+
+  var compareClass = getCompareClass(compare);
+  var comparePrefix = getComparePrefix(compare);
+  var rateText = formatRateText(rate, compare);
+
+  var className = forSummary ? "summaryCurrentCompare " + compareClass : compareClass;
+  var html = '<span class="' + className + '">';
+  html += comparePrefix + formatNumber(compare) + "원";
+
+  if (rateText !== "") {
+    html += " (" + rateText + ")";
+  }
+
+  html += "</span>";
+  return html;
+}
+
+function getStorageKey(category, item, field) {
+  return "ETF_DASHBOARD__" + field + "__" + category + "__" + item.code + "__" + item.name;
+}
+
+function getSavedField(category, item, fieldName, legacyName) {
+  var key = getStorageKey(category, item, fieldName);
+  var saved = localStorage.getItem(key);
+
+  if (saved !== null && saved !== undefined) {
+    return saved;
+  }
+
+  if (item[fieldName] !== undefined && item[fieldName] !== null) {
+    return String(item[fieldName]);
+  }
+
+  if (legacyName && item[legacyName] !== undefined && item[legacyName] !== null) {
+    return String(item[legacyName]);
+  }
+
+  return "";
+}
+
+function setSavedField(category, item, fieldName, value) {
+  item[fieldName] = value;
+
+  var key = getStorageKey(category, item, fieldName);
+  localStorage.setItem(key, value);
+}
+
+function getBuyPrice(category, item) {
+  return formatPlainNumberWithComma(getSavedField(category, item, "buyPrice", "매수가"));
+}
+
+function getQuantity(category, item) {
+  var value = getSavedField(category, item, "quantity", "주식수");
+  var num = toNumber(value);
+
+  if (isNaN(num)) {
+    return "";
+  }
+
+  return String(Math.round(num));
+}
+
+function setBuyPrice(category, item, value) {
+  setSavedField(category, item, "buyPrice", formatPlainNumberWithComma(value));
+}
+
+function setQuantity(category, item, value) {
+  var num = toNumber(value);
+
+  if (isNaN(num)) {
+    setSavedField(category, item, "quantity", "");
+  } else {
+    setSavedField(category, item, "quantity", String(Math.round(num)));
+  }
+}
+
+function makeDataFileText() {
+  var data = getData();
+
+  return "window.MyDCIRP_DATA = " +
+         JSON.stringify(data, null, 2) +
+         ";\n";
+}
+
+function downloadDataFile() {
+  var text = makeDataFileText();
+  var blob = new Blob([text], { type: "text/javascript;charset=utf-8" });
+  var url = URL.createObjectURL(blob);
+
+  var a = document.createElement("a");
+  a.href = url;
+  a.download = "MyDCIRP_DATA.js";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+
+  URL.revokeObjectURL(url);
+}
+
+function getProfitClass(profit) {
+  if (profit > 0) {
+    return "profitPlus";
+  }
+
+  if (profit < 0) {
+    return "profitMinus";
+  }
+
+  return "profitFlat";
+}
+
+function formatBuyInputValue(input) {
+  var raw = input.value.replace(/[^0-9]/g, "");
+
+  if (raw === "") {
+    input.value = "";
+    return;
+  }
+
+  var num = Number(raw);
+
+  if (isNaN(num)) {
+    input.value = "";
+    return;
+  }
+
+  if (num > 100000) {
+    num = 100000;
+  }
+
+  input.value = num.toLocaleString("ko-KR");
+}
+
+function formatQtyInputValue(input) {
+  var raw = input.value.replace(/[^0-9]/g, "");
+
+  if (raw === "") {
+    input.value = "";
+    return;
+  }
+
+  var num = Number(raw);
+
+  if (isNaN(num)) {
+    input.value = "";
+    return;
+  }
+
+  if (num > 9999) {
+    num = 9999;
+  }
+
+  input.value = String(num);
+}
+
+function calculateTotalBuy(buyValue, qtyValue) {
+  var buyPrice = toNumber(buyValue);
+  var quantity = toNumber(qtyValue);
+
+  if (isNaN(buyPrice) || isNaN(quantity)) {
+    return NaN;
+  }
+
+  return buyPrice * quantity;
+}
+
+function calculateTotalProfit(currentValue, buyValue, qtyValue) {
+  var current = toNumber(currentValue);
+  var buyPrice = toNumber(buyValue);
+  var quantity = toNumber(qtyValue);
+
+  if (isNaN(current) || isNaN(buyPrice) || isNaN(quantity)) {
+    return NaN;
+  }
+
+  return (current - buyPrice) * quantity;
+}
+
+function safeCodeText(code) {
+  return String(code).replace(/[^0-9A-Z]/g, "");
+}
+
+function getCardId(index, code) {
+  return "stockCard_" + index + "_" + safeCodeText(code);
+}
+
+function getSummaryCellId(field, index, code) {
+  return "summaryCell_" + field + "_" + index + "_" + safeCodeText(code);
+}
+
+function scrollToStockCard(index, code) {
+  var card = document.getElementById(getCardId(index, code));
+
+  if (!card) {
+    return;
+  }
+
+  card.scrollIntoView({
+    behavior: "smooth",
+    block: "center"
+  });
+
+  card.classList.add("cardFocus");
+
+  setTimeout(function() {
+    card.classList.remove("cardFocus");
+  }, 1800);
+}
+
+function updateSummaryTotal(category) {
+  var data = getData();
+  var items = data[category] || [];
+  var totalProfit = 0;
+  var hasValue = false;
+
+  for (var i = 0; i < items.length; i++) {
+    var item = items[i];
+
+    var currentPrice = item.currentPrice || "";
+    var buyPrice = getBuyPrice(category, item);
+    var quantity = getQuantity(category, item);
+
+    var profit = calculateTotalProfit(currentPrice, buyPrice, quantity);
+
+    if (!isNaN(profit)) {
+      totalProfit += profit;
+      hasValue = true;
+    }
+  }
+
+  var totalCell = document.getElementById("summaryTotalProfitCell");
+
+  if (!totalCell) {
+    return;
+  }
+
+  if (!hasValue) {
+    totalCell.className = "tdNumber profitFlat";
+    totalCell.innerHTML = "-";
+    return;
+  }
+
+  totalCell.className = "tdNumber " + getProfitClass(totalProfit);
+  totalCell.innerHTML = formatSignedWon(totalProfit);
+}
+
+function updateSummaryTableRow(category, index, item) {
+  var currentCell = document.getElementById(getSummaryCellId("current", index, item.code));
+  var changeCell = document.getElementById(getSummaryCellId("change", index, item.code));
+  var buyCell = document.getElementById(getSummaryCellId("buy", index, item.code));
+  var qtyCell = document.getElementById(getSummaryCellId("qty", index, item.code));
+  var totalBuyCell = document.getElementById(getSummaryCellId("totalBuy", index, item.code));
+  var profitCell = document.getElementById(getSummaryCellId("profit", index, item.code));
+
+  if (!currentCell || !changeCell || !buyCell || !qtyCell || !totalBuyCell || !profitCell) {
+    return;
+  }
+
+  var currentPrice = item.currentPrice || "";
+  var currentCompare = item.currentCompare || "";
+  var currentRate = item.currentRate || "";
+  var buyPrice = getBuyPrice(category, item);
+  var quantity = getQuantity(category, item);
+
+  var totalBuy = calculateTotalBuy(buyPrice, quantity);
+  var totalProfit = calculateTotalProfit(currentPrice, buyPrice, quantity);
+  var profitClass = getProfitClass(totalProfit);
+
+  currentCell.innerHTML = currentPrice ? formatNumber(currentPrice) + "원" : "-";
+  changeCell.innerHTML = buildChangeDisplayHtml(currentCompare, currentRate, true);
+  buyCell.innerHTML = buyPrice ? buyPrice + "원" : "-";
+  qtyCell.innerHTML = quantity ? quantity : "-";
+  totalBuyCell.innerHTML = formatWon(totalBuy);
+
+  profitCell.className = "tdNumber " + profitClass;
+  profitCell.innerHTML = formatSignedWon(totalProfit);
+
+  updateSummaryTotal(category);
+}
+
+function renderSummaryTable(category, items) {
+  var wrap = document.getElementById("summaryTableWrap");
+  wrap.innerHTML = "";
+
+  var title = document.createElement("div");
+  title.className = "summaryTitle";
+  title.appendChild(document.createTextNode(category + " 보유 현황 요약"));
+
+  var table = document.createElement("table");
+  table.className = "summaryTable";
+
+  var thead = document.createElement("thead");
+  var headRow = document.createElement("tr");
+
+  var headers = ["종목명", "현재가", "증감", "매수가", "주식수", "총 매입액", "총수익"];
+
+  for (var h = 0; h < headers.length; h++) {
+    var th = document.createElement("th");
+    th.appendChild(document.createTextNode(headers[h]));
+    headRow.appendChild(th);
+  }
+
+  thead.appendChild(headRow);
+
+  var tbody = document.createElement("tbody");
+
+  for (var i = 0; i < items.length; i++) {
+    var item = items[i];
+
+    var tr = document.createElement("tr");
+
+    var tdName = document.createElement("td");
+    tdName.className = "tdName";
+
+    var nameLink = document.createElement("span");
+    nameLink.className = "summaryNameLink";
+    nameLink.appendChild(document.createTextNode(item.name));
+
+    nameLink.onclick = function(index, code) {
+      return function() {
+        scrollToStockCard(index, code);
+      };
+    }(i, item.code);
+
+    tdName.appendChild(nameLink);
+
+    var tdCurrent = document.createElement("td");
+    tdCurrent.className = "tdNumber";
+    tdCurrent.id = getSummaryCellId("current", i, item.code);
+    tdCurrent.appendChild(document.createTextNode("-"));
+
+    var tdChange = document.createElement("td");
+    tdChange.className = "tdNumber";
+    tdChange.id = getSummaryCellId("change", i, item.code);
+    tdChange.appendChild(document.createTextNode("-"));
+
+    var tdBuy = document.createElement("td");
+    tdBuy.className = "tdNumber";
+    tdBuy.id = getSummaryCellId("buy", i, item.code);
+    tdBuy.appendChild(document.createTextNode("-"));
+
+    var tdQty = document.createElement("td");
+    tdQty.className = "tdNumber";
+    tdQty.id = getSummaryCellId("qty", i, item.code);
+    tdQty.appendChild(document.createTextNode("-"));
+
+    var tdTotalBuy = document.createElement("td");
+    tdTotalBuy.className = "tdNumber";
+    tdTotalBuy.id = getSummaryCellId("totalBuy", i, item.code);
+    tdTotalBuy.appendChild(document.createTextNode("-"));
+
+    var tdProfit = document.createElement("td");
+    tdProfit.className = "tdNumber profitFlat";
+    tdProfit.id = getSummaryCellId("profit", i, item.code);
+    tdProfit.appendChild(document.createTextNode("-"));
+
+    tr.appendChild(tdName);
+    tr.appendChild(tdCurrent);
+    tr.appendChild(tdChange);
+    tr.appendChild(tdBuy);
+    tr.appendChild(tdQty);
+    tr.appendChild(tdTotalBuy);
+    tr.appendChild(tdProfit);
+
+    tbody.appendChild(tr);
+  }
+
+  var tfoot = document.createElement("tfoot");
+  var totalRow = document.createElement("tr");
+
+  var totalLabelCell = document.createElement("td");
+  totalLabelCell.className = "tdTotalLabel";
+  totalLabelCell.colSpan = 6;
+  totalLabelCell.appendChild(document.createTextNode("총수익 합계"));
+
+  var totalProfitCell = document.createElement("td");
+  totalProfitCell.className = "tdNumber profitFlat";
+  totalProfitCell.id = "summaryTotalProfitCell";
+  totalProfitCell.appendChild(document.createTextNode("-"));
+
+  totalRow.appendChild(totalLabelCell);
+  totalRow.appendChild(totalProfitCell);
+  tfoot.appendChild(totalRow);
+
+  table.appendChild(thead);
+  table.appendChild(tbody);
+  table.appendChild(tfoot);
+
+  wrap.appendChild(title);
+  wrap.appendChild(table);
+
+  for (var j = 0; j < items.length; j++) {
+    updateSummaryTableRow(category, j, items[j]);
+  }
+
+  updateSummaryTotal(category);
+}
+
+function updateSummary(buyInput, qtyInput, summaryBox, currentPrice) {
+  var totalBuy = calculateTotalBuy(buyInput.value, qtyInput.value);
+  var totalProfit = calculateTotalProfit(currentPrice, buyInput.value, qtyInput.value);
+  var profitClass = getProfitClass(totalProfit);
+
+  var html = "";
+  html += '<span class="summaryLabel">총 매입액</span>';
+  html += '<span class="summaryValue">' + formatWon(totalBuy) + "</span>";
+  html += '<span class="separator">|</span>';
+  html += '<span class="summaryLabel">총수익</span>';
+  html += '<span class="' + profitClass + '">' + formatSignedWon(totalProfit) + "</span>";
+
+  summaryBox.innerHTML = html;
+}
+
+function saveItemInput(category, index, buyInputId, qtyInputId, statusId, summaryId) {
+  var data = getData();
+  var items = data[category];
+
+  if (!items || !items[index]) {
+    return;
+  }
+
+  var item = items[index];
+  var buyInput = document.getElementById(buyInputId);
+  var qtyInput = document.getElementById(qtyInputId);
+  var status = document.getElementById(statusId);
+  var summaryBox = document.getElementById(summaryId);
+
+  formatBuyInputValue(buyInput);
+  formatQtyInputValue(qtyInput);
+
+  var buyValue = buyInput.value.trim();
+  var qtyValue = qtyInput.value.trim();
+
+  var buyNumber = toNumber(buyValue);
+  var qtyNumber = toNumber(qtyValue);
+
+  if (buyValue !== "" && (isNaN(buyNumber) || buyNumber < 0 || buyNumber > 100000)) {
+    status.innerHTML = "매수가는 100,000 이하만 입력하세요.";
+    status.style.color = "#c00000";
+    return;
+  }
+
+  if (qtyValue !== "" && (isNaN(qtyNumber) || qtyNumber < 0 || qtyNumber > 9999)) {
+    status.innerHTML = "주식수는 9,999 이하만 입력하세요.";
+    status.style.color = "#c00000";
+    return;
+  }
+
+  setBuyPrice(category, item, buyValue);
+  setQuantity(category, item, qtyValue);
+
+  var currentPrice = item.currentPrice || "";
+  updateSummary(buyInput, qtyInput, summaryBox, currentPrice);
+  updateSummaryTableRow(category, index, item);
+  updateSummaryTotal(category);
+
+  status.innerHTML = "저장 완료";
+  status.style.color = "#0b66c3";
+
+  if (AUTO_DOWNLOAD_ON_SAVE) {
+    downloadDataFile();
+    status.innerHTML = "저장 완료 / JS 파일 다운로드";
+  }
+
+  setTimeout(function() {
+    status.innerHTML = "";
+  }, 2500);
+}
+
+function getPriceJsonpUrl(code, callbackName) {
+  return GAS_WEB_APP_URL +
+         "?code=" + encodeURIComponent(code) +
+         "&callback=" + encodeURIComponent(callbackName) +
+         "&_=" + new Date().getTime();
+}
+
+function updatePrice(code, priceBox, item, buyInput, qtyInput, summaryBox, category, index) {
+  priceBox.innerHTML = '<span class="priceLoading">현재가 조회 중...</span>';
+
+  var safeCode = String(code).replace(/[^0-9A-Z]/g, "");
+  var callbackName =
+    "priceCallback_" +
+    safeCode +
+    "_" +
+    new Date().getTime() +
+    "_" +
+    Math.floor(Math.random() * 100000);
+
+  var script = document.createElement("script");
+  var timeoutId;
+
+  window[callbackName] = function(json) {
+    clearTimeout(timeoutId);
+
+    try {
+      if (script && script.parentNode) {
+        script.parentNode.removeChild(script);
+      }
+    } catch (e) {}
+
+    try {
+      delete window[callbackName];
+    } catch (e) {
+      window[callbackName] = undefined;
+    }
+
+    if (!json || json.ok !== true) {
+      priceBox.innerHTML = '<span class="priceError">현재가 조회 실패</span>';
+      console.log("현재가 조회 실패:", code, json);
+      return;
+    }
+
+    var now = json.now;
+    var compare = json.compare;
+    var rate = json.rate;
+
+    item.currentPrice = now;
+    item.currentCompare = compare;
+    item.currentRate = rate;
+
+    if (now === null || now === undefined || now === "") {
+      priceBox.innerHTML = '<span class="priceError">현재가 값 없음</span>';
+      console.log("현재가 값 없음:", code, json);
+      return;
+    }
+
+    priceBox.innerHTML = buildCurrentDisplayHtml(now, compare, rate, false);
+
+    updateSummary(buyInput, qtyInput, summaryBox, now);
+    updateSummaryTableRow(category, index, item);
+    updateSummaryTotal(category);
+  };
+
+  script.onerror = function() {
+    clearTimeout(timeoutId);
+
+    priceBox.innerHTML = '<span class="priceError">현재가 조회 실패</span>';
+
+    try {
+      if (script && script.parentNode) {
+        script.parentNode.removeChild(script);
+      }
+    } catch (e) {}
+
+    try {
+      delete window[callbackName];
+    } catch (e) {
+      window[callbackName] = undefined;
+    }
+
+    console.log("JSONP 스크립트 로드 실패:", code);
+  };
+
+  timeoutId = setTimeout(function() {
+    priceBox.innerHTML = '<span class="priceError">현재가 조회 시간초과</span>';
+
+    try {
+      if (script && script.parentNode) {
+        script.parentNode.removeChild(script);
+      }
+    } catch (e) {}
+
+    try {
+      delete window[callbackName];
+    } catch (e) {
+      window[callbackName] = undefined;
+    }
+
+    console.log("JSONP 현재가 조회 시간초과:", code);
+  }, 12000);
+
+  script.src = getPriceJsonpUrl(code, callbackName);
+  document.body.appendChild(script);
+}
+
+function render() {
+  var data = getData();
+  var category = document.getElementById("category").value;
+  var chartType = document.getElementById("chartType").value;
+  var list = document.getElementById("list");
+  var status = document.getElementById("status");
+  var summaryTableWrap = document.getElementById("summaryTableWrap");
+
+  list.innerHTML = "";
+  summaryTableWrap.innerHTML = "";
+
+  if (!data || Object.keys(data).length === 0) {
+    status.innerHTML = "종목 데이터 파일(MyDCIRP_DATA.js)을 읽지 못했습니다.";
+    return;
+  }
+
+  var items = data[category];
+
+  if (!items || items.length === 0) {
+    status.innerHTML = "표시할 종목이 없습니다.";
+    return;
+  }
+
+  status.innerHTML = category + " 종목 " + items.length + "개 표시 중";
+
+  renderSummaryTable(category, items);
+
+  for (var i = 0; i < items.length; i++) {
+    var item = items[i];
+
+    var card = document.createElement("div");
+    card.className = "card";
+    card.id = getCardId(i, item.code);
+
+    var title = document.createElement("div");
+    title.className = "title";
+    title.appendChild(document.createTextNode(item.name));
+
+    var metaRow = document.createElement("div");
+    metaRow.className = "metaRow";
+
+    var code = document.createElement("div");
+    code.className = "code";
+    code.appendChild(document.createTextNode("종목코드: " + item.code));
+
+    var detailLink = document.createElement("a");
+    detailLink.className = "detailLink";
+    detailLink.href = getDetailUrl(item.code);
+    detailLink.target = "_blank";
+    detailLink.rel = "noopener";
+    detailLink.appendChild(document.createTextNode("네이버 금융 상세 보기"));
+
+    detailLink.onclick = function(event) {
+      event.stopPropagation();
+    };
+
+    metaRow.appendChild(code);
+    metaRow.appendChild(detailLink);
+
+    var img = document.createElement("img");
+    img.className = "chart";
+    img.src = getChartUrl(item.code, chartType);
+    img.alt = item.name + " 1주일 차트";
+
+    img.onclick = function(code) {
+      return function(event) {
+        event.stopPropagation();
+        openNaverStock(code);
+      };
+    }(item.code);
+
+    img.onerror = function() {
+      this.style.display = "none";
+
+      var err = document.createElement("div");
+      err.className = "error";
+      err.appendChild(
+        document.createTextNode(
+          "차트 이미지를 불러오지 못했습니다. 회사망/보안 설정 또는 종목코드를 확인하세요."
+        )
+      );
+
+      this.parentNode.appendChild(err);
+    };
+
+    var inputBox = document.createElement("div");
+    inputBox.className = "inputBox";
+
+    var inputRow = document.createElement("div");
+    inputRow.className = "inputRow";
+
+    var buyLabel = document.createElement("label");
+    buyLabel.appendChild(document.createTextNode("매수가"));
+
+    var buyInput = document.createElement("input");
+    buyInput.className = "buyInput";
+    buyInput.type = "text";
+    buyInput.inputMode = "numeric";
+    buyInput.maxLength = 7;
+    buyInput.placeholder = "100,000";
+    buyInput.value = getBuyPrice(category, item);
+
+    var qtyLabel = document.createElement("label");
+    qtyLabel.appendChild(document.createTextNode("주식수"));
+
+    var qtyInput = document.createElement("input");
+    qtyInput.className = "qtyInput";
+    qtyInput.type = "text";
+    qtyInput.inputMode = "numeric";
+    qtyInput.maxLength = 4;
+    qtyInput.placeholder = "9999";
+    qtyInput.value = getQuantity(category, item);
+
+    var buyInputId = "buyInput_" + category + "_" + i + "_" + item.code;
+    var qtyInputId = "qtyInput_" + category + "_" + i + "_" + item.code;
+    var statusId = "saveStatus_" + category + "_" + i + "_" + item.code;
+    var summaryId = "summary_" + category + "_" + i + "_" + item.code;
+
+    buyInput.id = buyInputId;
+    qtyInput.id = qtyInputId;
+
+    buyInput.onclick = function(event) {
+      event.stopPropagation();
+    };
+
+    qtyInput.onclick = function(event) {
+      event.stopPropagation();
+    };
+
+    buyInput.onkeydown = function(event) {
+      event.stopPropagation();
+    };
+
+    qtyInput.onkeydown = function(event) {
+      event.stopPropagation();
+    };
+
+    buyInput.oninput = function(event) {
+      event.stopPropagation();
+      formatBuyInputValue(this);
+    };
+
+    qtyInput.oninput = function(event) {
+      event.stopPropagation();
+      formatQtyInputValue(this);
+    };
+
+    var saveBtn = document.createElement("button");
+    saveBtn.className = "saveBtn";
+    saveBtn.type = "button";
+    saveBtn.appendChild(document.createTextNode("저장"));
+
+    var saveStatus = document.createElement("span");
+    saveStatus.className = "saveStatus";
+    saveStatus.id = statusId;
+
+    var summaryBox = document.createElement("div");
+    summaryBox.className = "summaryBox";
+    summaryBox.id = summaryId;
+
+    saveBtn.onclick = function(category, index, buyInputId, qtyInputId, statusId, summaryId) {
+      return function(event) {
+        event.stopPropagation();
+        saveItemInput(category, index, buyInputId, qtyInputId, statusId, summaryId);
+      };
+    }(category, i, buyInputId, qtyInputId, statusId, summaryId);
+
+    inputRow.appendChild(buyLabel);
+    inputRow.appendChild(buyInput);
+    inputRow.appendChild(qtyLabel);
+    inputRow.appendChild(qtyInput);
+    inputRow.appendChild(saveBtn);
+    inputRow.appendChild(saveStatus);
+
+    inputBox.appendChild(inputRow);
+    inputBox.appendChild(summaryBox);
+
+    var priceBox = document.createElement("div");
+    priceBox.className = "priceBox";
+    priceBox.appendChild(document.createTextNode("현재가 조회 중..."));
+
+    card.appendChild(title);
+    card.appendChild(metaRow);
+    card.appendChild(img);
+    card.appendChild(inputBox);
+    card.appendChild(priceBox);
+
+    list.appendChild(card);
+
+    updateSummary(buyInput, qtyInput, summaryBox, item.currentPrice || "");
+    updateSummaryTableRow(category, i, item);
+    updateSummaryTotal(category);
+    updatePrice(item.code, priceBox, item, buyInput, qtyInput, summaryBox, category, i);
+  }
+}
+
+document.getElementById("category").onchange = render;
+document.getElementById("chartType").onchange = render;
+
+initCategoryCombo();
+render();
+</script>
+
+</body>
+</html>

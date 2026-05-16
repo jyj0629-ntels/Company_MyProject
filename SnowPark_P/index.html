@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>스키장 날씨/웹캠</title>
+    <style>
+        body { font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; background-color: #eef2f3; margin: 0; padding: 20px; color: #333; }
+        h1 { text-align: center; color: #1a3a5a; margin-bottom: 30px; }
+        .container { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; max-width: 1200px; margin: 0 auto; }
+        .card { background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 10px 20px rgba(0,0,0,0.05); border: 1px solid #ddd; }
+        .card-header { background: #1a3a5a; color: white; padding: 15px; font-size: 1.2em; font-weight: bold; text-align: center; }
+        .card-body { padding: 20px; text-align: center; }
+        .info-box { background: #f8f9fa; padding: 15px; border-radius: 10px; margin-bottom: 15px; font-size: 0.95em; line-height: 1.6; }
+        .btn-group { display: flex; flex-direction: column; gap: 10px; }
+        .btn { display: block; text-decoration: none; padding: 12px; border-radius: 8px; font-weight: bold; transition: 0.3s; text-align: center; }
+        .btn-weather { background: #3498db; color: white; }
+        .btn-webcam { background: #2ecc71; color: white; }
+        .btn:hover { opacity: 0.8; transform: translateY(-2px); }
+        .footer { text-align: center; margin-top: 40px; color: #7f8c8d; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+    <!-- <h1>❄️스키장 날씨/웹캠</h1><div class="container"> -->
+    <div class="container">
+        <div class="compare>
+            <div class="card-header">거리 비교</div>
+            <div class="card-body">
+                <div class="btn-group">
+                     <a href="DistanceCompare.html">거리 비교 페이지로 이동 <target="_blank" class="btn btn-webcam">📹 실시간 웹캠/슬로프</a>
+                </div>
+            </div>
+        </div>
+        </div>
+        이게 되는건가?
+        <div class="card">
+            <div class="card-header">모나 용평</div>
+            <div class="card-body">
+                <div class="btn-group">
+                    <a href="https://search.naver.com/search.naver?query=모나용평+날씨" target="_blank" class="btn btn-weather">☀️ 실시간 날씨 보기</a>
+                    <a href="https://www.yongpyong.co.kr/kor/guide/realTimeNews/ypResortWebcam.do" target="_blank" class="btn btn-webcam">📹 실시간 웹캠/슬로프</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">웰리힐리파크</div>
+            <div class="card-body">
+                <div class="btn-group">
+                    <a href="https://search.naver.com/search.naver?query=웰리힐리파크+날씨" target="_blank" class="btn btn-weather">☀️ 실시간 날씨 보기</a>
+                    <a href="https://www.wellihillipark.com/home/customer/webcam" target="_blank" class="btn btn-webcam">📹 실시간 웹캠/슬로프</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">하이원 리조트</div>
+            <div class="card-body">
+                <div class="btn-group">
+                    <a href="https://search.naver.com/search.naver?query=하이원+날씨" target="_blank" class="btn btn-weather">☀️ 실시간 날씨 보기</a>
+                    <a href="https://www.high1.com/ski/slopeView.do?key=748&mode=p" target="_blank" class="btn btn-webcam">📹 실시간 웹캠/슬로프</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">지산 포레스트</div>
+            <div class="card-body">
+                <div class="btn-group">
+                    <a href="https://www.weatheri.co.kr/leisure/leisure05.php?rid=11B20701&k=5&a_name=%EC%A7%80%EC%82%B0%EB%A6%AC%EC%A1%B0%ED%8A%B8" target="_blank" class="btn btn-weather">☀️ 실시간 날씨 보기</a>
+                    <a href="https://www.jisanresort.co.kr/w/ski/slopes/webcam.asp" target="_blank" class="btn btn-webcam">📹 실시간 웹캠/슬로프</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">엘리시안 강촌</div>
+            <div class="card-body">
+                <div class="btn-group">
+                    <a href="https://search.naver.com/search.naver?query=엘리시안강촌+날씨" target="_blank" class="btn btn-weather">☀️ 실시간 날씨 보기</a>
+                    <a href="https://www.elysian.co.kr/about-gangchon/sky#guide-to-using-slopes" target="_blank" class="btn btn-webcam">📹 실시간 웹캠/슬로프</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>각 버튼을 클릭하면 해당 스키장의 실시간 네이버 날씨와 공식 웹캠 페이지로 연결됩니다.</p>
+        <p>© 2024 Ski Info Dashboard</p>
+    </div>
+
+</body>
+
+</html>

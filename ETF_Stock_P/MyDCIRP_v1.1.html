@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>ETF 주가 현황</title>
+
+<style>
+  body {
+    font-family: Arial, "맑은 고딕", sans-serif;
+    margin: 20px;
+    background: #f7f8fa;
+    color: #222;
+  }
+
+  h2 {
+    margin-bottom: 12px;
+  }
+
+  .toolbar {
+    background: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 16px;
+  }
+
+  select {
+    padding: 7px;
+    font-size: 14px;
+    margin-right: 12px;
+  }
+
+  button {
+    padding: 7px 14px;
+    font-size: 14px;
+    cursor: pointer;
+  }
+
+  .hint {
+    color: #666;
+    font-size: 12px;
+    margin-top: 8px;
+    line-height: 1.5;
+  }
+
+  .status {
+    margin: 10px 0 14px 0;
+    font-size: 13px;
+    color: #333;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    gap: 16px;
+  }
+
+  .card {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    padding: 12px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .card:hover {
+    border-color: #0b66c3;
+    box-shadow: 0 4px 12px rgba(0,102,204,0.18);
+    transform: translateY(-2px);
+  }
+
+  .title {
+    font-weight: bold;
+    font-size: 15px;
+    margin-bottom: 4px;
+    color: #111;
+  }
+
+  .code {
+    font-size: 12px;
+    color: #777;
+    margin-bottom: 8px;
+  }
+
+  .chart {
+    width: 100%;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    background: #fafafa;
+    display: block;
+    cursor: pointer;
+  }
+
+  .priceBox {
+    margin-top: 10px;
+    padding: 9px 10px;
+    background: #f3f6fb;
+    border: 1px solid #e1e7f0;
+    border-radius: 8px;
+    font-size: 14px;
+  }
+
+  .priceLabel {
+    color: #555;
+    margin-right: 6px;
+  }
+
+  .priceValue {
+    font-weight: bold;
+    color: #111;
+  }
+
+  .priceLoading {
+    color: #777;
+  }
+
+  .priceError {
+    color: #c00000;
+    font-size: 13px;
+  }
+
+  .compareUp {
+    color: #d60000;
+    font-weight: bold;
+    margin-left: 8px;
+  }
+
+  .compareDown {
+    color: #0054d6;
+    font-weight: bold;
+    margin-left: 8px;
+  }
+
+  .compareFlat {
+    color: #555;
+    font-weight: bold;
+    margin-left: 8px;
+  }
+
+  .link {
+    margin-top: 8px;
+    font-size: 12px;
+  }
+
+  .link a {
+    color: #0066cc;
+    text-decoration: none;
+  }
+
+  .link a:hover {
+    text-decoration: underline;
+  }
+
+  .error {
+    color: #c00000;
+    font-size: 12px;
+    margin-top: 8px;
+  }
+</style>
+</head>
+
+<body>
+
+<h2>ETF 주가 현황 (1주일 차트)</h2>
+
+<div class="toolbar">
+  <label>
+    구분:
+    <select id="category">
+      <option value="DC">DC</option>
+      <option value="연금저축">연금저축</option>
+      <option value="IRP">IRP</option>
+    </select>
+  </label>
+
+  <label>
+    차트 종류:
+    <select id="chartType">
+      <option value="area">라인(면적)</option>
+      <option value="candle">봉차트</option>
+    </select>
+  </label>
+
+  <button onclick="render()">조회</button>
+
+  <div class="hint">
+    ※ 종목 카드 또는 차트를 클릭하면 네이버증권 해당 종목 페이지가 새창으로 열립니다.<br>
+    ※ 차트는 네이버 금융 이미지 URL을 사용합니다.<br>
+    ※ 현재가는 Google Apps Script(JSONP 방식)를 통해 조회합니다.
+  </div>
+</div>
+
+<div id="status" class="status">로딩 중...</div>
+<div id="list" class="grid"></div>
+
+<script>
+/*
+  Google Apps Script Web App URL
+  중요:
+  - script.googleusercontent.com 주소를 넣지 마세요.
+  - 반드시 script.google.com/macros/s/.../exec 형태의 원래 배포 URL을 넣으세요.
+*/
+var GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyD9CC-N6eQC1EkZI50uOjpt0o756ZTLafGNpZs9lkN-W0CeYhpvGcI-jEv2tCyNNm0Qw/exec";
+
+var data = {
+  "DC": [
+    { name: "ACE AI반도체TOP3+", code: "469150" },
+    { name: "ACE KRX금현물", code: "411060" },
+    { name: "ACE 미국배당다우존스", code: "402970" },
+    { name: "ACE 미국빅테크TOP7 Plus", code: "465580" },
+    { name: "ACE 엔비디아채권혼합", code: "448540" },
+    { name: "KODEX 미국반도체", code: "390390" },
+    { name: "KODEX 삼성전자채권혼합", code: "448330" },
+    { name: "KODEX 헬스케어", code: "266420" },
+    { name: "PLUS K방산", code: "449450" },
+    { name: "PLUS 미국달러SOFR금리액티브(합성)", code: "456200" },
+    { name: "TIGER 200 중공업", code: "139230" },
+    { name: "TIGER 구리실물", code: "160580" },
+    { name: "TIGER 미국테크TOP10 INDXX", code: "381170" },
+    { name: "TIGER 미국필라델피아반도체나스닥", code: "381180" }
+  ],
+
+  "연금저축": [
+    { name: "KODEX 구리선물(H)", code: "138910" },
+    { name: "ACE 미국나스닥100", code: "367380" },
+    { name: "HANARO Fn조선해운", code: "441540" },
+    { name: "ACE AI반도체포커스", code: "469150" },
+    { name: "TIGER 미국테크TOP10채권혼합", code: "472170" }
+  ],
+
+  "IRP": [
+    { name: "KODEX 200미국채혼합", code: "284430" },
+    { name: "KODEX AI반도체핵심장비", code: "471990" },
+    { name: "KODEX TRF3070", code: "329650" },
+    { name: "KODEX 미국S&P500에너지(합성)", code: "218420" },
+    { name: "KODEX 미국빅테크10(H)", code: "314250" },
+    { name: "SOL 미국배당미국채혼합50", code: "490490" },
+    { name: "TIGER 글로벌혁신블루칩TOP10", code: "464930" },
+    { name: "TIGER 미국필라델피아반도체나스닥", code: "381180" },
+    { name: "TIGER 코리아배당다우존스", code: "0052D0" }
+  ]
+};
+
+function getChartUrl(code, chartType) {
+  var sid = new Date().getTime();
+
+  return "https://ssl.pstatic.net/imgfinance/chart/item/" +
+         chartType +
+         "/week/" +
+         code +
+         ".png?sidcode=" +
+         sid;
+}
+
+function getDetailUrl(code) {
+  return "https://finance.naver.com/item/main.naver?code=" + encodeURIComponent(code);
+}
+
+function openNaverStock(code) {
+  window.open(getDetailUrl(code), "_blank");
+}
+
+function formatNumber(value) {
+  if (value === null || value === undefined || value === "") {
+    return "-";
+  }
+
+  var num = String(value).replace(/,/g, "");
+
+  if (isNaN(num)) {
+    return value;
+  }
+
+  return Number(num).toLocaleString("ko-KR");
+}
+
+function getCompareClass(compareValue) {
+  if (compareValue === null || compareValue === undefined || compareValue === "") {
+    return "compareFlat";
+  }
+
+  var text = String(compareValue);
+
+  if (text.indexOf("-") === 0) {
+    return "compareDown";
+  }
+
+  if (text === "0" || text === "0.00") {
+    return "compareFlat";
+  }
+
+  return "compareUp";
+}
+
+function getComparePrefix(compareValue) {
+  if (compareValue === null || compareValue === undefined || compareValue === "") {
+    return "";
+  }
+
+  var text = String(compareValue);
+
+  if (text.indexOf("-") === 0) {
+    return "";
+  }
+
+  if (text === "0" || text === "0.00") {
+    return "";
+  }
+
+  return "+";
+}
+
+function getPriceJsonpUrl(code, callbackName) {
+  return GAS_WEB_APP_URL +
+         "?code=" + encodeURIComponent(code) +
+         "&callback=" + encodeURIComponent(callbackName) +
+         "&_=" + new Date().getTime();
+}
+
+/*
+  현재가 조회: JSONP 방식
+  - fetch를 쓰지 않습니다.
+  - script 태그를 동적으로 추가해서 Apps Script 응답을 실행합니다.
+  - CORS 문제를 피하기 위한 방식입니다.
+*/
+function updatePrice(code, priceBox) {
+  priceBox.innerHTML = '<span class="priceLoading">현재가 조회 중...</span>';
+
+  var safeCode = String(code).replace(/[^0-9A-Z]/g, "");
+  var callbackName = "priceCallback_" + safeCode + "_" + new Date().getTime() + "_" + Math.floor(Math.random() * 100000);
+
+  var script = document.createElement("script");
+  var timeoutId;
+
+  window[callbackName] = function(json) {
+    clearTimeout(timeoutId);
+
+    try {
+      if (script && script.parentNode) {
+        script.parentNode.removeChild(script);
+      }
+    } catch (e) {}
+
+    try {
+      delete window[callbackName];
+    } catch (e) {
+      window[callbackName] = undefined;
+    }
+
+    if (!json || json.ok !== true) {
+      priceBox.innerHTML = '<span class="priceError">현재가 조회 실패</span>';
+      console.log("현재가 조회 실패:", code, json);
+      return;
+    }
+
+    var now = json.now;
+    var compare = json.compare;
+    var rate = json.rate;
+
+    if (now === null || now === undefined || now === "") {
+      priceBox.innerHTML = '<span class="priceError">현재가 값 없음</span>';
+      console.log("현재가 값 없음:", code, json);
+      return;
+    }
+
+    var compareClass = getCompareClass(compare);
+    var comparePrefix = getComparePrefix(compare);
+
+    var html = "";
+    html += '<span class="priceLabel">현재가</span>';
+    html += '<span class="priceValue">' + formatNumber(now) + "원</span>";
+
+    if (compare !== undefined && compare !== null && compare !== "") {
+      html += '<span class="' + compareClass + '">';
+      html += comparePrefix + formatNumber(compare) + "원";
+
+      if (rate !== undefined && rate !== null && rate !== "") {
+        html += " (" + comparePrefix + rate + "%)";
+      }
+
+      html += "</span>";
+    }
+
+    priceBox.innerHTML = html;
+  };
+
+  script.onerror = function() {
+    clearTimeout(timeoutId);
+
+    priceBox.innerHTML = '<span class="priceError">현재가 조회 실패</span>';
+
+    try {
+      if (script && script.parentNode) {
+        script.parentNode.removeChild(script);
+      }
+    } catch (e) {}
+
+    try {
+      delete window[callbackName];
+    } catch (e) {
+      window[callbackName] = undefined;
+    }
+
+    console.log("JSONP 스크립트 로드 실패:", code);
+  };
+
+  timeoutId = setTimeout(function() {
+    priceBox.innerHTML = '<span class="priceError">현재가 조회 시간초과</span>';
+
+    try {
+      if (script && script.parentNode) {
+        script.parentNode.removeChild(script);
+      }
+    } catch (e) {}
+
+    try {
+      delete window[callbackName];
+    } catch (e) {
+      window[callbackName] = undefined;
+    }
+
+    console.log("JSONP 현재가 조회 시간초과:", code);
+  }, 12000);
+
+  script.src = getPriceJsonpUrl(code, callbackName);
+  document.body.appendChild(script);
+}
+
+function render() {
+  var category = document.getElementById("category").value;
+  var chartType = document.getElementById("chartType").value;
+  var list = document.getElementById("list");
+  var status = document.getElementById("status");
+
+  list.innerHTML = "";
+
+  var items = data[category];
+
+  if (!items || items.length === 0) {
+    status.innerHTML = "표시할 종목이 없습니다.";
+    return;
+  }
+
+  status.innerHTML = category + " 종목 " + items.length + "개 표시 중";
+
+  for (var i = 0; i < items.length; i++) {
+    var item = items[i];
+
+    var card = document.createElement("div");
+    card.className = "card";
+
+    card.onclick = function(code) {
+      return function() {
+        openNaverStock(code);
+      };
+    }(item.code);
+
+    var title = document.createElement("div");
+    title.className = "title";
+    title.appendChild(document.createTextNode(item.name));
+
+    var code = document.createElement("div");
+    code.className = "code";
+    code.appendChild(document.createTextNode("종목코드: " + item.code));
+
+    var img = document.createElement("img");
+    img.className = "chart";
+    img.src = getChartUrl(item.code, chartType);
+    img.alt = item.name + " 1주일 차트";
+
+    img.onclick = function(code) {
+      return function(event) {
+        event.stopPropagation();
+        openNaverStock(code);
+      };
+    }(item.code);
+
+    img.onerror = function() {
+      this.style.display = "none";
+
+      var err = document.createElement("div");
+      err.className = "error";
+      err.appendChild(
+        document.createTextNode(
+          "차트 이미지를 불러오지 못했습니다. 회사망/보안 설정 또는 종목코드를 확인하세요."
+        )
+      );
+
+      this.parentNode.appendChild(err);
+    };
+
+    var priceBox = document.createElement("div");
+    priceBox.className = "priceBox";
+    priceBox.appendChild(document.createTextNode("현재가 조회 중..."));
+
+    var link = document.createElement("div");
+    link.className = "link";
+
+    var a = document.createElement("a");
+    a.href = getDetailUrl(item.code);
+    a.target = "_blank";
+    a.appendChild(document.createTextNode("네이버 금융 상세 보기"));
+
+    a.onclick = function(event) {
+      event.stopPropagation();
+    };
+
+    link.appendChild(a);
+
+    card.appendChild(title);
+    card.appendChild(code);
+    card.appendChild(img);
+    card.appendChild(priceBox);
+    card.appendChild(link);
+
+    list.appendChild(card);
+
+    updatePrice(item.code, priceBox);
+  }
+}
+
+document.getElementById("category").onchange = render;
+document.getElementById("chartType").onchange = render;
+
+render();
+</script>
+
+</body>
+</html>
