@@ -2,522 +2,2371 @@
 <html lang="ko">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>항공권 통합 조회 도구</title>
-    <style>
-        body {
-            font-family: sans-serif;
-            padding: 20px;
-            line-height: 1.6;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ETF 주가 현황</title>
 
-        .container {
-            max-width: 650px;
-            margin: auto;
-            border: 1px solid #ccc;
-            padding: 20px;
-            border-radius: 10px;
-        }
+  <style>
+    body {
+      font-family: Arial, "맑은 고딕", sans-serif;
+      margin: 20px;
+      background: #f7f8fa;
+      color: #222;
+    }
 
-        .input-group {
-            margin-bottom: 15px;
-        }
+    #stickyHeader {
+      position: sticky;
+      top: 0;
+      z-index: 999;
+      background: #f7f8fa;
+      padding-top: 10px;
+      padding-bottom: 10px;
+      margin: -20px -20px 0 -20px;
+      padding-left: 20px;
+      padding-right: 20px;
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.04);
+    }
 
-        .trip-type-group {
-            display: flex;
-            gap: 1.25rem;
-            flex-wrap: nowrap;
-            align-items: center;
-            width: 100%;
-            justify-content: flex-start;
-            white-space: nowrap;
-        }
+    h2 {
+      margin: 0 0 12px 0;
+    }
 
-        .trip-type-group label {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-weight: normal;
-            white-space: nowrap;
-            flex-shrink: 0;
-        }
+    .toolbar {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 12px;
+    }
 
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
+    select {
+      padding: 7px;
+      font-size: 14px;
+      margin-right: 12px;
+    }
 
-        input {
-            width: 100%;
-            padding: 8px;
-            box-sizing: border-box;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
+    button {
+      padding: 7px 14px;
+      font-size: 14px;
+      cursor: pointer;
+      margin-right: 8px;
+    }
 
-        button {
-            width: 100%;
-            padding: 12px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-        }
+    .csvBtn {
+      border-radius: 999px;
+      border: 1px solid #1d72b8;
+      background: #1d72b8;
+      color: #fff;
+      padding: 5px 12px;
+      font-size: 13px;
+      line-height: 1.4;
+      box-shadow: 0 3px 8px rgba(29, 114, 184, 0.16);
+      transition: background 0.2s ease, transform 0.2s ease;
+    }
 
-        button:hover {
-            background-color: #0056b3;
-        }
+    .csvBtn:hover {
+      background: #145a97;
+      transform: translateY(-1px);
+    }
 
-        .airport-dropdown {
-            position: relative;
-            max-height: 240px;
-            overflow-y: auto;
-            border: 1px solid #ddd;
-            border-top: none;
-            background-color: #fff;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
-            z-index: 100;
-            display: none;
-        }
+    .hint {
+      color: #666;
+      font-size: 12px;
+      margin-top: 8px;
+      line-height: 1.5;
+    }
 
-        .airport-dropdown.visible {
-            display: block;
-        }
+    .status {
+      margin: 10px 0 12px 0;
+      font-size: 13px;
+      color: #333;
+      min-height: 18px;
+    }
 
-        .airport-item {
-            padding: 10px;
-            border-bottom: 1px solid #f1f1f1;
-            cursor: pointer;
-        }
+    .tableWrap {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      padding: 12px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+      overflow-x: auto;
+      margin-bottom: 16px;
+    }
 
-        .airport-item:last-child {
-            border-bottom: none;
-        }
+    .tableTitleRow {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 32px;
+      margin-bottom: 8px;
+    }
 
-        .airport-item:hover {
-            background-color: #f0f8ff;
-        }
+    .tableTitle {
+      font-size: 15px;
+      font-weight: bold;
+      margin: 0;
+    }
 
-        .airport-code {
-            font-weight: 700;
-            margin-right: 8px;
-        }
+    .titleActions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
 
-        .airport-details {
-            color: #555;
-            font-size: 0.95em;
-        }
+    table {
+      width: auto;
+      border-collapse: collapse;
+      font-size: 13px;
+      table-layout: auto;
+    }
 
-        .info {
-            font-size: 0.85em;
-            color: #666;
-            margin-top: 10px;
-        }
-    </style>
+    thead th {
+      background: #f3f6fb;
+      border: 1px solid #dfe6ef;
+      padding: 8px;
+      text-align: center;
+      white-space: nowrap;
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+
+    tbody td {
+      border: 1px solid #e5e5e5;
+      padding: 7px 8px;
+      white-space: nowrap;
+      vertical-align: middle;
+    }
+
+    td.tdCenter {
+      text-align: center;
+    }
+
+    td.tdRight {
+      text-align: right;
+    }
+
+    td.tdCategory {
+      text-align: center;
+      font-weight: 700;
+      color: #444;
+      background: #fafafa;
+      vertical-align: middle;
+    }
+
+    td.tdName {
+      text-align: left;
+      font-weight: 600;
+    }
+
+    .catNavLink {
+      color: #0066cc;
+      cursor: pointer;
+      text-decoration: none;
+      font-weight: 700;
+      user-select: none;
+    }
+
+    .catNavLink:hover {
+      text-decoration: underline;
+    }
+
+    .typeSafe {
+      color: #0054d6;
+      font-style: italic;
+      font-weight: 600;
+    }
+
+    .typeAttack {
+      color: #b8860b;
+      font-weight: 800;
+    }
+
+    .typeSelect {
+      padding: 5px 6px;
+      font-size: 13px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      background: #fff;
+      margin-left: 6px;
+    }
+
+    .dateInput {
+      padding: 5px 6px;
+      font-size: 13px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      background: #fff;
+    }
+
+    .categoryTotalRow td {
+      background: #f7fbff;
+      border-top: 2px solid #b7cbe6;
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .grandTotalRow td {
+      background: #fffaf0;
+      border-top: 2px solid #d9b86c;
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .totalLabel {
+      text-align: right;
+      color: #333;
+    }
+
+    .totalBlank {
+      background: inherit;
+    }
+
+    .buyInput {
+      width: 90px;
+      padding: 6px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 13px;
+      text-align: right;
+    }
+
+    .qtyInput {
+      width: 65px;
+      padding: 6px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 13px;
+      text-align: right;
+    }
+
+    .saveBtn {
+      padding: 6px 10px;
+      font-size: 12px;
+      border: 1px solid #bbb;
+      border-radius: 6px;
+      background: #fff;
+      cursor: pointer;
+    }
+
+    .saveBtn:hover {
+      background: #f2f2f2;
+    }
+
+    .saveStatus {
+      display: inline-block;
+      margin-left: 6px;
+      font-size: 12px;
+      color: #0b66c3;
+    }
+
+    .profitPlus {
+      color: #d60000;
+      font-weight: 700;
+    }
+
+    .profitMinus {
+      color: #0054d6;
+      font-weight: 700;
+    }
+
+    .profitFlat {
+      color: #555;
+      font-weight: 700;
+    }
+
+    .sortableHeader {
+      cursor: pointer;
+      user-select: none;
+      white-space: nowrap;
+    }
+
+    .sortArrow {
+      margin-left: 6px;
+      font-size: 0.85em;
+      color: #555;
+    }
+
+    .compareUp {
+      color: #d60000;
+      font-weight: 700;
+    }
+
+    .compareDown {
+      color: #0054d6;
+      font-weight: 700;
+    }
+
+    .compareFlat {
+      color: #555;
+      font-weight: 700;
+    }
+
+    .loading {
+      color: #777;
+    }
+
+    .error {
+      color: #c00000;
+      font-weight: 700;
+    }
+
+    .typeBreakCell {
+      font-size: 14px;
+      font-weight: 700;
+      text-align: center;
+      white-space: pre;
+    }
+
+    .nameScrollLink {
+      color: #0066cc;
+      cursor: pointer;
+      text-decoration: none;
+      font-weight: 700;
+      user-select: none;
+    }
+
+    .nameScrollLink:hover {
+      text-decoration: underline;
+    }
+
+    #cardsWrap {
+      display: none;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      padding: 12px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+      margin-bottom: 16px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+      gap: 16px;
+    }
+
+    .card {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      padding: 12px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+      transition: all 0.15s ease;
+    }
+
+    .card:hover {
+      border-color: #0b66c3;
+      box-shadow: 0 4px 12px rgba(0, 102, 204, 0.18);
+      transform: translateY(-2px);
+    }
+
+    .cardFocus {
+      border-color: #d9a600 !important;
+      box-shadow: 0 0 0 3px rgba(217, 166, 0, 0.22), 0 4px 12px rgba(0, 102, 204, 0.18) !important;
+    }
+
+    .cardTitle {
+      font-weight: 800;
+      font-size: 15px;
+      margin-bottom: 6px;
+    }
+
+    .cardMeta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      font-size: 12px;
+      color: #666;
+    }
+
+    .detailLink {
+      font-size: 12px;
+      color: #0066cc;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .detailLink:hover {
+      text-decoration: underline;
+    }
+
+    .chart {
+      width: 100%;
+      border: 1px solid #eee;
+      border-radius: 8px;
+      background: #fafafa;
+      display: block;
+      cursor: pointer;
+    }
+
+    #chartTypeWrap {
+      display: none;
+      margin-left: 8px;
+    }
+  </style>
+
+  <script src="./MyDCIRP_DATA.js"></script>
 </head>
 
 <body>
+  <div id="stickyHeader">
+    <h2>ETF 주가 현황</h2>
 
-    <div class="container">
-        <H3><u> <center> <b> <font color="red" align="center">반드시 Chrome을 '시크릿 창'으로  띄우고 하기 값 진행.</font> </b> </center></u></H3>
-        <h2>✈️ 항공권 통합 조회</h2>
+    <div class="toolbar">
+      <label>
+        구분:
+        <select id="category"></select>
+      </label>
 
-        <div class="input-group">
-            <label>출발지 (IATA 코드 또는 공항명 검색)</label>
-            <input type="text" id="origin" placeholder="공항명, 도시, IATA 코드로 검색" autocomplete="off" value="SEL">
-            <div class="airport-dropdown" id="originDropdown"></div>
-        </div>
+      <label id="chartTypeWrap">
+        차트 종류:
+        <select id="chartType">
+          <option value="area">라인(면적)</option>
+          <option value="candle">봉차트</option>
+        </select>
+      </label>
 
-        <div class="input-group">
-            <label>도착지 (IATA 코드 또는 공항명 검색)</label>
-            <input type="text" id="destination" placeholder="공항명, 도시, IATA 코드로 검색" autocomplete="off">
-            <div class="airport-dropdown" id="destinationDropdown"></div>
-        </div>
+      <button type="button" onclick="render()">조회</button>
+      <button type="button" onclick="downloadDataFile()">MyDCIRP_DATA.js 내보내기</button>
 
-        <div class="input-group">
-            <label>여정 선택</label>
-            <div class="trip-type-group">
-                <label><input type="checkbox" id="roundtrip" checked> 왕복</label>
-                <label><input type="checkbox" id="oneway"> 편도</label>
-            </div>
-        </div>
-
-        <div class="input-group">
-            <label>가는 날</label>
-            <input type="date" id="depDate">
-        </div>
-
-        <div class="input-group">
-            <label>오는 날</label>
-            <input type="date" id="retDate">
-        </div>
-
-        <button onclick="searchFlights()">모든 사이트에서 조회하기</button>
-
-        <p class="info">* 성인 1명, 직항 조건이 자동으로 적용됩니다.<br>
-            * 브라우저 팝업 차단 해제가 필요할 수 있습니다.</p>
+      <div class="hint">
+        • 현재가는 한국투자증권 KIS Open API Apps Script에서 내려주는 <b>json.now</b> 값을 사용합니다.<br>
+        • 여러 종목을 동시에 조회하지 않고, 종목을 하나씩 순차 조회합니다.<br>
+        • 시작 시 localStorage를 리셋하고 MyDCIRP_DATA.js 값으로 치환합니다.<br>
+        • 합계 행의 수익률은 <b>총수익 / 총 매입액</b> 기준으로 표시합니다.<br>
+        • CSV 저장 시 각 구분별 마지막에 합계 행을 추가합니다.
+      </div>
     </div>
+  </div>
 
-    <script>
-        const airports = [
-            { code: 'ICN', name: 'Incheon International Airport', koName: '인천국제공항', city: 'Seoul', koCity: '서울', country: 'South Korea' },
-            { code: 'GMP', name: 'Gimpo International Airport', koName: '김포국제공항', city: 'Seoul', koCity: '서울', country: 'South Korea' },
-            { code: 'PUS', name: 'Gimhae International Airport', koName: '김해국제공항', city: 'Busan', koCity: '부산', country: 'South Korea' },
-            { code: 'CJU', name: 'Jeju International Airport', koName: '제주국제공항', city: 'Jeju', koCity: '제주', country: 'South Korea' },
-            { code: 'NRT', name: 'Narita International Airport', koName: '나리타국제공항', city: 'Tokyo', koCity: '도쿄', country: 'Japan' },
-            { code: 'HND', name: 'Tokyo Haneda Airport', koName: '하네다공항', city: 'Tokyo', koCity: '도쿄', country: 'Japan' },
-            { code: 'HKG', name: 'Hong Kong International Airport', koName: '홍콩국제공항', city: 'Hong Kong', koCity: '홍콩', country: 'China' },
-            { code: 'TPE', name: 'Taiwan Taoyuan International Airport', koName: '타이완 타오위안 국제공항', city: 'Taipei', koCity: '타이베이', country: 'Taiwan' },
-            { code: 'SIN', name: 'Singapore Changi Airport', koName: '싱가포르 창이공항', city: 'Singapore', koCity: '싱가포르', country: 'Singapore' },
-            { code: 'BKK', name: 'Suvarnabhumi Airport', koName: '수완나품공항', city: 'Bangkok', koCity: '방콕', country: 'Thailand' },
-            { code: 'KUL', name: 'Kuala Lumpur International Airport', koName: '쿠알라룸푸르 국제공항', city: 'Kuala Lumpur', koCity: '쿠알라룸푸르', country: 'Malaysia' },
-            { code: 'DXB', name: 'Dubai International Airport', koName: '두바이 국제공항', city: 'Dubai', koCity: '두바이', country: 'United Arab Emirates' },
-            { code: 'DOH', name: 'Hamad International Airport', koName: '하마드 국제공항', city: 'Doha', koCity: '도하', country: 'Qatar' },
-            { code: 'IST', name: 'Istanbul Airport', koName: '이스탄불공항', city: 'Istanbul', koCity: '이스탄불', country: 'Turkey' },
-            { code: 'LHR', name: 'Heathrow Airport', koName: '히드로공항', city: 'London', koCity: '런던', country: 'United Kingdom' },
-            { code: 'LGW', name: 'Gatwick Airport', koName: '게트윅공항', city: 'London', koCity: '런던', country: 'United Kingdom' },
-            { code: 'CDG', name: 'Charles de Gaulle Airport', koName: '샤를드골공항', city: 'Paris', koCity: '파리', country: 'France' },
-            { code: 'ORY', name: 'Orly Airport', koName: '오를리공항', city: 'Paris', koCity: '파리', country: 'France' },
-            { code: 'AMS', name: 'Amsterdam Airport Schiphol', koName: '스키폴공항', city: 'Amsterdam', koCity: '암스테르담', country: 'Netherlands' },
-            { code: 'FRA', name: 'Frankfurt Airport', koName: '프랑크푸르트공항', city: 'Frankfurt', koCity: '프랑크푸르트', country: 'Germany' },
-            { code: 'MUC', name: 'Munich Airport', koName: '뮌헨공항', city: 'Munich', koCity: '뮌헨', country: 'Germany' },
-            { code: 'ZRH', name: 'Zurich Airport', koName: '취리히공항', city: 'Zurich', koCity: '취리히', country: 'Switzerland' },
-            { code: 'VIE', name: 'Vienna International Airport', koName: '비엔나 국제공항', city: 'Vienna', koCity: '빈', country: 'Austria' },
-            { code: 'BCN', name: 'Barcelona–El Prat Airport', koName: '엘프라트공항', city: 'Barcelona', koCity: '바르셀로나', country: 'Spain' },
-            { code: 'MAD', name: 'Adolfo Suárez Madrid–Barajas Airport', koName: '마드리드 바라하스공항', city: 'Madrid', koCity: '마드리드', country: 'Spain' },
-            { code: 'FCO', name: 'Leonardo da Vinci–Fiumicino Airport', koName: '피우미치노공항', city: 'Rome', koCity: '로마', country: 'Italy' },
-            { code: 'MXP', name: 'Malpensa Airport', koName: '말펜사공항', city: 'Milan', koCity: '밀라노', country: 'Italy' },
-            { code: 'ARN', name: 'Stockholm Arlanda Airport', koName: '알란다공항', city: 'Stockholm', koCity: '스톡홀름', country: 'Sweden' },
-            { code: 'OSL', name: 'Oslo Gardermoen Airport', koName: '오슬로공항', city: 'Oslo', koCity: '오슬로', country: 'Norway' },
-            { code: 'CPH', name: 'Copenhagen Airport', koName: '코펜하겐공항', city: 'Copenhagen', koCity: '코펜하겐', country: 'Denmark' },
-            { code: 'HEL', name: 'Helsinki Airport', koName: '헬싱키공항', city: 'Helsinki', koCity: '헬싱키', country: 'Finland' },
-            { code: 'DUB', name: 'Dublin Airport', koName: '더블린공항', city: 'Dublin', koCity: '더블린', country: 'Ireland' },
-            { code: 'JFK', name: 'John F. Kennedy International Airport', koName: '존 F. 케네디 국제공항', city: 'New York', koCity: '뉴욕', country: 'USA' },
-            { code: 'EWR', name: 'Newark Liberty International Airport', koName: '뉴어크공항', city: 'Newark', koCity: '뉴어크', country: 'USA' },
-            { code: 'LGA', name: 'LaGuardia Airport', koName: '라과디아공항', city: 'New York', koCity: '뉴욕', country: 'USA' },
-            { code: 'BOS', name: 'Logan International Airport', koName: '로건공항', city: 'Boston', koCity: '보스턴', country: 'USA' },
-            { code: 'ORD', name: 'O\'Hare International Airport', koName: '오헤어 국제공항', city: 'Chicago', koCity: '시카고', country: 'USA' },
-            { code: 'ATL', name: 'Hartsfield–Jackson Atlanta International Airport', koName: '하츠필드잭슨 애틀란타 국제공항', city: 'Atlanta', koCity: '애틀란타', country: 'USA' },
-            { code: 'DFW', name: 'Dallas/Fort Worth International Airport', koName: '달라스 포트워스 국제공항', city: 'Dallas', koCity: '댈러스', country: 'USA' },
-            { code: 'LAX', name: 'Los Angeles International Airport', koName: '로스앤젤레스 국제공항', city: 'Los Angeles', koCity: '로스앤젤레스', country: 'USA' },
-            { code: 'SFO', name: 'San Francisco International Airport', koName: '샌프란시스코 국제공항', city: 'San Francisco', koCity: '샌프란시스코', country: 'USA' },
-            { code: 'SEA', name: 'Seattle–Tacoma International Airport', koName: '시애틀 타코마 국제공항', city: 'Seattle', koCity: '시애틀', country: 'USA' },
-            { code: 'MIA', name: 'Miami International Airport', koName: '마이애미 국제공항', city: 'Miami', koCity: '마이애미', country: 'USA' },
-            { code: 'YYZ', name: 'Toronto Pearson International Airport', koName: '토론토 피어슨 국제공항', city: 'Toronto', koCity: '토론토', country: 'Canada' },
-            { code: 'YVR', name: 'Vancouver International Airport', koName: '밴쿠버 국제공항', city: 'Vancouver', koCity: '밴쿠버', country: 'Canada' },
-            { code: 'GRU', name: 'São Paulo–Guarulhos International Airport', koName: '상파울루 구아룰료스 국제공항', city: 'São Paulo', koCity: '상파울로', country: 'Brazil' },
-            { code: 'EZE', name: 'Ministro Pistarini International Airport', koName: '부에노스아이레스 미니스트로 피스타리니 국제공항', city: 'Buenos Aires', koCity: '부에노스아이레스', country: 'Argentina' },
-            { code: 'JNB', name: 'O. R. Tambo International Airport', koName: '요한네스버그 탐보 국제공항', city: 'Johannesburg', koCity: '요하네스버그', country: 'South Africa' },
-            { code: 'CPT', name: 'Cape Town International Airport', koName: '케이프타운 국제공항', city: 'Cape Town', koCity: '케이프타운', country: 'South Africa' },
-            { code: 'SYD', name: 'Sydney Kingsford Smith Airport', koName: '시드니공항', city: 'Sydney', koCity: '시드니', country: 'Australia' },
-            { code: 'MEL', name: 'Melbourne Airport', koName: '멜버른공항', city: 'Melbourne', koCity: '멜버른', country: 'Australia' },
-            { code: 'BNE', name: 'Brisbane Airport', koName: '브리즈번공항', city: 'Brisbane', koCity: '브리즈번', country: 'Australia' },
-            { code: 'AKL', name: 'Auckland Airport', koName: '오클랜드공항', city: 'Auckland', koCity: '오클랜드', country: 'New Zealand' },
-            { code: 'DEL', name: 'Indira Gandhi International Airport', koName: '인디라 간디 국제공항', city: 'Delhi', koCity: '델리', country: 'India' },
-            { code: 'BOM', name: 'Chhatrapati Shivaji Maharaj International Airport', koName: '뭄바이 국제공항', city: 'Mumbai', koCity: '뭄바이', country: 'India' },
-            { code: 'BLR', name: 'Kempegowda International Airport', koName: '벵갈루루 국제공항', city: 'Bengaluru', koCity: '벵갈루루', country: 'India' },
-            { code: 'MAA', name: 'Chennai International Airport', koName: '첸나이 국제공항', city: 'Chennai', koCity: '첸나이', country: 'India' },
-            { code: 'SHJ', name: 'Sharjah International Airport', koName: '샤르자 국제공항', city: 'Sharjah', koCity: '샤르자', country: 'United Arab Emirates' },
-            { code: 'PEK', name: 'Beijing Capital International Airport', koName: '베이징 서우두 국제공항', city: 'Beijing', koCity: '베이징', country: 'China' },
-            { code: 'PVG', name: 'Shanghai Pudong International Airport', koName: '상하이 푸둥 국제공항', city: 'Shanghai', koCity: '상하이', country: 'China' },
-            { code: 'CAN', name: 'Guangzhou Baiyun International Airport', koName: '광저우 바이윤 국제공항', city: 'Guangzhou', koCity: '광저우', country: 'China' },
-            { code: 'SZX', name: 'Shenzhen Bao\'an International Airport', koName: '선전 바오안 국제공항', city: 'Shenzhen', koCity: '선전', country: 'China' },
-            { code: 'KIX', name: 'Kansai International Airport', koName: '간사이 국제공항', city: 'Osaka', koCity: '오사카', country: 'Japan' },
-            { code: 'NGO', name: 'Chubu Centrair International Airport', koName: '나고야 주부 센트레어 국제공항', city: 'Nagoya', koCity: '나고야', country: 'Japan' },
-            { code: 'FUK', name: 'Fukuoka Airport', koName: '후쿠오카공항', city: 'Fukuoka', koCity: '후쿠오카', country: 'Japan' },
-            { code: 'CTS', name: 'New Chitose Airport', koName: '신치토세공항', city: 'Sapporo', koCity: '삿포로', country: 'Japan' },
-            { code: 'ITM', name: 'Osaka International Airport', koName: '오사카 국제공항', city: 'Osaka', koCity: '오사카', country: 'Japan' },
-            { code: 'NKG', name: 'Nanjing Lukou International Airport', koName: '난징 루커우 국제공항', city: 'Nanjing', koCity: '난징', country: 'China' },
-            { code: 'TSA', name: 'Taipei Songshan Airport', koName: '타이베이 송산공항', city: 'Taipei', koCity: '타이베이', country: 'Taiwan' },
-            { code: 'KHH', name: 'Kaohsiung International Airport', koName: '가오슝 국제공항', city: 'Kaohsiung', koCity: '가오슝', country: 'Taiwan' },
-            { code: 'CGK', name: 'Soekarno-Hatta International Airport', koName: '자카르타 수카르노하타 국제공항', city: 'Jakarta', koCity: '자카르타', country: 'Indonesia' },
-            { code: 'DPS', name: 'Ngurah Rai International Airport', koName: '응우라라이공항 (발리)', city: 'Denpasar', koCity: '덴파사르', country: 'Indonesia' },
-            { code: 'MNL', name: 'Ninoy Aquino International Airport', koName: '니노이 아키노 국제공항', city: 'Manila', koCity: '마닐라', country: 'Philippines' },
-            { code: 'CEB', name: 'Mactan–Cebu International Airport', koName: '막탄 세부 국제공항', city: 'Cebu', koCity: '세부', country: 'Philippines' },
-            { code: 'SGN', name: 'Tan Son Nhat International Airport', koName: '탄손냣 국제공항', city: 'Ho Chi Minh City', koCity: '호치민', country: 'Vietnam' },
-            { code: 'HAN', name: 'Noi Bai International Airport', koName: '노이바이 국제공항', city: 'Hanoi', koCity: '하노이', country: 'Vietnam' },
-            { code: 'DAD', name: 'Da Nang International Airport', koName: '다낭 국제공항', city: 'Da Nang', koCity: '다낭', country: 'Vietnam' },
-            { code: 'KTM', name: 'Tribhuvan International Airport', koName: '트리부반 국제공항', city: 'Kathmandu', koCity: '카트만두', country: 'Nepal' },
-            { code: 'CCU', name: 'Netaji Subhas Chandra Bose International Airport', koName: '콜카타 국제공항', city: 'Kolkata', koCity: '콜카타', country: 'India' },
-            { code: 'HYD', name: 'Rajiv Gandhi International Airport', koName: '하이데라바드 국제공항', city: 'Hyderabad', koCity: '하이데라바드', country: 'India' },
-            { code: 'AMD', name: 'Sardar Vallabhbhai Patel International Airport', koName: '아메다바드 국제공항', city: 'Ahmedabad', koCity: '아메다바드', country: 'India' },
-            { code: 'RUH', name: 'King Khalid International Airport', koName: '리야드 킹 칼리드 국제공항', city: 'Riyadh', koCity: '리야드', country: 'Saudi Arabia' },
-            { code: 'JED', name: 'King Abdulaziz International Airport', koName: '제다 킹 압둘아지즈 국제공항', city: 'Jeddah', koCity: '제다', country: 'Saudi Arabia' },
-            { code: 'AUH', name: 'Abu Dhabi International Airport', koName: '아부다비 국제공항', city: 'Abu Dhabi', koCity: '아부다비', country: 'United Arab Emirates' },
-            { code: 'BAH', name: 'Bahrain International Airport', koName: '바레인 국제공항', city: 'Manama', koCity: '마나마', country: 'Bahrain' },
-            { code: 'KWI', name: 'Kuwait International Airport', koName: '쿠웨이트 국제공항', city: 'Kuwait City', koCity: '쿠웨이트시티', country: 'Kuwait' },
-            { code: 'TBS', name: 'Tbilisi International Airport', koName: '트빌리시 국제공항', city: 'Tbilisi', koCity: '트빌리시', country: 'Georgia' },
-            { code: 'SVO', name: 'Sheremetyevo International Airport', koName: '셰레메티예보 국제공항', city: 'Moscow', koCity: '모스크바', country: 'Russia' },
-            { code: 'DME', name: 'Domodedovo International Airport', koName: '도모데도보 국제공항', city: 'Moscow', koCity: '모스크바', country: 'Russia' },
-            { code: 'LED', name: 'Pulkovo Airport', koName: '풀코보공항', city: 'Saint Petersburg', koCity: '상트페테르부르크', country: 'Russia' },
-            { code: 'KZN', name: 'Kazan International Airport', koName: '카잔 국제공항', city: 'Kazan', koCity: '카잔', country: 'Russia' },
-            { code: 'BOG', name: 'El Dorado International Airport', koName: '엘도라도 국제공항', city: 'Bogotá', koCity: '보고타', country: 'Colombia' },
-            { code: 'MEX', name: 'Mexico City International Airport', koName: '멕시코시티 국제공항', city: 'Mexico City', koCity: '멕시코시티', country: 'Mexico' },
-            { code: 'LIM', name: 'Jorge Chávez International Airport', koName: '호르헤 차베스 국제공항', city: 'Lima', koCity: '리마', country: 'Peru' },
-            { code: 'SCL', name: 'Comodoro Arturo Merino Benítez International Airport', koName: '산티아고 국제공항', city: 'Santiago', koCity: '산티아고', country: 'Chile' },
-            { code: 'GIG', name: 'Rio de Janeiro–Galeão International Airport', koName: '리우데자네이루 국제공항', city: 'Rio de Janeiro', koCity: '리우데자네이루', country: 'Brazil' },
-            { code: 'SJO', name: 'Juan Santamaría International Airport', koName: '산 호세 국제공항', city: 'San José', koCity: '산 호세', country: 'Costa Rica' },
-            { code: 'PTY', name: 'Tocumen International Airport', koName: '토쿠멘 국제공항', city: 'Panama City', koCity: '파나마시티', country: 'Panama' },
-            { code: 'SAL', name: 'Monseñor Óscar Arnulfo Romero International Airport', koName: '산살바도르 국제공항', city: 'San Salvador', koCity: '산살바도르', country: 'El Salvador' },
-            { code: 'CCS', name: 'Simón Bolívar International Airport', koName: '시몬 볼리바르 국제공항', city: 'Caracas', koCity: '카라카스', country: 'Venezuela' },
-            { code: 'HAV', name: 'José Martí International Airport', koName: '호세 마르티 국제공항', city: 'Havana', koCity: '아바나', country: 'Cuba' },
-            { code: 'IAD', name: 'Washington Dulles International Airport', koName: '워싱턴 덜레스 국제공항', city: 'Washington, D.C.', koCity: '워싱턴 D.C.', country: 'USA' },
-            { code: 'DCA', name: 'Ronald Reagan Washington National Airport', koName: '워싱턴 내셔널 공항', city: 'Washington, D.C.', koCity: '워싱턴 D.C.', country: 'USA' },
-            { code: 'MDW', name: 'Midway International Airport', koName: '미드웨이 국제공항', city: 'Chicago', koCity: '시카고', country: 'USA' },
-            { code: 'IAH', name: 'George Bush Intercontinental Airport', koName: '휴스턴 조지 부시 국제공항', city: 'Houston', koCity: '휴스턴', country: 'USA' },
-            { code: 'DEN', name: 'Denver International Airport', koName: '덴버 국제공항', city: 'Denver', koCity: '덴버', country: 'USA' },
-            { code: 'PHX', name: 'Phoenix Sky Harbor International Airport', koName: '피닉스 스카이 하버 국제공항', city: 'Phoenix', koCity: '피닉스', country: 'USA' },
-            { code: 'LAS', name: 'Harry Reid International Airport', koName: '라스베이거스 국제공항', city: 'Las Vegas', koCity: '라스베이거스', country: 'USA' },
-            { code: 'SAN', name: 'San Diego International Airport', koName: '샌디에이고 국제공항', city: 'San Diego', koCity: '샌디에이고', country: 'USA' },
-            { code: 'PHL', name: 'Philadelphia International Airport', koName: '필라델피아 국제공항', city: 'Philadelphia', koCity: '필라델피아', country: 'USA' },
-            { code: 'MSP', name: 'Minneapolis–Saint Paul International Airport', koName: '미니애폴리스 국제공항', city: 'Minneapolis', koCity: '미니애폴리스', country: 'USA' },
-            { code: 'DTW', name: 'Detroit Metropolitan Airport', koName: '디트로이트 메트로폴리탄공항', city: 'Detroit', koCity: '디트로이트', country: 'USA' },
-            { code: 'BWI', name: 'Baltimore/Washington International Thurgood Marshall Airport', koName: '볼티모어 워싱턴 국제공항', city: 'Baltimore', koCity: '볼티모어', country: 'USA' },
-            { code: 'FLL', name: 'Fort Lauderdale–Hollywood International Airport', koName: '포트로더데일 국제공항', city: 'Fort Lauderdale', koCity: '포트로더데일', country: 'USA' },
-            { code: 'TPA', name: 'Tampa International Airport', koName: '탐파 국제공항', city: 'Tampa', koCity: '탐파', country: 'USA' },
-            { code: 'YUL', name: 'Montréal–Trudeau International Airport', koName: '몬트리올 트뤼도 국제공항', city: 'Montreal', koCity: '몬트리올', country: 'Canada' },
-            { code: 'YYC', name: 'Calgary International Airport', koName: '캘거리 국제공항', city: 'Calgary', koCity: '캘거리', country: 'Canada' },
-            { code: 'YOW', name: 'Ottawa Macdonald–Cartier International Airport', koName: '오타와 국제공항', city: 'Ottawa', koCity: '오타와', country: 'Canada' },
-            { code: 'YWG', name: 'Winnipeg James Armstrong Richardson International Airport', koName: '위니펙 국제공항', city: 'Winnipeg', koCity: '위니펙', country: 'Canada' },
-            { code: 'PER', name: 'Perth Airport', koName: '퍼스공항', city: 'Perth', koCity: '퍼스', country: 'Australia' },
-            { code: 'ADL', name: 'Adelaide Airport', koName: '애들레이드공항', city: 'Adelaide', koCity: '애들레이드', country: 'Australia' },
-            { code: 'CNS', name: 'Cairns Airport', koName: '케언즈공항', city: 'Cairns', koCity: '케언즈', country: 'Australia' },
-            { code: 'CHC', name: 'Christchurch Airport', koName: '크라이스트처치공항', city: 'Christchurch', koCity: '크라이스트처치', country: 'New Zealand' },
-            { code: 'WLG', name: 'Wellington Airport', koName: '웰링턴공항', city: 'Wellington', koCity: '웰링턴', country: 'New Zealand' },
-            { code: 'NAN', name: 'Nadi International Airport', koName: '나디 국제공항', city: 'Nadi', koCity: '나디', country: 'Fiji' },
-            { code: 'CAI', name: 'Cairo International Airport', koName: '카이로 국제공항', city: 'Cairo', koCity: '카이로', country: 'Egypt' },
-            { code: 'NBO', name: 'Jomo Kenyatta International Airport', koName: '요모 케냐타 국제공항', city: 'Nairobi', koCity: '나이로비', country: 'Kenya' },
-            { code: 'ADD', name: 'Addis Ababa Bole International Airport', koName: '아디스아바바 볼레 국제공항', city: 'Addis Ababa', koCity: '아디스아바바', country: 'Ethiopia' },
-            { code: 'LOS', name: 'Murtala Muhammed International Airport', koName: '무르탈라 무함마드 국제공항', city: 'Lagos', koCity: '라고스', country: 'Nigeria' },
-            { code: 'ACC', name: 'Kotoka International Airport', koName: '코토카 국제공항', city: 'Accra', koCity: '아크라', country: 'Ghana' },
-            { code: 'DAR', name: 'Julius Nyerere International Airport', koName: '줄리어스 니에레레 국제공항', city: 'Dar es Salaam', koCity: '다르에살람', country: 'Tanzania' },
-            { code: 'CMN', name: 'Mohammed V International Airport', koName: '무함마드 5세 국제공항', city: 'Casablanca', koCity: '카사블랑카', country: 'Morocco' },
-            { code: 'TUN', name: 'Tunis–Carthage International Airport', koName: '튀니스 카르타고 국제공항', city: 'Tunis', koCity: '튀니스', country: 'Tunisia' },
-            { code: 'DUR', name: 'King Shaka International Airport', koName: '킹 샤카 국제공항', city: 'Durban', koCity: '더반', country: 'South Africa' },
-            { code: 'MSA', name: 'Muscat International Airport', koName: '무스카트 국제공항', city: 'Muscat', koCity: '무스카트', country: 'Oman' },
-            { code: 'BEG', name: 'Belgrade Nikola Tesla Airport', koName: '베오그라드 니콜라 테슬라공항', city: 'Belgrade', koCity: '베오그라드', country: 'Serbia' },
-            { code: 'ZAG', name: 'Zagreb Airport', koName: '자그레브공항', city: 'Zagreb', koCity: '자그레브', country: 'Croatia' },
-            { code: 'WAW', name: 'Warsaw Chopin Airport', koName: '바르샤바 쇼팽공항', city: 'Warsaw', koCity: '바르샤바', country: 'Poland' },
-            { code: 'ATH', name: 'Eleftherios Venizelos Airport', koName: '아테네 국제공항', city: 'Athens', koCity: '아테네', country: 'Greece' },
-            { code: 'OTP', name: 'Henri Coandă International Airport', koName: '부카레스트 앙리 코안다 국제공항', city: 'Bucharest', koCity: '부카레스트', country: 'Romania' },
-            { code: 'SKG', name: 'Thessaloniki Airport', koName: '테살로니키공항', city: 'Thessaloniki', koCity: '테살로니키', country: 'Greece' },
-            { code: 'BKI', name: 'Kota Kinabalu International Airport', koName: '코타키나발루 국제공항', city: 'Kota Kinabalu', koCity: '코타키나발루', country: 'Malaysia' },
-            { code: 'PEN', name: 'Penang International Airport', koName: '페낭 국제공항', city: 'Penang', koCity: '페낭', country: 'Malaysia' },
-            { code: 'REP', name: 'Siem Reap International Airport', koName: '시엠립 국제공항', city: 'Siem Reap', koCity: '시엠립', country: 'Cambodia' },
-            { code: 'UBN', name: 'Ulaanbaatar Chinggis Khaan International Airport', koName: '울란바토르 국제공항', city: 'Ulaanbaatar', koCity: '울란바토르', country: 'Mongolia' },
-            { code: 'SXJ', name: 'Srinagar International Airport', koName: '스리나가르 국제공항', city: 'Srinagar', koCity: '스리나가르', country: 'India' },
-            { code: 'LUX', name: 'Luxembourg Airport', koName: '룩셈부르크공항', city: 'Luxembourg', koCity: '룩셈부르크', country: 'Luxembourg' },
-            { code: 'BER', name: 'Berlin Brandenburg Airport', koName: '베를린 브란덴부르크공항', city: 'Berlin', koCity: '베를린', country: 'Germany' },
-            { code: 'PRG', name: 'Václav Havel Airport Prague', koName: '프라하 공항', city: 'Prague', koCity: '프라하', country: 'Czech Republic' },
-            { code: 'BUD', name: 'Budapest Ferenc Liszt International Airport', koName: '부다페스트 국제공항', city: 'Budapest', koCity: '부다페스트', country: 'Hungary' },
-            { code: 'MFM', name: 'Macau International Airport', koName: '마카오 국제공항', city: 'Macau', koCity: '마카오', country: 'China' },
-            { code: 'ZYL', name: 'Zhengzhou Xinzheng International Airport', koName: '정저우 신정 국제공항', city: 'Zhengzhou', koCity: '정저우', country: 'China' },
-            { code: 'WUH', name: 'Wuhan Tianhe International Airport', koName: '우한 국제공항', city: 'Wuhan', koCity: '우한', country: 'China' },
-            { code: 'XIY', name: 'Xian Xianyang International Airport', koName: '시안 국제공항', city: 'Xian', koCity: '시안', country: 'China' },
-            { code: 'KMG', name: 'Kunming Changshui International Airport', koName: '쿤밍 국제공항', city: 'Kunming', koCity: '쿤밍', country: 'China' },
-            { code: 'CTU', name: 'Chengdu Shuangliu International Airport', koName: '청두 국제공항', city: 'Chengdu', koCity: '청두', country: 'China' },
-            { code: 'CNX', name: 'Chiang Mai International Airport', koName: '치앙마이 국제공항', city: 'Chiang Mai', koCity: '치앙마이', country: 'Thailand' },
-            { code: 'VTE', name: 'Wattay International Airport', koName: '비엔티안 국제공항', city: 'Vientiane', koCity: '비엔티안', country: 'Laos' },
-            { code: 'RGN', name: 'Yangon International Airport', koName: '양곤 국제공항', city: 'Yangon', koCity: '양곤', country: 'Myanmar' },
-            { code: 'MDL', name: 'Mandalay International Airport', koName: '만달레이 국제공항', city: 'Mandalay', koCity: '만달레이', country: 'Myanmar' }
-        ];
+  <div id="status" class="status">로딩 중...</div>
 
-        function createAirportLabel(airport) {
-            const koInfo = airport.koName ? `${airport.koName} (${airport.koCity})` : '';
-            const enInfo = `${airport.name} (${airport.city}, ${airport.country})`;
-            return koInfo ? `${airport.code} · ${koInfo} / ${enInfo}` : `${airport.code} · ${enInfo}`;
+  <div id="tableWrap" class="tableWrap">
+    <div class="tableTitleRow">
+      <div id="tableTitle" class="tableTitle"></div>
+      <div id="titleActions" class="titleActions"></div>
+    </div>
+    <div id="tableArea"></div>
+  </div>
+
+  <div id="cardsWrap">
+    <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:10px;">
+      <div style="font-weight:800;">종목별 그래프</div>
+      <div style="font-size:12px; color:#666;">종목명을 클릭하면 해당 그래프로 이동합니다.</div>
+    </div>
+    <div id="cardsGrid" class="grid"></div>
+  </div>
+
+  <script>
+    var GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwEgzdCJnia1K97P3DtibRvmn9N3-3NbiTlvoQq6h6TJQ62Q4fiHBpftsls35T9X4NYtQ/exec";
+    var PRICE_REQUEST_DELAY_MS = 100;          // 종목별 가격 조회 시 요청 간 최소 지연 시간 (ms)
+    var PRICE_REQUEST_CONCURRENCY = 5;       // 종목별 가격 조회 시 최대 동시 요청 수
+    var PRICE_REQUEST_MAX_RETRY = 3;         // 종목별 가격 조회 시 실패한 요청의 최대 재시도 횟수
+
+    var RENDER_TOKEN = 0;
+    var __VIEW_SCOPE = "전체보기";
+    var __ROWS = [];
+    var __CAT_TOTALS = {};
+    var __SORT_FIELD = "hold";
+    var __SORT_ASC = false;
+    var __SIREN_PLAYED = false;
+
+    function sleep(ms) {
+      return new Promise(function (resolve) {
+        setTimeout(resolve, ms);
+      });
+    }
+
+    function playAmbulanceSiren() {
+      try {
+        var AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return false;
+
+        var ctx = new AudioCtx();
+        var o = ctx.createOscillator();
+        var g = ctx.createGain();
+
+        o.type = "sawtooth";
+        g.gain.value = 0.03;
+        o.connect(g);
+        g.connect(ctx.destination);
+
+        var t0 = ctx.currentTime;
+        var upDur = 0.18;
+        var downDur = 0.18;
+        var cycles = 8;
+
+        o.frequency.setValueAtTime(650, t0);
+
+        var t = t0;
+
+        for (var i = 0; i < cycles; i++) {
+          o.frequency.linearRampToValueAtTime(1200, t + upDur);
+          t += upDur;
+          o.frequency.linearRampToValueAtTime(650, t + downDur);
+          t += downDur;
         }
 
-        function searchAirports(query) {
-            const normalized = query.trim().toUpperCase();
-            if (!normalized) {
-                return airports.slice(0, 12);
-            }
-            return airports.filter(airport => {
-                return airport.code.includes(normalized)
-                    || airport.name.toUpperCase().includes(normalized)
-                    || airport.city.toUpperCase().includes(normalized)
-                    || airport.country.toUpperCase().includes(normalized)
-                    || (airport.koName && airport.koName.includes(query))
-                    || (airport.koCity && airport.koCity.includes(query));
-            }).slice(0, 20);
-        }
+        o.start(t0);
+        o.stop(t + 0.05);
 
-        function renderDropdown(inputId, dropdownId, query) {
-            const dropdown = document.getElementById(dropdownId);
-            const results = searchAirports(query);
-            dropdown.innerHTML = '';
+        setTimeout(function () {
+          try {
+            ctx.close && ctx.close();
+          } catch (e) { }
+        }, Math.ceil((t - t0 + 0.2) * 1000));
 
-            if (results.length === 0) {
-                const item = document.createElement('div');
-                item.className = 'airport-item';
-                item.textContent = '검색 결과가 없습니다.';
-                dropdown.appendChild(item);
-                dropdown.classList.add('visible');
-                return;
-            }
+        return true;
+      } catch (e) {
+        return false;
+      }
+    }
 
-            results.forEach(airport => {
-                const item = document.createElement('div');
-                item.className = 'airport-item';
-                const koInfo = airport.koName ? `<span style="color: #333;">${airport.koName} (${airport.koCity})</span><br>` : '';
-                const enInfo = `<span style="color: #666; font-size: 0.9em;">${airport.city}, ${airport.country} — ${airport.name}</span>`;
-                item.innerHTML = `
-                    <span class="airport-code">${airport.code}</span>
-                    <span class="airport-details">${koInfo}${enInfo}</span>
-                `;
-                item.addEventListener('mousedown', function (event) {
-                    event.preventDefault();
-                    selectAirport(inputId, airport.code);
-                });
-                dropdown.appendChild(item);
-            });
-            dropdown.classList.add('visible');
-        }
+    function notifyRenderedSirenOnce() {
+      if (__SIREN_PLAYED) return;
+      __SIREN_PLAYED = true;
 
-        function selectAirport(inputId, code) {
-            const input = document.getElementById(inputId);
-            input.value = code;
-            const dropdown = document.getElementById(inputId + 'Dropdown');
-            if (dropdown) dropdown.classList.remove('visible');
-            input.focus();
-        }
+      var ok = playAmbulanceSiren();
 
-        function closeDropdown(dropdownId) {
-            const dropdown = document.getElementById(dropdownId);
-            if (dropdown) dropdown.classList.remove('visible');
-        }
+      if (!ok) __SIREN_PLAYED = false;
+    }
 
-        function attachAirportSearch(inputId, dropdownId) {
-            const input = document.getElementById(inputId);
-            const dropdown = document.getElementById(dropdownId);
+    document.addEventListener("click", function () {
+      if (!__SIREN_PLAYED) notifyRenderedSirenOnce();
+    }, { once: true });
 
-            input.addEventListener('focus', () => {
-                renderDropdown(inputId, dropdownId, input.value);
-            });
+    function getData() {
+      if (window.MyDCIRP_DATA) return window.MyDCIRP_DATA;
+      if (window.ETF_DATA) return window.ETF_DATA;
+      return {};
+    }
 
-            input.addEventListener('input', () => {
-                renderDropdown(inputId, dropdownId, input.value);
-            });
+    function getRowSortValue(row, field) {
+      if (!row || !field) return null;
 
-            input.addEventListener('blur', () => {
-                setTimeout(() => closeDropdown(dropdownId), 150);
-            });
+      if (field === "name") {
+        return String((row.item && row.item.name) || "").toLowerCase();
+      }
 
-            input.addEventListener('keydown', event => {
-                if (event.key === 'Escape') {
-                    closeDropdown(dropdownId);
-                }
-            });
-        }
+      if (field === "hold") {
+        var buy = getBuyPrice(row.category, row.item);
+        var qty = getQuantity(row.category, row.item);
+        var totalBuy = calculateTotalBuy(buy, qty);
+        var denomBuy = (__CAT_TOTALS[row.category] && __CAT_TOTALS[row.category].hasBuy) ? __CAT_TOTALS[row.category].totalBuy : 0;
+        var hold = calculateHoldPercent(totalBuy, denomBuy);
+        return isFinite(hold) ? hold : null;
+      }
 
-        function getAirportCode(value) {
-            const normalized = value.trim();
-            const codeMatch = normalized.toUpperCase().match(/^[A-Z]{3}$/);
-            if (codeMatch) {
-                return codeMatch[0];
-            }
-            const found = airports.find(airport => createAirportLabel(airport).toUpperCase().startsWith(normalized.toUpperCase()));
-            if (found) {
-                return found.code;
-            }
-            const partial = airports.find(airport => createAirportLabel(airport).toUpperCase().includes(normalized.toUpperCase()));
-            return partial ? partial.code : '';
-        }
+      return null;
+    }
 
-        function updateTripTypeState(type) {
-            const roundtripCheckbox = document.getElementById('roundtrip');
-            const onewayCheckbox = document.getElementById('oneway');
-            const retDateInput = document.getElementById('retDate');
+    function compareSortValues(a, b) {
+      if (a === b) return 0;
+      if (a === null || a === undefined || a === "") return 1;
+      if (b === null || b === undefined || b === "") return -1;
+      if (typeof a === "string" && typeof b === "string") {
+        return a.localeCompare(b);
+      }
+      if (typeof a === "number" && typeof b === "number") {
+        return a - b;
+      }
+      return String(a).localeCompare(String(b));
+    }
 
-            if (type === 'oneway') {
-                roundtripCheckbox.checked = false;
-                onewayCheckbox.checked = true;
-                retDateInput.disabled = true;
-                retDateInput.value = '';
-            } else {
-                roundtripCheckbox.checked = true;
-                onewayCheckbox.checked = false;
-                retDateInput.disabled = false;
-            }
-        }
+    function applyRowSorting(rows, scope) {
+      if (!__SORT_FIELD || !rows || rows.length === 0) return;
 
-        // Chrome 시크릿창은 웹페이지 자바스크립트로 강제 실행할 수 없습니다.
-        // 대신 새 탭으로 열도록 설정합니다.
-        function searchFlights() {
-            const originValue = document.getElementById('origin').value;
-            const destValue = document.getElementById('destination').value;
-            const origin = getAirportCode(originValue);
-            const dest = getAirportCode(destValue);
-            const depDate = document.getElementById('depDate').value;
-            const retDate = document.getElementById('retDate').value;
-            const tripType = document.getElementById('oneway').checked ? 'ONEWAY' : 'ROUNDTRIP';
-            const tripTypeLower = tripType === 'ROUNDTRIP' ? 'roundtrip' : 'oneway';
-
-            if (!origin || !dest || !depDate || (tripType === 'ROUNDTRIP' && !retDate)) {
-                alert('모든 정보를 입력해주세요. 공항 검색 결과에서 공항을 선택하거나 IATA 코드를 입력하세요.');
-                return;
-            }
-
-            const depDateYYYYMMDD = depDate.replace(/-/g, '');
-            const depDateYYMMDD = depDateYYYYMMDD.slice(2);
-            const retDateYYYYMMDD = retDate ? retDate.replace(/-/g, '') : '';
-
-            console.log('검색 정보:', { origin, dest, depDate, retDate, tripType });
-
-            const skyscannerUrl = tripType === 'ROUNDTRIP'
-                ? `https://www.skyscanner.co.kr/transport/flights/${origin.toLowerCase()}/${dest.toLowerCase()}/${depDateYYMMDD}/?adultsv2=1&cabinclass=economy&childrenv2=&inboundaltsenabled=false&outboundaltsenabled=false&preferdirects=true&rtn=1#/results`
-                : `https://www.skyscanner.co.kr/transport/flights/${origin.toLowerCase()}/${dest.toLowerCase()}/${depDateYYMMDD}/?adultsv2=1&cabinclass=economy&childrenv2=&inboundaltsenabled=false&outboundaltsenabled=false&preferdirects=true&rtn=0#/results`;
-            console.log('스카이스캐너:', skyscannerUrl);
-            window.open(skyscannerUrl, '_blank', 'noopener,noreferrer');
-
-            const bookingUrl = tripType === 'ROUNDTRIP'
-                ? `https://flights.booking.com/flights/${origin}.CITY-${dest}.AIRPORT/?type=ROUNDTRIP&adults=1&cabinClass=ECONOMY&children=&from=${origin}.CITY&to=${dest}.AIRPORT&stops=0&depart=${depDate}&return=${retDate}&sort=CHEAPEST&travelPurpose=leisure`
-                : `https://flights.booking.com/flights/${origin}.CITY-${dest}.AIRPORT/?type=ONEWAY&adults=1&cabinClass=ECONOMY&children=&from=${origin}.CITY&to=${dest}.AIRPORT&stops=0&depart=${depDate}&sort=CHEAPEST&travelPurpose=leisure`;
-            console.log('부킹닷컴:', bookingUrl);
-            window.open(bookingUrl, '_blank', 'noopener,noreferrer');
-
-            const naverUrl = tripType === 'ROUNDTRIP'
-                ? `https://flight.naver.com/flights/international/${origin}:city-${dest}:city-${depDateYYYYMMDD}/${dest}:city-${origin}:city-${retDateYYYYMMDD}?adult=1&isDirect=true&fareType=Y`
-                : `https://flight.naver.com/flights/international/${origin}:city-${dest}:city-${depDateYYYYMMDD}?adult=1&isDirect=true&fareType=Y`;
-            console.log('네이버:', naverUrl);
-            window.open(naverUrl, '_blank', 'noopener,noreferrer');
-
-            const googleUrl = tripType === 'ROUNDTRIP'
-                ? 'https://www.google.com/travel/flights/search?tfs=CBwQAholEgoyMDI2LTA1LTIyKABqDAgCEggvbS8waHNxZnIHCAESA0NHSxolEgoyMDI2LTA1LTMxKABqBwgBEgNDR0tyDAgCEggvbS8waHNxZkABSAFwAYIBCwj___________8BmAEB&tfu=EgYIAhAAGAA&hl=ko&gl=KR'
-                : `https://www.google.com/travel/flights/search?hl=ko&gl=KR&tfu=EgYIAhAAGAA&q=${encodeURIComponent(`cheapest direct flights from ${origin} to ${dest} on ${depDate}`)}`;
-            console.log('구글:', googleUrl);
-            window.open(googleUrl, '_blank', 'noopener,noreferrer');
-        }
-
-        document.addEventListener('DOMContentLoaded', function () {
-            attachAirportSearch('origin', 'originDropdown');
-            attachAirportSearch('destination', 'destinationDropdown');
-
-            document.getElementById('roundtrip').addEventListener('change', function () {
-                if (this.checked) {
-                    updateTripTypeState('roundtrip');
-                } else if (!document.getElementById('oneway').checked) {
-                    updateTripTypeState('roundtrip');
-                }
-            });
-
-            document.getElementById('oneway').addEventListener('change', function () {
-                if (this.checked) {
-                    updateTripTypeState('oneway');
-                } else if (!document.getElementById('roundtrip').checked) {
-                    updateTripTypeState('roundtrip');
-                }
-            });
-
-            updateTripTypeState('roundtrip');
+      function sortArray(arr) {
+        arr.sort(function (a, b) {
+          var va = getRowSortValue(a, __SORT_FIELD);
+          var vb = getRowSortValue(b, __SORT_FIELD);
+          var cmp = compareSortValues(va, vb);
+          return __SORT_ASC ? cmp : -cmp;
         });
-    </script>
+      }
 
+      if (scope === "전체보기") {
+        var grouped = {};
+        var categoryOrder = [];
+
+        for (var i = 0; i < rows.length; i++) {
+          var row = rows[i];
+          if (!grouped[row.category]) {
+            grouped[row.category] = [];
+            categoryOrder.push(row.category);
+          }
+          grouped[row.category].push(row);
+        }
+
+        rows.length = 0;
+
+        for (var j = 0; j < categoryOrder.length; j++) {
+          var cat = categoryOrder[j];
+          sortArray(grouped[cat]);
+          rows.push.apply(rows, grouped[cat]);
+        }
+      } else {
+        sortArray(rows);
+      }
+    }
+
+    function toggleSort(field) {
+      if (__SORT_FIELD === field) {
+        __SORT_ASC = !__SORT_ASC;
+      } else {
+        __SORT_FIELD = field;
+        __SORT_ASC = true;
+      }
+    }
+
+    function buildSortArrow(field) {
+      if (__SORT_FIELD === field) {
+        return '<span class="sortArrow">' + (__SORT_ASC ? "▲" : "▼") + '</span>';
+      }
+      return '<span class="sortArrow">⇵</span>';
+    }
+
+    function safeCodeText(code) {
+      return String(code).replace(/[^0-9A-Z]/g, "");
+    }
+
+    function getStorageKey(category, item, field) {
+      return "ETF_DASHBOARD__" + field + "__" + category + "__" + item.code + "__" + item.name;
+    }
+
+    function resetLocalStorageAndSyncFromFile() {
+      try {
+        var keys = Object.keys(localStorage);
+
+        for (var i = 0; i < keys.length; i++) {
+          if (keys[i].indexOf("ETF_DASHBOARD__") === 0) {
+            localStorage.removeItem(keys[i]);
+          }
+        }
+      } catch (e) { }
+
+      var data = getData() || {};
+      var fields = ["buyPrice", "quantity", "type", "buyDate"];
+
+      for (var cat in data) {
+        if (!data.hasOwnProperty(cat)) continue;
+
+        var items = data[cat] || [];
+
+        for (var j = 0; j < items.length; j++) {
+          var it = items[j] || {};
+
+          for (var f = 0; f < fields.length; f++) {
+            var fieldName = fields[f];
+            var v = (it[fieldName] === null || it[fieldName] === undefined) ? "" : String(it[fieldName]);
+            localStorage.setItem(getStorageKey(cat, it, fieldName), v);
+          }
+        }
+      }
+    }
+
+    function csvEscape(value) {
+      var s = (value === null || value === undefined) ? "" : String(value);
+
+      if (s.indexOf('"') >= 0) {
+        s = s.replace(/"/g, '""');
+      }
+
+      if (/[,\n\r"]/.test(s)) {
+        s = '"' + s + '"';
+      }
+
+      return s;
+    }
+
+    function downloadCsv(filename, csvText) {
+      var bom = "\ufeff";
+      var blob = new Blob([bom + csvText], { type: "text/csv;charset=utf-8" });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement("a");
+
+      a.href = url;
+      a.download = filename;
+
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+
+      URL.revokeObjectURL(url);
+    }
+
+    function formatCsvRoiRatio(totalProfit, totalBuy) {
+      if (!isFinite(totalProfit) || isNaN(totalProfit)) return "";
+      if (!isFinite(totalBuy) || isNaN(totalBuy) || totalBuy === 0) return "";
+
+      var ratio = totalProfit / totalBuy;
+      return String(Number(ratio.toFixed(8)));
+    }
+
+    function buildSafeAttackRatioText(safeBuy, attackBuy) {
+      var safe = isFinite(safeBuy) ? safeBuy : 0;
+      var attack = isFinite(attackBuy) ? attackBuy : 0;
+      var total = safe + attack;
+
+      var safePct = formatPercent(calculateHoldPercent(safe, total));
+      var attackPct = formatPercent(calculateHoldPercent(attack, total));
+
+      return "안전 " + safePct + " / 공격 " + attackPct;
+    }
+
+    function exportAllViewCsv() {
+      recomputeViewTotals();
+
+      var lines = [];
+
+      lines.push([
+        "구분",
+        "타입",
+        "종목명",
+        "보유비율",
+        "주식수",
+        "매수가",
+        "현재가",
+        "총 매입액",
+        "총수익",
+        "수익율"
+      ].map(csvEscape).join(","));
+
+      var prevCat = null;
+
+      function appendCategoryTotalCsvLine(category) {
+        var totalInfo = __CAT_TOTALS[category];
+
+        if (!totalInfo) return;
+
+        var totalBuy = totalInfo.hasBuy ? totalInfo.totalBuy : 0;
+        var totalProfit = totalInfo.hasProfit ? totalInfo.totalProfit : 0;
+
+        var safeAttackRatioText = buildSafeAttackRatioText(
+          totalInfo.safeBuy,
+          totalInfo.attackBuy
+        );
+
+        var totalBuyText = totalInfo.hasBuy ? String(Math.round(totalBuy)) : "";
+        var totalProfitText = totalInfo.hasProfit ? String(Math.round(totalProfit)) : "";
+        var totalRoiText = formatCsvRoiRatio(totalProfit, totalBuy);
+
+        lines.push([
+          category,
+          "합계",
+          "합계",
+          safeAttackRatioText,
+          "",
+          "",
+          "",
+          totalBuyText,
+          totalProfitText,
+          totalRoiText
+        ].map(csvEscape).join(","));
+      }
+
+      for (var i = 0; i < __ROWS.length; i++) {
+        var row = __ROWS[i];
+        var cat = row.category;
+        var it = row.item;
+
+        if (prevCat !== null && prevCat !== cat) {
+          appendCategoryTotalCsvLine(prevCat);
+          lines.push("");
+          lines.push("");
+        }
+
+        prevCat = cat;
+
+        var denomBuy = (__CAT_TOTALS[cat] && __CAT_TOTALS[cat].hasBuy)
+          ? __CAT_TOTALS[cat].totalBuy
+          : 0;
+
+        var typeVal = getType(cat, it);
+        var buy = getBuyPrice(cat, it);
+        var qty = getQuantity(cat, it);
+
+        var totalBuy = calculateTotalBuy(buy, qty);
+        var profit = calculateTotalProfit(it.currentPrice || "", buy, qty);
+        var roi = calculateRoiPercent(profit, totalBuy);
+        var hold = calculateHoldPercent(totalBuy, denomBuy);
+
+        var holdText = formatPercent(hold);
+        var holdCsvText = isFinite(hold) ? String(hold.toFixed(2)) : "";
+        var qtyText = qty ? String(qty) : "";
+        var buyNum = toNumber(buy);
+        var buyText = isFinite(buyNum) ? String(Math.round(buyNum)) : "";
+        var nowNum = toNumber(it.currentPrice);
+        var nowText = isFinite(nowNum) ? String(Math.round(nowNum)) : "";
+
+        var totalBuyText = isNaN(totalBuy) ? "" : String(Math.round(totalBuy));
+        var profitText = isNaN(profit) ? "" : String(Math.round(profit));
+
+        var roiText = "";
+        if (roi !== null && roi !== undefined && isFinite(roi) && !isNaN(roi)) {
+          var ratio = Number(roi) / 100;
+          roiText = String(Number(ratio.toFixed(8)));
+        }
+
+        lines.push([
+          cat,
+          typeVal,
+          it.name,
+          holdCsvText,
+          qtyText,
+          buyText,
+          nowText,
+          totalBuyText,
+          profitText,
+          roiText
+        ].map(csvEscape).join(","));
+      }
+
+      if (prevCat !== null) {
+        appendCategoryTotalCsvLine(prevCat);
+      }
+
+      var filename = "DCIRP_" + getTodayYYYYMMDD() + ".csv";
+      downloadCsv(filename, lines.join("\n"));
+    }
+
+    function initCategoryCombo() {
+      var sel = document.getElementById("category");
+      var data = getData();
+
+      sel.innerHTML = "";
+
+      var optAll = document.createElement("option");
+      optAll.value = "전체보기";
+      optAll.appendChild(document.createTextNode("전체보기"));
+      sel.appendChild(optAll);
+
+      for (var key in data) {
+        if (data.hasOwnProperty(key)) {
+          var opt = document.createElement("option");
+          opt.value = key;
+          opt.appendChild(document.createTextNode(key));
+          sel.appendChild(opt);
+        }
+      }
+
+      sel.value = "전체보기";
+    }
+
+    function navigateToCategory(cat) {
+      document.getElementById("category").value = cat;
+      render();
+    }
+
+    function getTodayYYYYMMDD() {
+      var d = new Date();
+      var y = d.getFullYear();
+      var m = String(d.getMonth() + 1).padStart(2, "0");
+      var day = String(d.getDate()).padStart(2, "0");
+
+      return "" + y + m + day;
+    }
+
+    function parseYYYYMMDDorISO(dateStr) {
+      if (!dateStr) return null;
+
+      if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+        var p = dateStr.split("-");
+        var dt = new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]));
+        return isNaN(dt.getTime()) ? null : dt;
+      }
+
+      if (/^\d{8}$/.test(dateStr)) {
+        var y = Number(dateStr.slice(0, 4));
+        var m = Number(dateStr.slice(4, 6)) - 1;
+        var d = Number(dateStr.slice(6, 8));
+        var dt2 = new Date(y, m, d);
+        return isNaN(dt2.getTime()) ? null : dt2;
+      }
+
+      return null;
+    }
+
+    function diffDaysFromToday(buyDateStr) {
+      var dt = parseYYYYMMDDorISO(buyDateStr);
+
+      if (!dt) return NaN;
+
+      var today = new Date();
+      var a = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
+      var b = new Date(dt.getFullYear(), dt.getMonth(), dt.getDate()).getTime();
+      var diff = Math.floor((a - b) / 86400000);
+
+      return diff >= 0 ? diff + 1 : 0;
+    }
+
+    function toNumber(value) {
+      if (value === null || value === undefined || value === "") return NaN;
+
+      return Number(
+        String(value)
+          .replace(/,/g, "")
+          .replace(/\+/g, "")
+          .replace(/원|주|%/g, "")
+          .trim()
+      );
+    }
+
+    function formatNumber(value) {
+      var n = toNumber(value);
+
+      if (isNaN(n)) return "-";
+
+      return Math.round(n).toLocaleString("ko-KR");
+    }
+
+    function formatPlainNumberWithComma(value) {
+      var n = toNumber(value);
+
+      if (isNaN(n)) return "";
+
+      return Math.round(n).toLocaleString("ko-KR");
+    }
+
+    function formatWon(value) {
+      if (value === null || value === undefined || isNaN(value)) return "-";
+
+      return Math.round(value).toLocaleString("ko-KR") + "원";
+    }
+
+    function formatWon0(value) {
+      var v = Number(value);
+
+      if (!isFinite(v) || isNaN(v)) v = 0;
+
+      return Math.round(v).toLocaleString("ko-KR") + "원";
+    }
+
+    function formatSignedWon(value) {
+      if (value === null || value === undefined || isNaN(value)) return "-";
+
+      var r = Math.round(value);
+      var absText = Math.abs(r).toLocaleString("ko-KR") + "원";
+
+      if (r > 0) return "+" + absText;
+      if (r < 0) return "-" + absText;
+
+      return "0원";
+    }
+
+    function formatSignedPercent(value) {
+      var v = Number(value);
+
+      if (!isFinite(v) || isNaN(v)) v = 0;
+
+      var sign = v > 0 ? "+" : (v < 0 ? "-" : "");
+
+      return sign + Math.abs(v).toFixed(2) + "%";
+    }
+
+    function formatPercent(value) {
+      var v = Number(value);
+
+      if (!isFinite(v) || isNaN(v)) v = 0;
+
+      return Math.abs(v).toFixed(2) + "%";
+    }
+
+    function getProfitClass(profit) {
+      if (profit > 0) return "profitPlus";
+      if (profit < 0) return "profitMinus";
+
+      return "profitFlat";
+    }
+
+    function getCompareClass(compareValue) {
+      if (compareValue === null || compareValue === undefined || compareValue === "") return "compareFlat";
+
+      var t = String(compareValue);
+
+      if (t.indexOf("-") === 0) return "compareDown";
+      if (t === "0" || t === "0.00" || t === "+0") return "compareFlat";
+
+      return "compareUp";
+    }
+
+    function getComparePrefix(compareValue) {
+      if (compareValue === null || compareValue === undefined || compareValue === "") return "";
+
+      var t = String(compareValue);
+
+      if (t.indexOf("-") === 0 || t.indexOf("+") === 0) return "";
+      if (t === "0" || t === "0.00") return "";
+
+      return "+";
+    }
+
+    function formatRateText(rate, compareValue) {
+      if (rate === null || rate === undefined || rate === "") return "";
+
+      var rateText = String(rate).replace(/%/g, "");
+      var prefix = getComparePrefix(compareValue);
+
+      if (rateText.indexOf("-") === 0 || rateText.indexOf("+") === 0) return rateText + "%";
+
+      return prefix + rateText + "%";
+    }
+
+    function buildChangeHTML(compare, rate) {
+      if (compare === null || compare === undefined || compare === "") return "-";
+
+      var cls = getCompareClass(compare);
+      var pre = getComparePrefix(compare);
+      var rateText = formatRateText(rate, compare);
+      var html = '<span class="' + cls + '">';
+
+      html += pre + formatNumber(compare) + "원";
+
+      if (rateText !== "") {
+        html += " (" + rateText + ")";
+      }
+
+      html += "</span>";
+
+      return html;
+    }
+
+    function calculateTotalBuy(buyValue, qtyValue) {
+      var buy = toNumber(buyValue);
+      var qty = toNumber(qtyValue);
+
+      if (isNaN(buy) || isNaN(qty)) return NaN;
+
+      return buy * qty;
+    }
+
+    function calculateTotalProfit(currentValue, buyValue, qtyValue) {
+      var cur = toNumber(currentValue);
+      var buy = toNumber(buyValue);
+      var qty = toNumber(qtyValue);
+
+      if (isNaN(cur) || isNaN(buy) || isNaN(qty)) return NaN;
+
+      return (cur - buy) * qty;
+    }
+
+    function calculateRoiPercent(totalProfit, totalBuy) {
+      if (!isFinite(totalBuy) || isNaN(totalBuy) || totalBuy === 0) return NaN;
+      if (!isFinite(totalProfit) || isNaN(totalProfit)) return NaN;
+
+      return (totalProfit / totalBuy) * 100;
+    }
+
+    function calculateHoldPercent(partBuy, denomBuy) {
+      if (!isFinite(denomBuy) || isNaN(denomBuy) || denomBuy === 0) return NaN;
+      if (!isFinite(partBuy) || isNaN(partBuy)) return NaN;
+
+      return (partBuy / denomBuy) * 100;
+    }
+
+    function normalizeType(raw) {
+      return raw === "공격" ? "공격" : "안전";
+    }
+
+    function getTypeClass(typeValue) {
+      return typeValue === "공격" ? "typeAttack" : "typeSafe";
+    }
+
+    function getSavedField(category, item, fieldName) {
+      if (item[fieldName] !== undefined && item[fieldName] !== null) {
+        return String(item[fieldName]);
+      }
+
+      return "";
+    }
+
+    function setSavedField(category, item, fieldName, value) {
+      item[fieldName] = value;
+      localStorage.setItem(getStorageKey(category, item, fieldName), value);
+    }
+
+    function getBuyPrice(category, item) {
+      return formatPlainNumberWithComma(getSavedField(category, item, "buyPrice"));
+    }
+
+    function getQuantity(category, item) {
+      var v = getSavedField(category, item, "quantity");
+      var n = toNumber(v);
+
+      if (isNaN(n)) return "";
+
+      return String(Math.round(n));
+    }
+
+    function getType(category, item) {
+      return normalizeType(getSavedField(category, item, "type"));
+    }
+
+    function getBuyDate(category, item) {
+      var d = getSavedField(category, item, "buyDate");
+
+      if (/^\d{8}$/.test(d)) {
+        return d.slice(0, 4) + "-" + d.slice(4, 6) + "-" + d.slice(6, 8);
+      }
+
+      return d || "";
+    }
+
+    function setBuyPrice(category, item, value) {
+      setSavedField(category, item, "buyPrice", formatPlainNumberWithComma(value));
+    }
+
+    function setQuantity(category, item, value) {
+      var n = toNumber(value);
+
+      if (isNaN(n)) {
+        setSavedField(category, item, "quantity", "");
+      } else {
+        setSavedField(category, item, "quantity", String(Math.round(n)));
+      }
+    }
+
+    function setType(category, item, value) {
+      setSavedField(category, item, "type", normalizeType(value));
+    }
+
+    function setBuyDate(category, item, value) {
+      setSavedField(category, item, "buyDate", value || "");
+    }
+
+    function formatBuyInputValue(input) {
+      var raw = input.value.replace(/[^0-9]/g, "");
+
+      if (raw === "") {
+        input.value = "";
+        return;
+      }
+
+      var num = Number(raw);
+
+      if (isNaN(num)) {
+        input.value = "";
+        return;
+      }
+
+      if (num > 100000) num = 100000;
+
+      input.value = num.toLocaleString("ko-KR");
+    }
+
+    function formatQtyInputValue(input) {
+      var raw = input.value.replace(/[^0-9]/g, "");
+
+      if (raw === "") {
+        input.value = "";
+        return;
+      }
+
+      var num = Number(raw);
+
+      if (isNaN(num)) {
+        input.value = "";
+        return;
+      }
+
+      if (num > 9999) num = 9999;
+
+      input.value = String(num);
+    }
+
+    function buildDataFromMemory() {
+      var src = getData();
+      return JSON.parse(JSON.stringify(src || {}));
+    }
+
+    function makeDataFileTextFromMemory() {
+      var data = buildDataFromMemory();
+      return "window.MyDCIRP_DATA = " + JSON.stringify(data, null, 2) + ";\n";
+    }
+
+    function downloadDataFile() {
+      var text = makeDataFileTextFromMemory();
+      var blob = new Blob([text], { type: "text/javascript;charset=utf-8" });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement("a");
+
+      a.href = url;
+      a.download = "MyDCIRP_DATA.js";
+
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+
+      URL.revokeObjectURL(url);
+    }
+
+    var __dataFileHandle = null;
+
+    async function ensureWritableHandle() {
+      if (__dataFileHandle) return __dataFileHandle;
+      if (!window.isSecureContext || !window.showSaveFilePicker) return null;
+
+      __dataFileHandle = await window.showSaveFilePicker({
+        suggestedName: "MyDCIRP_DATA.js",
+        types: [
+          {
+            description: "JavaScript",
+            accept: {
+              "text/javascript": [".js"]
+            }
+          }
+        ]
+      });
+
+      return __dataFileHandle;
+    }
+
+    async function writeMyDataFileAlways() {
+      try {
+        var handle = await ensureWritableHandle();
+
+        if (handle && handle.createWritable) {
+          var text = makeDataFileTextFromMemory();
+          var writable = await handle.createWritable();
+
+          await writable.write(text);
+          await writable.close();
+
+          return {
+            ok: true,
+            method: "direct"
+          };
+        }
+      } catch (e) { }
+
+      downloadDataFile();
+
+      return {
+        ok: false,
+        method: "download"
+      };
+    }
+
+    function getPriceJsonpUrl(code, callbackName) {
+      return GAS_WEB_APP_URL +
+        "?code=" + encodeURIComponent(code) +
+        "&callback=" + encodeURIComponent(callbackName) +
+        "&_=" + new Date().getTime();
+    }
+
+    function makeRowKey(category, index, code) {
+      return category + "_" + index + "_" + safeCodeText(code);
+    }
+
+    function getCellId(field, rowKey) {
+      return "cell_" + field + "_" + rowKey;
+    }
+
+    function getInputId(field, rowKey) {
+      return field + "_" + rowKey;
+    }
+
+    function fetchPriceForRow(rowInfo, onAfterUpdate, token) {
+      var it = rowInfo.item;
+      var cbName = "cb_" + safeCodeText(it.code) + "_" + Date.now() + "_" + Math.floor(Math.random() * 100000);
+      var script = document.createElement("script");
+      var timeoutId;
+
+      function cleanup() {
+        try {
+          if (script && script.parentNode) {
+            script.parentNode.removeChild(script);
+          }
+        } catch (e) { }
+
+        try {
+          delete window[cbName];
+        } catch (e) {
+          window[cbName] = undefined;
+        }
+      }
+
+      window[cbName] = function (json) {
+        clearTimeout(timeoutId);
+        cleanup();
+
+        if (token !== RENDER_TOKEN) return;
+
+        if (!json || json.ok !== true) {
+          it.currentPrice = "";
+          it.currentCompare = "";
+          it.currentRate = "";
+          onAfterUpdate(true);
+          return;
+        }
+
+        it.currentPrice = json.now || "";
+        it.currentCompare = json.compare || "";
+        it.currentRate = json.rate || "";
+
+        onAfterUpdate(false);
+      };
+
+      script.onerror = function () {
+        clearTimeout(timeoutId);
+        cleanup();
+
+        if (token !== RENDER_TOKEN) return;
+
+        it.currentPrice = "";
+        it.currentCompare = "";
+        it.currentRate = "";
+
+        onAfterUpdate(true);
+      };
+
+      timeoutId = setTimeout(function () {
+        cleanup();
+
+        if (token !== RENDER_TOKEN) return;
+
+        it.currentPrice = "";
+        it.currentCompare = "";
+        it.currentRate = "";
+
+        onAfterUpdate(true);
+      }, 6000);
+
+      script.src = getPriceJsonpUrl(it.code, cbName);
+      document.body.appendChild(script);
+    }
+
+    function fetchPriceForRowPromise(rowInfo, token) {
+      return new Promise(function (resolve) {
+        fetchPriceForRow(rowInfo, function (isErr) {
+          resolve(isErr);
+        }, token);
+      });
+    }
+
+    async function fetchPricesConcurrently(rows, token, headersLength) {
+      var status = document.getElementById("status");
+      var completedRows = 0;
+      var taskQueue = rows.slice();
+      var activeCount = 0;
+
+      function updateStatus() {
+        if (!status || token !== RENDER_TOKEN) return;
+        status.textContent = "현재가 조회 중... " + completedRows + " / " + rows.length;
+      }
+
+      async function processTask(rowInfo) {
+        if (token !== RENDER_TOKEN) return;
+
+        var isErr = true;
+
+        try {
+          isErr = await fetchPriceForRowPromise(rowInfo, token);
+        } catch (e) {
+          isErr = true;
+        }
+
+        if (token !== RENDER_TOKEN) return;
+
+        if (!isErr) {
+          rowInfo.fetchRetryCount = 0;
+          updateRow(rowInfo, false);
+          completedRows++;
+        } else {
+          rowInfo.fetchRetryCount = (rowInfo.fetchRetryCount || 0) + 1;
+
+          if (rowInfo.fetchRetryCount < PRICE_REQUEST_MAX_RETRY) {
+            taskQueue.push(rowInfo);
+          } else {
+            updateRow(rowInfo, true);
+            completedRows++;
+          }
+        }
+
+        recomputeViewTotals();
+        updateTotalsRow(headersLength);
+
+        if (PRICE_REQUEST_DELAY_MS > 0) {
+          await sleep(PRICE_REQUEST_DELAY_MS);
+        }
+      }
+
+      return new Promise(function (resolve) {
+        function maybeStartNext() {
+          if (token !== RENDER_TOKEN) return;
+
+          while (activeCount < PRICE_REQUEST_CONCURRENCY && taskQueue.length > 0) {
+            var rowInfo = taskQueue.shift();
+            activeCount++;
+
+            (function (row) {
+              processTask(row).then(function () {
+                activeCount--;
+                updateStatus();
+
+                if (token !== RENDER_TOKEN) return;
+                if (taskQueue.length === 0 && activeCount === 0) {
+                  if (token === RENDER_TOKEN && status) {
+                    status.textContent = (__VIEW_SCOPE === "전체보기")
+                      ? "전체보기 표시 중"
+                      : (__VIEW_SCOPE + " 표시 중");
+                  }
+                  resolve();
+                } else {
+                  maybeStartNext();
+                }
+              });
+            })(rowInfo);
+          }
+
+          if (activeCount === 0 && taskQueue.length === 0) {
+            if (token === RENDER_TOKEN && status) {
+              status.textContent = (__VIEW_SCOPE === "전체보기")
+                ? "전체보기 표시 중"
+                : (__VIEW_SCOPE + " 표시 중");
+            }
+            resolve();
+          }
+        }
+
+        updateStatus();
+        maybeStartNext();
+      });
+    }
+
+    function buildTypeBreakdownText(safeBuy, attackBuy) {
+      var safe = isFinite(safeBuy) ? safeBuy : 0;
+      var atk = isFinite(attackBuy) ? attackBuy : 0;
+      var total = safe + atk;
+      var safePct = formatPercent(calculateHoldPercent(safe, total));
+      var atkPct = formatPercent(calculateHoldPercent(atk, total));
+
+      return "안전 = " + formatWon0(safe) + " (" + safePct + ")      |      공격 = " + formatWon0(atk) + " (" + atkPct + ")";
+    }
+
+    function computeTotalsForCategory(category, items) {
+      var totalBuy = 0;
+      var totalProfit = 0;
+      var safeBuy = 0;
+      var attackBuy = 0;
+      var hasBuy = false;
+      var hasProfit = false;
+
+      for (var i = 0; i < items.length; i++) {
+        var it = items[i];
+        var buy = getBuyPrice(category, it);
+        var qty = getQuantity(category, it);
+
+        var tb = calculateTotalBuy(buy, qty);
+
+        if (!isNaN(tb)) {
+          totalBuy += tb;
+          hasBuy = true;
+
+          var t = getType(category, it);
+
+          if (t === "공격") {
+            attackBuy += tb;
+          } else {
+            safeBuy += tb;
+          }
+        }
+
+        var tp = calculateTotalProfit(it.currentPrice || "", buy, qty);
+
+        if (!isNaN(tp)) {
+          totalProfit += tp;
+          hasProfit = true;
+        }
+      }
+
+      return {
+        totalBuy: totalBuy,
+        totalProfit: totalProfit,
+        safeBuy: safeBuy,
+        attackBuy: attackBuy,
+        hasBuy: hasBuy,
+        hasProfit: hasProfit
+      };
+    }
+
+    function recomputeViewTotals() {
+      var totals = {};
+      var cats = {};
+
+      for (var i = 0; i < __ROWS.length; i++) {
+        cats[__ROWS[i].category] = true;
+      }
+
+      for (var cat in cats) {
+        if (!cats.hasOwnProperty(cat)) continue;
+
+        var items = [];
+
+        for (var j = 0; j < __ROWS.length; j++) {
+          if (__ROWS[j].category === cat) {
+            items.push(__ROWS[j].item);
+          }
+        }
+
+        totals[cat] = computeTotalsForCategory(cat, items);
+      }
+
+      __CAT_TOTALS = totals;
+    }
+
+    function setMoneyCell(cell, value) {
+      if (!cell) return;
+
+      if (value === null || value === undefined || isNaN(value)) {
+        cell.className = "tdRight profitFlat";
+        cell.innerHTML = "-";
+        return;
+      }
+
+      cell.className = "tdRight " + getProfitClass(value);
+      cell.innerHTML = formatSignedWon(value);
+    }
+
+    function updateRow(rowInfo, isError) {
+      var cat = rowInfo.category;
+      var it = rowInfo.item;
+      var k = rowInfo.rowKey;
+
+      var tdCurrent = document.getElementById(getCellId("current", k));
+      var tdChange = document.getElementById(getCellId("change", k));
+      var tdTotalBuy = document.getElementById(getCellId("totalBuy", k));
+      var tdProfit = document.getElementById(getCellId("profit", k));
+      var tdHold = document.getElementById(getCellId("hold", k));
+      var tdRoi = document.getElementById(getCellId("roi", k));
+      var tdDaily = document.getElementById(getCellId("daily", k));
+      var tdHoldDays = document.getElementById(getCellId("holdDays", k));
+      var typeLabel = document.getElementById(getCellId("typeLabel", k));
+
+      var buy = getBuyPrice(cat, it);
+      var qty = getQuantity(cat, it);
+      var totalBuy = calculateTotalBuy(buy, qty);
+      var profit = calculateTotalProfit(it.currentPrice || "", buy, qty);
+      var roi = calculateRoiPercent(profit, totalBuy);
+      var denomBuy = (__CAT_TOTALS[cat] && __CAT_TOTALS[cat].hasBuy) ? __CAT_TOTALS[cat].totalBuy : 0;
+      var hold = calculateHoldPercent(totalBuy, denomBuy);
+
+      var t = getType(cat, it);
+
+      if (typeLabel) {
+        typeLabel.className = getTypeClass(t);
+        typeLabel.textContent = t;
+      }
+
+      if (tdCurrent) {
+        tdCurrent.innerHTML = isError
+          ? '<span class="error">조회 실패</span>'
+          : (it.currentPrice ? (formatNumber(it.currentPrice) + "원") : "-");
+      }
+
+      if (tdChange) {
+        tdChange.innerHTML = isError ? "-" : buildChangeHTML(it.currentCompare || "", it.currentRate || "");
+      }
+
+      if (tdTotalBuy) {
+        tdTotalBuy.innerHTML = formatWon(totalBuy);
+      }
+
+      if (tdProfit) {
+        tdProfit.className = "tdRight " + getProfitClass(profit);
+        tdProfit.innerHTML = formatSignedWon(profit);
+      }
+
+      if (tdHold) {
+        tdHold.className = "tdRight profitFlat";
+        tdHold.innerHTML = formatPercent(hold);
+      }
+
+      if (tdRoi) {
+        tdRoi.className = "tdRight " + getProfitClass(profit);
+        tdRoi.innerHTML = formatSignedPercent(roi);
+      }
+
+      var buyDate = getBuyDate(cat, it);
+      var holdDays = diffDaysFromToday(buyDate);
+      var daily = (isFinite(holdDays) && holdDays > 0) ? (Number(roi) / holdDays) : 0;
+
+      if (tdHoldDays) {
+        tdHoldDays.textContent = isNaN(holdDays) ? "-" : (String(holdDays) + "일");
+      }
+
+      if (tdDaily) {
+        tdDaily.className = "tdRight " + getProfitClass(profit);
+        tdDaily.textContent = formatSignedPercent(daily);
+      }
+    }
+
+    function updateTotalsRow(colCount) {
+      for (var cat in __CAT_TOTALS) {
+        if (!__CAT_TOTALS.hasOwnProperty(cat)) continue;
+
+        var t = __CAT_TOTALS[cat];
+
+        var bd = document.getElementById("catTotalBreak__" + cat);
+        if (bd) {
+          bd.textContent = buildTypeBreakdownText(t.safeBuy, t.attackBuy);
+        }
+
+        var buyCell = document.getElementById("catTotalBuy__" + cat);
+        if (buyCell) {
+          buyCell.textContent = formatWon(t.totalBuy);
+        }
+
+        var profitCell = document.getElementById("catTotalProfit__" + cat);
+        if (profitCell) {
+          setMoneyCell(profitCell, t.totalProfit);
+        }
+
+        var holdCell = document.getElementById("catTotalHold__" + cat);
+        if (holdCell) {
+          holdCell.textContent = "100.00%";
+        }
+
+        var roiCell = document.getElementById("catTotalRoi__" + cat);
+        if (roiCell) {
+          var catRoi = calculateRoiPercent(t.totalProfit, t.totalBuy);
+          roiCell.className = "tdRight " + getProfitClass(t.totalProfit);
+          roiCell.textContent = formatSignedPercent(catRoi);
+        }
+
+        var dailyCell = document.getElementById("catTotalDaily__" + cat);
+        if (dailyCell) {
+          dailyCell.textContent = "";
+        }
+      }
+
+      var gBuy = 0;
+      var gProfit = 0;
+      var gSafe = 0;
+      var gAtk = 0;
+      var hasAny = false;
+
+      for (var c in __CAT_TOTALS) {
+        if (!__CAT_TOTALS.hasOwnProperty(c)) continue;
+
+        hasAny = true;
+
+        gBuy += (__CAT_TOTALS[c].hasBuy ? __CAT_TOTALS[c].totalBuy : 0);
+        gProfit += (__CAT_TOTALS[c].hasProfit ? __CAT_TOTALS[c].totalProfit : 0);
+        gSafe += (__CAT_TOTALS[c].safeBuy || 0);
+        gAtk += (__CAT_TOTALS[c].attackBuy || 0);
+      }
+
+      var gBreak = document.getElementById("grandTotalBreak");
+      if (gBreak) {
+        gBreak.textContent = buildTypeBreakdownText(gSafe, gAtk);
+      }
+
+      var gBuyCell = document.getElementById("grandTotalBuy");
+      if (gBuyCell) {
+        gBuyCell.textContent = hasAny ? formatWon(gBuy) : "-";
+      }
+
+      var gProfitCell = document.getElementById("grandTotalProfit");
+      if (gProfitCell) {
+        setMoneyCell(gProfitCell, hasAny ? gProfit : NaN);
+      }
+
+      var gHoldCell = document.getElementById("grandTotalHold");
+      if (gHoldCell) {
+        gHoldCell.textContent = "100.00%";
+      }
+
+      var gRoiCell = document.getElementById("grandTotalRoi");
+      if (gRoiCell) {
+        var grandRoi = calculateRoiPercent(gProfit, gBuy);
+        gRoiCell.className = "tdRight " + getProfitClass(gProfit);
+        gRoiCell.textContent = formatSignedPercent(grandRoi);
+      }
+
+      var gDailyCell = document.getElementById("grandTotalDaily");
+      if (gDailyCell) {
+        gDailyCell.textContent = "";
+      }
+    }
+
+    function onSaveRow(rowInfo) {
+      var cat = rowInfo.category;
+      var it = rowInfo.item;
+      var k = rowInfo.rowKey;
+
+      var typeSel = document.getElementById(getInputId("typeSel", k));
+      var buyInput = document.getElementById(getInputId("buyInput", k));
+      var qtyInput = document.getElementById(getInputId("qtyInput", k));
+      var dateInput = document.getElementById(getInputId("buyDate", k));
+      var status = document.getElementById(getInputId("saveStatus", k));
+
+      if (typeSel) setType(cat, it, typeSel.value);
+      if (dateInput) setBuyDate(cat, it, dateInput.value);
+
+      formatBuyInputValue(buyInput);
+      formatQtyInputValue(qtyInput);
+
+      var buyValue = buyInput.value.trim();
+      var qtyValue = qtyInput.value.trim();
+      var buyNum = toNumber(buyValue);
+      var qtyNum = toNumber(qtyValue);
+
+      if (buyValue !== "" && (isNaN(buyNum) || buyNum < 0 || buyNum > 100000)) {
+        status.textContent = "매수가는 100,000 이하만";
+        status.style.color = "#c00000";
+        return;
+      }
+
+      if (qtyValue !== "" && (isNaN(qtyNum) || qtyNum < 0 || qtyNum > 9999)) {
+        status.textContent = "주식수는 9,999 이하만";
+        status.style.color = "#c00000";
+        return;
+      }
+
+      setBuyPrice(cat, it, buyValue);
+      setQuantity(cat, it, qtyValue);
+
+      buyInput.value = getBuyPrice(cat, it);
+      qtyInput.value = getQuantity(cat, it);
+
+      recomputeViewTotals();
+
+      for (var i = 0; i < __ROWS.length; i++) {
+        updateRow(__ROWS[i], false);
+      }
+
+      updateTotalsRow();
+
+      status.textContent = "저장 중...";
+      status.style.color = "#0b66c3";
+
+      (async function () {
+        var res = await writeMyDataFileAlways();
+
+        if (res.ok && res.method === "direct") {
+          status.textContent = "저장 완료 (MyDCIRP_DATA.js 직접 저장됨)";
+        } else {
+          status.textContent = "저장 완료 (MyDCIRP_DATA.js 갱신본 다운로드됨)";
+        }
+
+        setTimeout(function () {
+          status.textContent = "";
+        }, 2500);
+      })();
+    }
+
+    function buildRowsForScope(scope) {
+      var data = getData();
+      var rows = [];
+
+      if (scope === "전체보기") {
+        for (var cat in data) {
+          if (!data.hasOwnProperty(cat)) continue;
+
+          var items = data[cat] || [];
+
+          for (var i = 0; i < items.length; i++) {
+            rows.push({
+              category: cat,
+              index: i,
+              item: items[i],
+              rowKey: makeRowKey(cat, i, items[i].code),
+              fetchRetryCount: 0
+            });
+          }
+        }
+
+        return rows;
+      }
+
+      var items2 = data[scope] || [];
+
+      for (var j = 0; j < items2.length; j++) {
+        rows.push({
+          category: scope,
+          index: j,
+          item: items2[j],
+          rowKey: makeRowKey(scope, j, items2[j].code),
+          fetchRetryCount: 0
+        });
+      }
+
+      return rows;
+    }
+
+    function makeCategoryTotalRow(category, colCount) {
+      var tr = document.createElement("tr");
+      tr.className = "categoryTotalRow";
+
+      var tailCols = 6;
+      var leftCols = colCount - tailCols;
+
+      var tdBreak = document.createElement("td");
+      tdBreak.className = "typeBreakCell";
+      tdBreak.colSpan = Math.max(1, leftCols - 1);
+      tdBreak.id = "catTotalBreak__" + category;
+      tdBreak.textContent = "";
+      tr.appendChild(tdBreak);
+
+      var tdLabel = document.createElement("td");
+      tdLabel.className = "totalLabel";
+      tdLabel.colSpan = 1;
+      tdLabel.innerHTML = '<span class="catNavLink" onclick="navigateToCategory(\'' + String(category).replace(/'/g, "\\'") + '\')">' + category + "</span> 합계";
+      tr.appendChild(tdLabel);
+
+      var buyCell = document.createElement("td");
+      buyCell.className = "tdRight profitFlat";
+      buyCell.id = "catTotalBuy__" + category;
+      buyCell.textContent = "-";
+      tr.appendChild(buyCell);
+
+      var profitCell = document.createElement("td");
+      profitCell.className = "tdRight profitFlat";
+      profitCell.id = "catTotalProfit__" + category;
+      profitCell.textContent = "-";
+      tr.appendChild(profitCell);
+
+      var holdCell = document.createElement("td");
+      holdCell.className = "tdRight profitFlat";
+      holdCell.id = "catTotalHold__" + category;
+      holdCell.textContent = "100.00%";
+      tr.appendChild(holdCell);
+
+      var roiCell = document.createElement("td");
+      roiCell.className = "tdRight profitFlat";
+      roiCell.id = "catTotalRoi__" + category;
+      roiCell.textContent = "";
+      tr.appendChild(roiCell);
+
+      var dailyCell = document.createElement("td");
+      dailyCell.className = "tdRight profitFlat";
+      dailyCell.id = "catTotalDaily__" + category;
+      dailyCell.textContent = "";
+      tr.appendChild(dailyCell);
+
+      var blank = document.createElement("td");
+      blank.className = "tdCenter totalBlank";
+      blank.textContent = "";
+      tr.appendChild(blank);
+
+      return tr;
+    }
+
+    function makeGrandTotalRow(colCount) {
+      var tr = document.createElement("tr");
+      tr.className = "grandTotalRow";
+
+      var tailCols = 6;
+      var leftCols = colCount - tailCols;
+
+      var tdBreak = document.createElement("td");
+      tdBreak.className = "typeBreakCell";
+      tdBreak.colSpan = Math.max(1, leftCols - 1);
+      tdBreak.id = "grandTotalBreak";
+      tdBreak.textContent = "";
+      tr.appendChild(tdBreak);
+
+      var tdLabel = document.createElement("td");
+      tdLabel.className = "totalLabel";
+      tdLabel.colSpan = 1;
+      tdLabel.textContent = "합계";
+      tr.appendChild(tdLabel);
+
+      var buyCell = document.createElement("td");
+      buyCell.className = "tdRight profitFlat";
+      buyCell.id = "grandTotalBuy";
+      buyCell.textContent = "-";
+      tr.appendChild(buyCell);
+
+      var profitCell = document.createElement("td");
+      profitCell.className = "tdRight profitFlat";
+      profitCell.id = "grandTotalProfit";
+      profitCell.textContent = "-";
+      tr.appendChild(profitCell);
+
+      var holdCell = document.createElement("td");
+      holdCell.className = "tdRight profitFlat";
+      holdCell.id = "grandTotalHold";
+      holdCell.textContent = "100.00%";
+      tr.appendChild(holdCell);
+
+      var roiCell = document.createElement("td");
+      roiCell.className = "tdRight profitFlat";
+      roiCell.id = "grandTotalRoi";
+      roiCell.textContent = "";
+      tr.appendChild(roiCell);
+
+      var dailyCell = document.createElement("td");
+      dailyCell.className = "tdRight profitFlat";
+      dailyCell.id = "grandTotalDaily";
+      dailyCell.textContent = "";
+      tr.appendChild(dailyCell);
+
+      var blank = document.createElement("td");
+      blank.className = "tdCenter totalBlank";
+      blank.textContent = "";
+      tr.appendChild(blank);
+
+      return tr;
+    }
+
+    function getChartUrl(code, chartType) {
+      var sid = new Date().getTime();
+
+      return "https://ssl.pstatic.net/imgfinance/chart/item/" +
+        chartType + "/week/" + encodeURIComponent(code) + ".png?sidcode=" + sid;
+    }
+
+    function getDetailUrl(code) {
+      return "https://finance.naver.com/item/main.naver?code=" + encodeURIComponent(code);
+    }
+
+    function openNaverStock(code) {
+      window.open(getDetailUrl(code), "_blank");
+    }
+
+    function getCardId(category, index, code) {
+      return "card_" + category + "_" + index + "_" + safeCodeText(code);
+    }
+
+    function scrollToCard(category, index, code) {
+      var el = document.getElementById(getCardId(category, index, code));
+
+      if (!el) return;
+
+      el.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+
+      el.classList.add("cardFocus");
+
+      setTimeout(function () {
+        el.classList.remove("cardFocus");
+      }, 1800);
+    }
+
+    function renderCardsForCategory(category) {
+      var data = getData();
+      var items = data[category] || [];
+      var wrap = document.getElementById("cardsWrap");
+      var grid = document.getElementById("cardsGrid");
+      var chartType = document.getElementById("chartType").value;
+
+      grid.innerHTML = "";
+
+      for (var i = 0; i < items.length; i++) {
+        var it = items[i];
+
+        var card = document.createElement("div");
+        card.className = "card";
+        card.id = getCardId(category, i, it.code);
+
+        var title = document.createElement("div");
+        title.className = "cardTitle";
+        title.textContent = it.name;
+
+        var meta = document.createElement("div");
+        meta.className = "cardMeta";
+
+        var codeSpan = document.createElement("div");
+        codeSpan.textContent = "종목코드: " + it.code;
+
+        var link = document.createElement("a");
+        link.className = "detailLink";
+        link.href = getDetailUrl(it.code);
+        link.target = "_blank";
+        link.rel = "noopener";
+        link.textContent = "네이버 금융 상세";
+        link.onclick = function (e) {
+          e.stopPropagation();
+        };
+
+        meta.appendChild(codeSpan);
+        meta.appendChild(link);
+
+        var img = document.createElement("img");
+        img.className = "chart";
+        img.src = getChartUrl(it.code, chartType);
+        img.alt = it.name + " 차트";
+        img.onclick = (function (code) {
+          return function (e) {
+            e.stopPropagation();
+            openNaverStock(code);
+          };
+        })(it.code);
+
+        card.appendChild(title);
+        card.appendChild(meta);
+        card.appendChild(img);
+
+        grid.appendChild(card);
+      }
+
+      wrap.style.display = "block";
+    }
+
+    function renderTable(scope, token) {
+      __VIEW_SCOPE = scope;
+      __ROWS = buildRowsForScope(scope);
+
+      recomputeViewTotals();
+      applyRowSorting(__ROWS, scope);
+
+      var isAllView = scope === "전체보기";
+      var title = document.getElementById("tableTitle");
+      var actions = document.getElementById("titleActions");
+      var area = document.getElementById("tableArea");
+
+      area.innerHTML = "";
+      actions.innerHTML = "";
+
+      title.textContent = isAllView ? "전체 보유 현황 요약" : (scope + " 보유 현황 요약");
+
+      var chartWrap = document.getElementById("chartTypeWrap");
+
+      if (isAllView) {
+        chartWrap.style.display = "none";
+
+        var csvBtn = document.createElement("button");
+        csvBtn.className = "csvBtn";
+        csvBtn.type = "button";
+        csvBtn.textContent = "CSV 저장";
+        csvBtn.onclick = exportAllViewCsv;
+        actions.appendChild(csvBtn);
+      } else {
+        chartWrap.style.display = "inline-block";
+      }
+
+      var table = document.createElement("table");
+      var thead = document.createElement("thead");
+      var trh = document.createElement("tr");
+      var headers = [
+        { label: "구분" },
+        { label: "타입" },
+        { label: "종목명", field: "name" },
+        { label: "매입일" },
+        { label: "보유일" },
+        { label: "현재가" },
+        { label: "전일대비 증감" },
+        { label: "매수가" },
+        { label: "주식수" },
+        { label: "총 매입액" },
+        { label: "총수익" },
+        { label: "보유비율", field: "hold" },
+        { label: "수익률" },
+        { label: "일수익율" },
+        { label: "저장" }
+      ];
+
+      for (var i = 0; i < headers.length; i++) {
+        var header = headers[i];
+        var th = document.createElement("th");
+
+        if (header.field) {
+          th.className = "sortableHeader";
+          th.innerHTML = header.label + buildSortArrow(header.field);
+          th.onclick = (function (field) {
+            return function () {
+              toggleSort(field);
+              render();
+            };
+          })(header.field);
+        } else {
+          th.textContent = header.label;
+        }
+
+        trh.appendChild(th);
+      }
+
+      thead.appendChild(trh);
+      table.appendChild(thead);
+
+      var tbody = document.createElement("tbody");
+      var counts = {};
+
+      for (var r = 0; r < __ROWS.length; r++) {
+        counts[__ROWS[r].category] = (counts[__ROWS[r].category] || 0) + 1;
+      }
+
+      var prevCat = null;
+
+      for (var idx = 0; idx < __ROWS.length; idx++) {
+        var row = __ROWS[idx];
+        var cat = row.category;
+        var it = row.item;
+        var k = row.rowKey;
+
+        if (prevCat !== null && prevCat !== cat) {
+          tbody.appendChild(makeCategoryTotalRow(prevCat, headers.length));
+        }
+
+        prevCat = cat;
+
+        var tr = document.createElement("tr");
+
+        if (idx === 0 || __ROWS[idx - 1].category !== cat) {
+          var tdCat = document.createElement("td");
+          tdCat.className = "tdCategory";
+
+          var spanCat = document.createElement("span");
+          spanCat.className = "catNavLink";
+          spanCat.textContent = cat;
+          spanCat.onclick = (function (catName) {
+            return function (e) {
+              e.stopPropagation();
+              navigateToCategory(catName);
+            };
+          })(cat);
+
+          tdCat.appendChild(spanCat);
+          tdCat.rowSpan = counts[cat];
+          tr.appendChild(tdCat);
+        }
+
+        var tdType = document.createElement("td");
+        tdType.className = "tdCenter";
+
+        var typeLabel = document.createElement("span");
+        typeLabel.id = getCellId("typeLabel", k);
+
+        var typeSel = document.createElement("select");
+        typeSel.className = "typeSelect";
+        typeSel.id = getInputId("typeSel", k);
+
+        var optSafe = document.createElement("option");
+        optSafe.value = "안전";
+        optSafe.textContent = "안전";
+
+        var optAtk = document.createElement("option");
+        optAtk.value = "공격";
+        optAtk.textContent = "공격";
+
+        typeSel.appendChild(optSafe);
+        typeSel.appendChild(optAtk);
+
+        typeSel.value = getType(cat, it);
+        typeSel.onchange = (function (labelEl, selEl) {
+          return function () {
+            var v = normalizeType(selEl.value);
+            labelEl.className = getTypeClass(v);
+            labelEl.textContent = v;
+          };
+        })(typeLabel, typeSel);
+
+        tdType.appendChild(typeLabel);
+        tdType.appendChild(typeSel);
+        tr.appendChild(tdType);
+
+        var tdName = document.createElement("td");
+        tdName.className = "tdName";
+
+        if (!isAllView) {
+          var nameLink = document.createElement("span");
+          nameLink.className = "nameScrollLink";
+          nameLink.textContent = it.name;
+          nameLink.onclick = (function (catName, index, code) {
+            return function () {
+              scrollToCard(catName, index, code);
+            };
+          })(cat, row.index, it.code);
+
+          tdName.appendChild(nameLink);
+        } else {
+          tdName.textContent = it.name;
+        }
+
+        tr.appendChild(tdName);
+
+        var tdBuyDate = document.createElement("td");
+        tdBuyDate.className = "tdCenter";
+
+        var dateInput = document.createElement("input");
+        dateInput.type = "date";
+        dateInput.className = "dateInput";
+        dateInput.id = getInputId("buyDate", k);
+        dateInput.value = getBuyDate(cat, it);
+
+        tdBuyDate.appendChild(dateInput);
+        tr.appendChild(tdBuyDate);
+
+        var tdHoldDays = document.createElement("td");
+        tdHoldDays.className = "tdCenter";
+        tdHoldDays.id = getCellId("holdDays", k);
+        tdHoldDays.textContent = "-";
+        tr.appendChild(tdHoldDays);
+
+        var tdCurrent = document.createElement("td");
+        tdCurrent.className = "tdRight";
+        tdCurrent.id = getCellId("current", k);
+        tdCurrent.innerHTML = '<span class="loading">조회 대기...</span>';
+        tr.appendChild(tdCurrent);
+
+        var tdChange = document.createElement("td");
+        tdChange.className = "tdRight";
+        tdChange.id = getCellId("change", k);
+        tdChange.textContent = "-";
+        tr.appendChild(tdChange);
+
+        var tdBuy = document.createElement("td");
+        tdBuy.className = "tdRight";
+
+        var buyInput = document.createElement("input");
+        buyInput.className = "buyInput";
+        buyInput.type = "text";
+        buyInput.inputMode = "numeric";
+        buyInput.maxLength = 7;
+        buyInput.placeholder = "100,000";
+        buyInput.id = getInputId("buyInput", k);
+        buyInput.value = getBuyPrice(cat, it);
+        buyInput.oninput = function () {
+          formatBuyInputValue(this);
+        };
+
+        tdBuy.appendChild(buyInput);
+        tr.appendChild(tdBuy);
+
+        var tdQty = document.createElement("td");
+        tdQty.className = "tdRight";
+
+        var qtyInput = document.createElement("input");
+        qtyInput.className = "qtyInput";
+        qtyInput.type = "text";
+        qtyInput.inputMode = "numeric";
+        qtyInput.maxLength = 4;
+        qtyInput.placeholder = "9999";
+        qtyInput.id = getInputId("qtyInput", k);
+        qtyInput.value = getQuantity(cat, it);
+        qtyInput.oninput = function () {
+          formatQtyInputValue(this);
+        };
+
+        tdQty.appendChild(qtyInput);
+        tr.appendChild(tdQty);
+
+        var tdTotalBuy = document.createElement("td");
+        tdTotalBuy.className = "tdRight";
+        tdTotalBuy.id = getCellId("totalBuy", k);
+        tdTotalBuy.textContent = "-";
+        tr.appendChild(tdTotalBuy);
+
+        var tdProfit = document.createElement("td");
+        tdProfit.className = "tdRight profitFlat";
+        tdProfit.id = getCellId("profit", k);
+        tdProfit.textContent = "-";
+        tr.appendChild(tdProfit);
+
+        var tdHold = document.createElement("td");
+        tdHold.className = "tdRight profitFlat";
+        tdHold.id = getCellId("hold", k);
+        tdHold.textContent = "0.00%";
+        tr.appendChild(tdHold);
+
+        var tdRoi = document.createElement("td");
+        tdRoi.className = "tdRight profitFlat";
+        tdRoi.id = getCellId("roi", k);
+        tdRoi.textContent = "0.00%";
+        tr.appendChild(tdRoi);
+
+        var tdDaily = document.createElement("td");
+        tdDaily.className = "tdRight profitFlat";
+        tdDaily.id = getCellId("daily", k);
+        tdDaily.textContent = "0.00%";
+        tr.appendChild(tdDaily);
+
+        var tdSave = document.createElement("td");
+        tdSave.className = "tdCenter";
+
+        var btn = document.createElement("button");
+        btn.className = "saveBtn";
+        btn.type = "button";
+        btn.textContent = "저장";
+        btn.onclick = (function (ri) {
+          return function () {
+            onSaveRow(ri);
+          };
+        })(row);
+
+        var st = document.createElement("span");
+        st.className = "saveStatus";
+        st.id = getInputId("saveStatus", k);
+
+        tdSave.appendChild(btn);
+        tdSave.appendChild(st);
+        tr.appendChild(tdSave);
+
+        tbody.appendChild(tr);
+
+        updateRow(row, false);
+      }
+
+      if (prevCat !== null) {
+        tbody.appendChild(makeCategoryTotalRow(prevCat, headers.length));
+      }
+
+      tbody.appendChild(makeGrandTotalRow(headers.length));
+
+      table.appendChild(tbody);
+      area.appendChild(table);
+
+      updateTotalsRow(headers.length);
+
+      fetchPricesConcurrently(__ROWS, token, headers.length);
+    }
+
+    function render() {
+      RENDER_TOKEN++;
+      var token = RENDER_TOKEN;
+
+      var data = getData();
+      var selected = document.getElementById("category").value;
+      var status = document.getElementById("status");
+
+      if (!data || Object.keys(data).length === 0) {
+        status.textContent = "종목 데이터 파일(MyDCIRP_DATA.js)을 읽지 못했습니다.";
+        document.getElementById("tableTitle").textContent = "";
+        document.getElementById("titleActions").innerHTML = "";
+        document.getElementById("tableArea").innerHTML = "";
+        document.getElementById("cardsWrap").style.display = "none";
+        document.getElementById("chartTypeWrap").style.display = "none";
+        return;
+      }
+
+      if (selected === "전체보기") {
+        status.textContent = "전체보기 표시 중";
+      } else {
+        status.textContent = selected + " 표시 중";
+      }
+
+      renderTable(selected, token);
+
+      if (selected !== "전체보기") {
+        renderCardsForCategory(selected);
+      } else {
+        document.getElementById("cardsWrap").style.display = "none";
+      }
+
+      notifyRenderedSirenOnce();
+    }
+
+    document.getElementById("category").addEventListener("change", render);
+
+    document.getElementById("chartType").addEventListener("change", function () {
+      var selected = document.getElementById("category").value;
+
+      if (selected !== "전체보기") {
+        render();
+      }
+    });
+
+    resetLocalStorageAndSyncFromFile();
+    initCategoryCombo();
+    render();
+  </script>
 </body>
 
 </html>
