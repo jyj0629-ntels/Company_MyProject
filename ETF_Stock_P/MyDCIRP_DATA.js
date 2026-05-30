@@ -162,8 +162,8 @@ window.MyDCIRP_DATA = {
       "currentPrice": "23110",
       "currentCompare": "+115",
       "currentRate": "+0.50",
-      "buyPrice": "21,567",
-      "quantity": "380",
+      "buyPrice": "21,833",
+      "quantity": "429",
       "type": "안전",
       "buyDate": "2026-04-30"
     },
@@ -173,8 +173,8 @@ window.MyDCIRP_DATA = {
       "currentPrice": "33420",
       "currentCompare": "+250",
       "currentRate": "+0.75",
-      "buyPrice": "33,027",
-      "quantity": "259",
+      "buyPrice": "32,472",
+      "quantity": "324",
       "type": "공격",
       "buyDate": "2026-04-30"
     },
@@ -206,8 +206,8 @@ window.MyDCIRP_DATA = {
       "currentPrice": "59035",
       "currentCompare": "+375",
       "currentRate": "+0.64",
-      "buyPrice": "57,173",
-      "quantity": "120",
+      "buyPrice": "57,997",
+      "quantity": "152",
       "type": "공격",
       "buyDate": "2026-05-06"
     },
@@ -217,8 +217,8 @@ window.MyDCIRP_DATA = {
       "currentPrice": "11545",
       "currentCompare": "-5",
       "currentRate": "-0.04",
-      "buyPrice": "11,522",
-      "quantity": "530",
+      "buyPrice": "11,568",
+      "quantity": "631",
       "type": "공격",
       "buyDate": "2026-04-30"
     },
@@ -243,6 +243,17 @@ window.MyDCIRP_DATA = {
       "quantity": "11",
       "type": "공격",
       "buyDate": "2026-05-06"
+    },
+    {
+      "name": "KODEX 미국AI전력핵심인프라",
+      "code": "487230",
+      "currentPrice": "25,890",
+      "currentCompare": "+90",
+      "currentRate": "+0.35",
+      "buyPrice": "25,718",
+      "quantity": "61",
+      "type": "공격",
+      "buyDate": "2026-05-29"
     },
     {
       "name": "TIGER 코리아배당다우존스",
