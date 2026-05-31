@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>ETF 주가 현황</title>
+  <title>ETF 주가 현황(DC, IRP, 연금저축, 증권)</title>
 
   <style>
     body {
@@ -1637,10 +1637,9 @@
           roiCell.textContent = formatSignedPercent(catRoi);
         }
 
-        var totalAmountCell = document.getElementById("catTotalAmount__" + cat);
-        if (totalAmountCell) {
-          var catTotalAmount = (t.hasBuy ? t.totalBuy : 0) + (t.hasProfit ? t.totalProfit : 0);
-          totalAmountCell.textContent = (t.hasBuy || t.hasProfit) ? ("총액 " + formatWon(catTotalAmount)) : "-";
+        var dailyCell = document.getElementById("catTotalDaily__" + cat);
+        if (dailyCell) {
+          dailyCell.textContent = "";
         }
       }
 
@@ -1688,10 +1687,9 @@
         gRoiCell.textContent = formatSignedPercent(grandRoi);
       }
 
-      var gAmountCell = document.getElementById("grandTotalAmount");
-      if (gAmountCell) {
-        var grandTotalAmount = gBuy + gProfit;
-        gAmountCell.textContent = hasAny ? ("총액 " + formatWon(grandTotalAmount)) : "-";
+      var gDailyCell = document.getElementById("grandTotalDaily");
+      if (gDailyCell) {
+        gDailyCell.textContent = "";
       }
     }
 
@@ -1844,12 +1842,16 @@
       roiCell.textContent = "";
       tr.appendChild(roiCell);
 
-      var totalAmountCell = document.createElement("td");
-      totalAmountCell.className = "tdRight profitFlat";
-      totalAmountCell.id = "catTotalAmount__" + category;
-      totalAmountCell.colSpan = 2;
-      totalAmountCell.textContent = "";
-      tr.appendChild(totalAmountCell);
+      var dailyCell = document.createElement("td");
+      dailyCell.className = "tdRight profitFlat";
+      dailyCell.id = "catTotalDaily__" + category;
+      dailyCell.textContent = "";
+      tr.appendChild(dailyCell);
+
+      var blank = document.createElement("td");
+      blank.className = "tdCenter totalBlank";
+      blank.textContent = "";
+      tr.appendChild(blank);
 
       return tr;
     }
@@ -1898,12 +1900,16 @@
       roiCell.textContent = "";
       tr.appendChild(roiCell);
 
-      var totalAmountCell = document.createElement("td");
-      totalAmountCell.className = "tdRight profitFlat";
-      totalAmountCell.id = "grandTotalAmount";
-      totalAmountCell.colSpan = 2;
-      totalAmountCell.textContent = "";
-      tr.appendChild(totalAmountCell);
+      var dailyCell = document.createElement("td");
+      dailyCell.className = "tdRight profitFlat";
+      dailyCell.id = "grandTotalDaily";
+      dailyCell.textContent = "";
+      tr.appendChild(dailyCell);
+
+      var blank = document.createElement("td");
+      blank.className = "tdCenter totalBlank";
+      blank.textContent = "";
+      tr.appendChild(blank);
 
       return tr;
     }
