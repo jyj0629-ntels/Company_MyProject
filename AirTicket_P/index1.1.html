@@ -527,12 +527,19 @@
 
             console.log('검색 정보:', { origin, dest, depDate, retDate, tripType });
             let firstOpenedWindow = null;
+            let firstOpenedTarget = null;
+            let openedCount = 0;
 
             function openSite(url) {
-                const openedWindow = window.open(url, '_blank', 'noopener,noreferrer');
+                const targetName = openedCount === 0 ? 'flight_first_site' : '_blank';
+                const openedWindow = window.open(url, targetName);
                 if (!firstOpenedWindow && openedWindow) {
                     firstOpenedWindow = openedWindow;
                 }
+                if (!firstOpenedTarget) {
+                    firstOpenedTarget = targetName;
+                }
+                openedCount += 1;
             }
 
             const kayakUrl = tripType === 'ROUNDTRIP'
@@ -568,15 +575,24 @@
             }
 
             const googleUrl = tripType === 'ROUNDTRIP'
-                ? `https://www.google.com/travel/flights?hl=ko&gl=KR&curr=KRW#flt=${origin}.${dest}.${depDate}*${dest}.${origin}.${retDate};c:KRW;e:1;sd:1;t:f`
-                : `https://www.google.com/travel/flights?hl=ko&gl=KR&curr=KRW#flt=${origin}.${dest}.${depDate};c:KRW;e:1;sd:1;t:f`;
+                ? `https://www.google.com/travel/flights/search?hl=ko&gl=KR&q=${encodeURIComponent(`왕복 ${origin} ${dest} ${depDate} ${retDate}`)}`
+                : `https://www.google.com/travel/flights/search?hl=ko&gl=KR&q=${encodeURIComponent(`편도 ${origin} ${dest} ${depDate}`)}`;
             console.log('구글:', googleUrl);
             if (selectedSites.google) {
                 openSite(googleUrl);
             }
 
-            if (firstOpenedWindow && !firstOpenedWindow.closed) {
-                setTimeout(() => firstOpenedWindow.focus(), 150);
+            if (firstOpenedTarget) {
+                setTimeout(() => {
+                    const namedWindow = window.open('', firstOpenedTarget);
+                    if (namedWindow && !namedWindow.closed) {
+                        namedWindow.focus();
+                        return;
+                    }
+                    if (firstOpenedWindow && !firstOpenedWindow.closed) {
+                        firstOpenedWindow.focus();
+                    }
+                }, 200);
             }
         }
 
