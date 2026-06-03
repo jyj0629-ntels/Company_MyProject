@@ -575,24 +575,20 @@
             }
 
             const googleUrl = tripType === 'ROUNDTRIP'
-                ? `https://www.google.com/travel/flights/search?hl=ko&gl=KR&q=${encodeURIComponent(`왕복 ${origin} ${dest} ${depDate} ${retDate}`)}`
-                : `https://www.google.com/travel/flights/search?hl=ko&gl=KR&q=${encodeURIComponent(`편도 ${origin} ${dest} ${depDate}`)}`;
+                ? `https://www.google.com/travel/flights/search?hl=ko&gl=KR&q=${encodeURIComponent(`왕복 ${origin} ${dest} ${depDate} ${retDate} 직항`)}`
+                : `https://www.google.com/travel/flights/search?hl=ko&gl=KR&q=${encodeURIComponent(`편도 ${origin} ${dest} ${depDate} 직항`)}`;
             console.log('구글:', googleUrl);
             if (selectedSites.google) {
                 openSite(googleUrl);
             }
 
             if (firstOpenedTarget) {
-                setTimeout(() => {
-                    const namedWindow = window.open('', firstOpenedTarget);
-                    if (namedWindow && !namedWindow.closed) {
-                        namedWindow.focus();
-                        return;
-                    }
-                    if (firstOpenedWindow && !firstOpenedWindow.closed) {
-                        firstOpenedWindow.focus();
-                    }
-                }, 200);
+                const namedWindow = window.open('', firstOpenedTarget);
+                if (namedWindow && !namedWindow.closed) {
+                    namedWindow.focus();
+                } else if (firstOpenedWindow && !firstOpenedWindow.closed) {
+                    firstOpenedWindow.focus();
+                }
             }
         }
 
