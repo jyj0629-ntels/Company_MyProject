@@ -526,13 +526,21 @@
             }
 
             console.log('검색 정보:', { origin, dest, depDate, retDate, tripType });
+            let firstOpenedWindow = null;
+
+            function openSite(url) {
+                const openedWindow = window.open(url, '_blank', 'noopener,noreferrer');
+                if (!firstOpenedWindow && openedWindow) {
+                    firstOpenedWindow = openedWindow;
+                }
+            }
 
             const kayakUrl = tripType === 'ROUNDTRIP'
                 ? `https://www.kayak.co.kr/flights/${origin}-${dest}/${depDate}/${retDate}?fs=fdDir%3Dfalse&ucs=qcxs1v&sort=bestflight_a`
                 : `https://www.kayak.co.kr/flights/${origin}-${dest}/${depDate}?ucs=102bygw&sort=bestflight_a`;
             console.log('카약:', kayakUrl);
             if (selectedSites.kayak) {
-                window.open(kayakUrl, '_blank', 'noopener,noreferrer');
+                openSite(kayakUrl);
             }
 
             const skyscannerUrl = tripType === 'ROUNDTRIP'
@@ -540,7 +548,7 @@
                 : `https://www.skyscanner.co.kr/transport/flights/${origin.toLowerCase()}/${dest.toLowerCase()}/${depDateYYMMDD}/?adultsv2=1&cabinclass=economy&childrenv2=&inboundaltsenabled=false&outboundaltsenabled=false&preferdirects=true&rtn=0#/results`;
             console.log('스카이스캐너:', skyscannerUrl);
             if (selectedSites.skyscanner) {
-                window.open(skyscannerUrl, '_blank', 'noopener,noreferrer');
+                openSite(skyscannerUrl);
             }
 
             const naverUrl = tripType === 'ROUNDTRIP'
@@ -548,7 +556,7 @@
                 : `https://flight.naver.com/flights/international/${origin}:city-${dest}:city-${depDateYYYYMMDD}?adult=1&isDirect=true&fareType=Y`;
             console.log('네이버:', naverUrl);
             if (selectedSites.naver) {
-                window.open(naverUrl, '_blank', 'noopener,noreferrer');
+                openSite(naverUrl);
             }
 
             const bookingUrl = tripType === 'ROUNDTRIP'
@@ -556,15 +564,19 @@
                 : `https://flights.booking.com/flights/${origin}.CITY-${dest}.AIRPORT/?type=ONEWAY&adults=1&cabinClass=ECONOMY&children=&from=${origin}.CITY&to=${dest}.AIRPORT&stops=0&depart=${depDate}&sort=CHEAPEST&travelPurpose=leisure`;
             console.log('부킹닷컴:', bookingUrl);
             if (selectedSites.booking) {
-                window.open(bookingUrl, '_blank', 'noopener,noreferrer');
+                openSite(bookingUrl);
             }
 
             const googleUrl = tripType === 'ROUNDTRIP'
-                ? 'https://www.google.com/travel/flights/search?tfs=CBwQAholEgoyMDI2LTA1LTIyKABqDAgCEggvbS8waHNxZnIHCAESA0NHSxolEgoyMDI2LTA1LTMxKABqBwgBEgNDR0tyDAgCEggvbS8waHNxZkABSAFwAYIBCwj___________8BmAEB&tfu=EgYIAhAAGAA&hl=ko&gl=KR'
-                : `https://www.google.com/travel/flights/search?hl=ko&gl=KR&tfu=EgYIAhAAGAA&q=${encodeURIComponent(`cheapest direct flights from ${origin} to ${dest} on ${depDate}`)}`;
+                ? `https://www.google.com/travel/flights?hl=ko&gl=KR&curr=KRW#flt=${origin}.${dest}.${depDate}*${dest}.${origin}.${retDate};c:KRW;e:1;sd:1;t:f`
+                : `https://www.google.com/travel/flights?hl=ko&gl=KR&curr=KRW#flt=${origin}.${dest}.${depDate};c:KRW;e:1;sd:1;t:f`;
             console.log('구글:', googleUrl);
             if (selectedSites.google) {
-                window.open(googleUrl, '_blank', 'noopener,noreferrer');
+                openSite(googleUrl);
+            }
+
+            if (firstOpenedWindow && !firstOpenedWindow.closed) {
+                setTimeout(() => firstOpenedWindow.focus(), 150);
             }
         }
 
