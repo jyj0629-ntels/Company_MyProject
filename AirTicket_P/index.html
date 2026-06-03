@@ -460,6 +460,9 @@
 
         function getAirportCode(value) {
             const normalized = value.trim();
+            if (!normalized) {
+                return '';
+            }
             const codeMatch = normalized.toUpperCase().match(/^[A-Z]{3}$/);
             if (codeMatch) {
                 return codeMatch[0];
@@ -526,7 +529,7 @@
 
             const kayakUrl = tripType === 'ROUNDTRIP'
                 ? `https://www.kayak.co.kr/flights/${origin}-${dest}/${depDate}/${retDate}?fs=fdDir%3Dfalse&ucs=qcxs1v&sort=bestflight_a`
-                : `https://www.kayak.co.kr/flights/${origin}-${dest}/${depDate}?ucs=g3c76n&sort=bestflight_a#default`;
+                : `https://www.kayak.co.kr/flights/${origin}-${dest}/${depDate}?ucs=102bygw&sort=bestflight_a`;
             console.log('카약:', kayakUrl);
             if (selectedSites.kayak) {
                 window.open(kayakUrl, '_blank', 'noopener,noreferrer');
