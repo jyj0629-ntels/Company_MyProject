@@ -128,7 +128,7 @@ window.MyDCIRP_DATA = {
       "currentCompare": "-15",
       "currentRate": "-0.09",
       "buyPrice": "15,795",
-      "quantity": "343",
+      "quantity": "340",
       "type": "공격",
       "buyDate": "2026-04-16"
     },
@@ -188,17 +188,6 @@ window.MyDCIRP_DATA = {
       "quantity": "144",
       "type": "안전",
       "buyDate": "2026-04-30"
-    },
-    {
-      "name": "KODEX TRF7030",
-      "code": "329670",
-      "currentPrice": "22510",
-      "currentCompare": "+25",
-      "currentRate": "+0.17",
-      "buyPrice": "22515",
-      "quantity": "10",
-      "type": "공격",
-      "buyDate": "2026-07-21"
     },
     {
       "name": "KODEX 미국S&P500에너지(합성)",
