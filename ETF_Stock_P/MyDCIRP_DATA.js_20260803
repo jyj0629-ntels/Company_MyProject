@@ -342,43 +342,10 @@ window.MyDCIRP_DATA = {
       "currentPrice": "67390",
       "currentCompare": "-1,410",
       "currentRate": "-2.05",
-      "buyPrice": "78,091",
-      "quantity": "135",
+      "buyPrice": "80,360",
+      "quantity": "125",
       "type": "공격",
       "buyDate": "2026-03-04"
-    },
-    {
-      "name": "KODEX 미국S&P500",
-      "code": "379800",
-      "currentPrice": "2925",
-      "currentCompare": "-55",
-      "currentRate": "-1.85",
-      "buyPrice": "24,168",
-      "quantity": "8",
-      "type": "공격",
-      "buyDate": "2026-07-29"
-    },
-    {
-      "name": "RISE 미국나스닥100",
-      "code": "368590",
-      "currentPrice": "2925",
-      "currentCompare": "-55",
-      "currentRate": "-1.85",
-      "buyPrice": "29,762",
-      "quantity": "4",
-      "type": "공격",
-      "buyDate": "2026-07-29"
-    },
-    {
-      "name": "ACE 미국배당다우존스",
-      "code": "402970",
-      "currentPrice": "2925",
-      "currentCompare": "-55",
-      "currentRate": "-1.85",
-      "buyPrice": "15,640",
-      "quantity": "4",
-      "type": "공격",
-      "buyDate": "2026-07-29"
     },
     {
       "name": "HLB테라퓨틱스",
