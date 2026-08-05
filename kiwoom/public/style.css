@@ -1,0 +1,152 @@
+:root {
+  --bg: #f3f6f9;
+  --card: #ffffff;
+  --line: #d6dee6;
+  --text: #1e2a36;
+  --sub: #5c6b7a;
+  --primary: #0d6efd;
+  --primary-dark: #0a58ca;
+  --danger: #d63384;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", "Malgun Gothic", sans-serif;
+  background: linear-gradient(180deg, #f8fbff 0%, var(--bg) 100%);
+  color: var(--text);
+}
+
+.page {
+  width: min(1100px, 94vw);
+  margin: 24px auto 48px;
+}
+
+h1 {
+  margin: 0;
+  font-size: 28px;
+}
+
+.subtitle {
+  margin-top: 8px;
+  color: var(--sub);
+}
+
+.card {
+  margin-top: 16px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.toolbar,
+.footer-actions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.footer-actions {
+  justify-content: flex-end;
+  margin-top: 12px;
+  margin-bottom: 0;
+}
+
+button {
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--text);
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+button:hover {
+  border-color: #b5c1cd;
+}
+
+button.primary {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+
+button.primary:hover {
+  background: var(--primary-dark);
+}
+
+button.ghost {
+  background: #f6faff;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 820px;
+}
+
+th,
+td {
+  border: 1px solid var(--line);
+  padding: 8px;
+  text-align: left;
+}
+
+th {
+  background: #f1f5fb;
+  font-weight: 700;
+}
+
+input[type="text"],
+input[type="number"] {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #bcc9d6;
+  border-radius: 6px;
+}
+
+input[disabled] {
+  background: #eef2f7;
+  color: #7d8a97;
+}
+
+.check-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.remove {
+  color: var(--danger);
+}
+
+#resultText {
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+
+.result-success {
+  color: #198754;
+}
+
+.result-failed {
+  color: #b02a37;
+}
+
+@media (max-width: 760px) {
+  .page {
+    width: 96vw;
+  }
+
+  h1 {
+    font-size: 22px;
+  }
+}
