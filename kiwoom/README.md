@@ -1,60 +1,76 @@
-# Kiwoom 예약 매수 웹앱 (초간단 버전)
+# Kiwoom 예약 매수 웹앱 (GAS 연동 버전)
 
-이 프로젝트는 키움 REST API를 이용해 **평일 09:00 자동 매수 예약**을 만들기 위한 최소 구조입니다.
+이 프로젝트는 키움 API 비밀값을 로컬 파일이 아닌 **Google Apps Script(GAS)**에 저장하고,
+웹 화면은 GAS만 호출하는 방식으로 동작합니다.
 
-## 1) 실행 방법
+## 1) 목표 구조
 
-1. `.env.example`를 복사해 `.env`를 만듭니다.
-2. 필요한 값(앱키, 시크릿, 계좌)을 채웁니다.
-3. 아래 명령으로 실행합니다.
+- 브라우저 UI: `public/index.html`
+- API 키/시크릿/주문 처리: `gas/Code.gs`
+- 키움 민감정보는 GAS Script Properties에 저장
 
-```bash
-npm install
-npm start
+이 구조를 쓰면 휴대폰/회사 노트북에서도 동일 URL로 사용 가능합니다.
+
+## 2) 빠른 설정 순서
+
+1. Google Apps Script 새 프로젝트 생성
+2. `gas/Code.gs` 내용 붙여넣기
+3. Script Properties 설정
+4. 웹앱 배포(Deploy as web app)
+5. 발급된 `/exec` URL을 `public/config.js`에 입력
+
+## 3) Script Properties 예시
+
+- `KIWOOM_APP_KEY`: 키움 앱키
+- `KIWOOM_APP_SECRET`: 키움 시크릿
+- `KIWOOM_ACCOUNT_NO`: 계좌번호
+- `KIWOOM_DOMESTIC_EXCHANGE`: `KRX` (또는 NXT/SOR)
+- `DRY_RUN`: `true` 권장 (초기 테스트)
+- `STOCK_MASTER_JSON`: 종목 매핑 JSON 문자열
+
+`STOCK_MASTER_JSON` 예시:
+
+```json
+[
+	{ "code": "005930", "name": "삼성전자" },
+	{ "code": "000660", "name": "SK하이닉스" }
+]
 ```
 
-브라우저에서 `http://localhost:4100` 접속
+## 4) 프론트 설정
 
-## 2) 안전 모드
+`public/config.js`에서 아래만 입력하면 됩니다.
 
-- 기본값 `DRY_RUN=true`
-- 이 상태에서는 실제 주문이 나가지 않고, 모의 주문번호만 생성됩니다.
-- 실제 주문은 반드시 충분한 테스트 후 `DRY_RUN=false`로 변경하세요.
+```js
+window.APP_CONFIG = {
+	GAS_WEB_APP_URL: "https://script.google.com/macros/s/발급값/exec",
+	ENABLE_LOCAL_FALLBACK: true
+};
+```
 
-## 3) 화면 기능
+## 5) 현재 구현된 기능
 
-- 행 추가로 여러 종목 예약
-- 종목코드 입력 시 종목명 자동 조회
-- 종목명 입력 시 종목코드 자동 조회
+- 종목코드 입력 -> 종목명 자동 조회
+- 종목명 입력 -> 종목코드 자동 조회
 - 시장가 체크 시 구매가 비활성
-- 고정가(시장가 체크 해제) 시 구매가 입력 가능
-- 구매가는 천 단위 자동 콤마
-- 예약 구매 시 예약번호와 결과 표시
+- 고정가 시 구매가 활성
+- 여러 종목 동시 예약/주문
+- 결과 화면에 예약번호, 주문번호, 결과 표시
 
-## 4) 데이터 파일
-
-- `data/stock-master.json`: 종목 코드/명 매핑
-- `data/reservations.json`: 예약 저장
-
-처음 실행 시 `stock-master.sample.json`에서 자동 복사됩니다.
-
-## 5) 키움 API key 관련 중요한 확인
-
-- 키움 REST는 보통 **앱키 + 시크릿 + OAuth 토큰** 흐름을 사용합니다.
-- 즉, API key 하나만으로는 주문까지 즉시 불가능할 수 있습니다.
-- 본 코드도 `/oauth2/token` 발급을 전제로 구현되어 있습니다.
-- 실제 주문 전, 키움 포털에서 사용 신청/권한/허용 IP/실전계좌 연동 상태를 반드시 확인하세요.
-
-## 6) 현재 구현된 주문 매핑
+## 6) 현재 구현된 키움 주문 매핑
 
 - 국내주식 매수주문: `api_id=kt10000`
 - 주문 경로: `/api/dostk/ordr`
 - 시장가: `trde_tp=3`
 - 지정가: `trde_tp=0`
 
-## 7) 운영 전 체크리스트
+## 7) 안전 가이드
 
-- 장 시작 시점 주문 리스크(슬리피지) 감수 여부
-- 종목/수량 입력 검증
-- 계좌 주문가능금액/증거금 확인
-- 소액 모의 또는 최소 수량으로 실전 검증
+- 초기엔 반드시 `DRY_RUN=true`
+- 소액/최소 수량으로 단계 검증
+- 키움 포털 사용신청/허용IP/실전 권한 확인
+
+## 8) 참고
+
+기존 Node 서버 방식(`src/server.js`)도 남아 있지만,
+GAS URL이 `public/config.js`에 설정되면 프론트는 GAS를 우선 사용합니다.
