@@ -1,3 +1,7 @@
+/*******************************************************
+ * 키움증권 자동 매수 Script
+ * API Key 정보 설정
+ *******************************************************/
 var APP_CONFIG = {
   TIMEZONE: "Asia/Seoul",
   RUN_HOUR: 8,
@@ -13,42 +17,53 @@ var APP_CONFIG = {
   ALERT_EMAIL: ""
 };
 
+/*******************************************************
+ * 매수 종목 설정 변수
+ *
+ * 이 배열에 있는 종목을 자동 매수 대상으로 사용합니다.
+ * 실제 자동 실행은 note 값과 무관하며, 월요일~금요일만 동작합니다.
+ * 실행 시간은 APP_CONFIG.RUN_HOUR / RUN_MINUTE 값을 따릅니다.
+ *
+ * 각 컬럼 설명
+ * enabled   : true 이면 주문 대상 포함, false 이면 제외
+ * code      : 6자리 종목코드 문자열
+ * name      : 종목명
+ * orderType : "MARKET" 또는 "LIMIT"
+ * quantity  : 주문 수량
+ * price     : 지정가일 때만 숫자 입력, 시장가면 null
+ *******************************************************/
 var BUY_TARGETS = [
   {
     enabled: true,
-    code: "005930",
-    name: "삼성전자",
+    code: "379800 ",
+    name: "KODEX 미국S&P500",
     orderType: "MARKET",
-    quantity: 1,
-    price: null,
-    note: "매일 실행"
+    quantity: 2,
+    price: null
   },
   {
     enabled: true,
-    code: "000660",
-    name: "SK하이닉스",
+    code: "368590",
+    name: "RISE 미국나스닥100",
     orderType: "MARKET",
     quantity: 1,
-    price: null,
-    note: "매일 실행"
+    price: null
   },
   {
     enabled: true,
-    code: "035420",
-    name: "NAVER",
+    code: "402970",
+    name: "ACE 미국배당다우존스",
     orderType: "MARKET",
     quantity: 1,
-    price: null,
-    note: "매일 실행"
+    price: null
   },
   {
     enabled: true,
-    code: "068270",
-    name: "셀트리온",
+    code: "449450",
+    name: "PLUS K방산",
     orderType: "MARKET",
     quantity: 1,
-    price: null,
-    note: "매일 실행"
+    price: null
   }
 ];
 
