@@ -8,9 +8,9 @@ var APP_CONFIG = {
   RUN_MINUTE: 40,
   DRY_RUN: true,
   KIWOOM_BASE_URL: "https://api.kiwoom.com",
-  KIWOOM_APP_KEY: "PUT_YOUR_APP_KEY_HERE",
-  KIWOOM_APP_SECRET: "PUT_YOUR_APP_SECRET_HERE",
-  KIWOOM_ACCOUNT_NO: "PUT_YOUR_ACCOUNT_NO_HERE",
+  KIWOOM_APP_KEY: "APP_KEY",                  // 해당값을 수정해서 등록
+  KIWOOM_APP_SECRET: "APP_SECRET",            // 해당값을 수정해서 등록
+  KIWOOM_ACCOUNT_NO: "BANK_ACCOUNT",          // 해당값을 수정해서 등록
   KIWOOM_PRODUCT_CODE: "01",
   KIWOOM_DOMESTIC_EXCHANGE: "KRX",
   ENABLE_EMAIL_NOTICE: false,
