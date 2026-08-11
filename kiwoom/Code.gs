@@ -201,7 +201,7 @@ function kiwoomPost_(path, apiId, requestBody) {
       authorization: "Bearer " + accessToken,
       appkey: APP_CONFIG.KIWOOM_APP_KEY,
       appsecret: APP_CONFIG.KIWOOM_APP_SECRET,
-      api_id: apiId
+      "api-id": apiId
     },
     payload: JSON.stringify(requestBody || {}),
     muteHttpExceptions: true
