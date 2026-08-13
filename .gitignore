@@ -1,0 +1,4 @@
+# Kiwoom Windows 자동 매수 - 비밀값/상태 파일 제외
+kiwoom/config.json
+kiwoom/state.json
+kiwoom/autobuy.log

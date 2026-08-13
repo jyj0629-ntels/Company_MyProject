@@ -1,0 +1,50 @@
+{
+    "TIMEZONE": "Asia/Seoul",
+    "DRY_RUN": true,
+    "KIWOOM_BASE_URL": "https://api.kiwoom.com",
+    "KIWOOM_APP_KEY": "PUT_YOUR_APP_KEY_HERE",
+    "KIWOOM_APP_SECRET": "PUT_YOUR_APP_SECRET_HERE",
+    "KIWOOM_ACCOUNT_NO": "PUT_YOUR_ACCOUNT_NO_HERE",
+    "KIWOOM_PRODUCT_CODE": "01",
+    "KIWOOM_DOMESTIC_EXCHANGE": "KRX",
+    "ENABLE_EMAIL_NOTICE": false,
+    "ALERT_EMAIL": "",
+    "SMTP_SERVER": "smtp.gmail.com",
+    "SMTP_PORT": 587,
+    "SMTP_USER": "",
+    "SMTP_PASSWORD": "",
+    "BUY_TARGETS": [
+        {
+            "enabled": true,
+            "code": "379800",
+            "name": "KODEX 미국S&P500",
+            "orderType": "MARKET",
+            "quantity": 2,
+            "price": null
+        },
+        {
+            "enabled": true,
+            "code": "368590",
+            "name": "RISE 미국나스닥100",
+            "orderType": "MARKET",
+            "quantity": 1,
+            "price": null
+        },
+        {
+            "enabled": true,
+            "code": "402970",
+            "name": "ACE 미국배당다우존스",
+            "orderType": "MARKET",
+            "quantity": 1,
+            "price": null
+        },
+        {
+            "enabled": true,
+            "code": "449450",
+            "name": "PLUS K방산",
+            "orderType": "MARKET",
+            "quantity": 1,
+            "price": null
+        }
+    ]
+}
