@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Multi AI Compare</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="panel-header">
+          <h1>AI 질문 비교</h1>
+        </div>
+
+        <div class="section">
+          <label class="section-title">질문할 AI 선택</label>
+          <div id="providerList" class="provider-list" aria-label="AI provider selection"></div>
+        </div>
+
+        <div class="section">
+          <label for="questionInput" class="section-title">질문 입력</label>
+          <textarea
+            id="questionInput"
+            rows="7"
+            placeholder="질문을 입력하세요. Enter로 전송, Shift + Enter로 줄바꿈"
+          ></textarea>
+          <div class="toolbar">
+            <button id="runBtn" class="primary-btn" type="button">Enter</button>
+            <button id="clearBtn" class="secondary-btn" type="button">초기화</button>
+          </div>
+        </div>
+
+        <div class="section api-box">
+          <label class="section-title">Google 로그인</label>
+          <div class="key-grid">
+            <label>
+              <span>Google ID</span>
+              <input id="googleId" type="text" placeholder="your-google-id@gmail.com" />
+            </label>
+            <label>
+              <span>Google PWD</span>
+              <input id="googlePwd" type="password" placeholder="password" />
+            </label>
+          </div>
+          <small class="gas-note">로그인 후 GAS 설정 정보를 받아오며, 브라우저 UI에는 공개 URL을 노출하지 않습니다.</small>
+        </div>
+      </aside>
+
+      <main class="result-area">
+        <div id="statusBar" class="status-bar">모든 AI가 기본 선택되어 있습니다.</div>
+        <div id="resultGrid" class="result-grid"></div>
+      </main>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
