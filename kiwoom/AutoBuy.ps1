@@ -33,6 +33,16 @@ function Get-KoreaNow {
     return [System.TimeZoneInfo]::ConvertTime([DateTime]::UtcNow, $tz)
 }
 
+function Get-PublicIp {
+    try {
+        $ip = (Invoke-RestMethod -Uri 'https://api.ipify.org?format=text' -Method Get -TimeoutSec 10).Trim()
+        return if ($ip) { $ip } else { 'UNKNOWN' }
+    }
+    catch {
+        return 'UNKNOWN'
+    }
+}
+
 function Get-Config {
     if (-not (Test-Path $ConfigPath)) {
         throw "config.json 파일이 없습니다. config.example.json을 복사해서 만드세요: $ConfigPath"
@@ -119,6 +129,9 @@ function Get-AccessToken {
         return $State.accessToken
     }
 
+    $publicIp = Get-PublicIp
+    Write-Log "키움 토큰 발급 시도: 현재 공인 IP=$publicIp"
+
     $body = @{
         grant_type = 'client_credentials'
         appkey     = $Config.KIWOOM_APP_KEY
@@ -129,13 +142,15 @@ function Get-AccessToken {
         $response = Invoke-RestMethod -Uri "$($Config.KIWOOM_BASE_URL)/oauth2/token" -Method Post -ContentType 'application/json' -Body $body
     }
     catch {
-        throw "토큰 발급 실패: $($_.Exception.Message)"
+        $publicIp = Get-PublicIp
+        throw "토큰 발급 실패: $($_.Exception.Message) (현재 공인 IP: $publicIp, 키움 OpenAPI+ 관리 화면에서 해당 IP를 지정단말기에 등록해야 합니다)"
     }
 
     if (-not $response.token) {
         $msg = if ($response.return_msg) { $response.return_msg } else { $response.msg1 }
-        if ($msg -match '8050|지정단말기') {
-            throw "토큰 발급 실패: $msg (원인: 지정단말기 인증 실패. 키움 OpenAPI+ 관리 화면에서 이 PC의 공인 IP가 등록돼 있는지 확인하세요)"
+        if ($msg -match '8050|지정단말기|지정 단말기') {
+            $publicIp = Get-PublicIp
+            throw "토큰 발급 실패: $msg (현재 공인 IP: $publicIp, 원인: 지정단말기 인증 실패. 키움 OpenAPI+ 관리 화면에서 이 PC의 공인 IP가 등록돼 있는지 확인하세요)"
         }
         throw "토큰 발급 실패: $msg"
     }
@@ -240,7 +255,7 @@ function Send-ResultEmail {
             -Credential $credential
     }
     catch {
-        Write-Log "메일 전송 실패: $($_.Exception.Message)"
+        Write-Log "메일 전송 실패: $($_.Exception.Message) (원인: Gmail은 일반 비밀번호 대신 앱 비밀번호가 필요할 수 있습니다)"
     }
 }
 

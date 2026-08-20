@@ -107,6 +107,10 @@ schtasks /Delete /TN "KiwoomAutoBuy" /F
 "SMTP_PASSWORD": "앱 비밀번호"
 ```
 
+- Gmail은 일반 계정 비밀번호 대신 `2단계 인증` 후 발급받은 `앱 비밀번호`를 넣어야 합니다.
+- 앱 비밀번호를 넣지 않으면 `Authentication Required` 오류가 발생합니다.
+- 이 오류는 매수 실패 원인이 아니고, 메일 알림만 실패한 상태입니다.
+
 ## 9) 실전 전환 순서
 
 1. `DRY_RUN: true` 상태로 며칠간 스케줄러 실행 확인 (`autobuy.log` 확인)
