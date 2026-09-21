@@ -114,7 +114,7 @@ schtasks /Delete /TN "KiwoomAutoBuy" /F
 - 이 오류는 매수 실패 원인이 아니고, 메일 알림만 실패한 상태입니다.
 
 ## 9) 실전 전환 순서
-
+'DRY_RUN = false 이면 실 매매, true 이면 가상 매매
 1. `DRY_RUN: true` 상태로 며칠간 스케줄러 실행 확인 (`autobuy.log` 확인)
 2. 문제 없으면 `config.json`에서 `DRY_RUN: false`로 변경
 3. 소액/소수량으로 먼저 실거래 확인

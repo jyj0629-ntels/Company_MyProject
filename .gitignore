@@ -2,3 +2,7 @@
 kiwoom/config.json
 kiwoom/state.json
 kiwoom/autobuy.log
+# TrueFriend(한국투자증권) Windows 자동 매수 - 비밀값/상태 파일 제외
+TrueFriend/config.json
+TrueFriend/state.json
+TrueFriend/autobuy.log

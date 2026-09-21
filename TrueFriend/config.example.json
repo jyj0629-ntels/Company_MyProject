@@ -1,0 +1,132 @@
+{
+    "TIMEZONE": "Asia/Seoul",
+    "DRY_RUN": true,
+    "KIS_BASE_URL": "https://openapi.koreainvestment.com:9443",
+    "KIS_APP_KEY": "PUT_YOUR_APP_KEY_HERE",
+    "KIS_APP_SECRET": "PUT_YOUR_APP_SECRET_HERE",
+    "KIS_CANO": "PUT_YOUR_ACCOUNT_8DIGITS_HERE",
+    "KIS_ACNT_PRDT_CD": "22",
+    "KIS_CUST_TYPE": "P",
+    "KIS_BUY_TR_ID": "TTTC0802U",
+    "KIS_EXCG_ID_DVSN_CD": "KRX",
+    "ENABLE_EMAIL_NOTICE": false,
+    "ALERT_EMAIL": "",
+    "SMTP_SERVER": "smtp.gmail.com",
+    "SMTP_PORT": 587,
+    "SMTP_USER": "",
+    "SMTP_PASSWORD": "",
+    "BUY_TARGETS": [
+        {
+            "enabled": true,
+            "code": "402970",
+            "name": "ACE 미국배당다우존스",
+            "orderType": "MARKET",
+            "quantity": 1,
+            "price": null
+        },
+        {
+            "enabled": true,
+            "code": "465580",
+            "name": "ACE 미국빅테크TOP7 Plus",
+            "orderType": "MARKET",
+            "quantity": 1,
+            "price": null
+        },
+        {
+            "enabled": true,
+            "code": "469150",
+            "name": "ACE AI반도체TOP3+",
+            "orderType": "MARKET",
+            "quantity": 1,
+            "price": null
+        },
+        {
+            "enabled": true,
+            "code": "411060",
+            "name": "ACE KRX금현물",
+            "orderType": "MARKET",
+            "quantity": 1,
+            "price": null
+        },
+        {
+            "enabled": true,
+            "code": "448540",
+            "name": "ACE 엔비디아채권혼합",
+            "orderType": "MARKET",
+            "quantity": 1,
+            "price": null
+        },
+        {
+            "enabled": true,
+            "code": "390390",
+            "name": "KODEX 미국반도체",
+            "orderType": "MARKET",
+            "quantity": 1,
+            "price": null
+        },
+        {
+            "enabled": true,
+            "code": "448330",
+            "name": "KODEX 삼성전자채권혼합",
+            "orderType": "MARKET",
+            "quantity": 1,
+            "price": null
+        },
+        {
+            "enabled": true,
+            "code": "266420",
+            "name": "KODEX 헬스케어",
+            "orderType": "MARKET",
+            "quantity": 1,
+            "price": null
+        },
+        {
+            "enabled": true,
+            "code": "449450",
+            "name": "PLUS K방산",
+            "orderType": "MARKET",
+            "quantity": 1,
+            "price": null
+        },
+        {
+            "enabled": true,
+            "code": "456200",
+            "name": "PLUS 미국달러SOFR금리액티브(합성)",
+            "orderType": "MARKET",
+            "quantity": 1,
+            "price": null
+        },
+        {
+            "enabled": true,
+            "code": "139230",
+            "name": "TIGER 200 중공업",
+            "orderType": "MARKET",
+            "quantity": 1,
+            "price": null
+        },
+        {
+            "enabled": true,
+            "code": "160580",
+            "name": "TIGER 구리실물",
+            "orderType": "MARKET",
+            "quantity": 1,
+            "price": null
+        },
+        {
+            "enabled": true,
+            "code": "381170",
+            "name": "TIGER 미국테크TOP10 INDXX",
+            "orderType": "MARKET",
+            "quantity": 1,
+            "price": null
+        },
+        {
+            "enabled": true,
+            "code": "381180",
+            "name": "TIGER 미국필라델피아반도체나스닥",
+            "orderType": "MARKET",
+            "quantity": 1,
+            "price": null
+        }
+    ]
+}

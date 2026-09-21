@@ -342,8 +342,8 @@ window.MyDCIRP_DATA = {
       "currentPrice": "67390",
       "currentCompare": "-1,410",
       "currentRate": "-2.05",
-      "buyPrice": "73,664",
-      "quantity": "165",
+      "buyPrice": "73,405",
+      "quantity": "167",
       "type": "공격",
       "buyDate": "2026-03-04"
     },
@@ -353,8 +353,8 @@ window.MyDCIRP_DATA = {
       "currentPrice": "2925",
       "currentCompare": "-55",
       "currentRate": "-1.85",
-      "buyPrice": "24,021",
-      "quantity": "68",
+      "buyPrice": "24,0003",
+      "quantity": "72",
       "type": "공격",
       "buyDate": "2026-07-29"
     },
@@ -364,8 +364,8 @@ window.MyDCIRP_DATA = {
       "currentPrice": "2925",
       "currentCompare": "-55",
       "currentRate": "-1.85",
-      "buyPrice": "30,057",
-      "quantity": "35",
+      "buyPrice": "30,045",
+      "quantity": "37",
       "type": "공격",
       "buyDate": "2026-07-29"
     },
@@ -375,8 +375,8 @@ window.MyDCIRP_DATA = {
       "currentPrice": "2925",
       "currentCompare": "-55",
       "currentRate": "-1.85",
-      "buyPrice": "15,386",
-      "quantity": "33",
+      "buyPrice": "15,365",
+      "quantity": "35",
       "type": "공격",
       "buyDate": "2026-07-29"
     },
