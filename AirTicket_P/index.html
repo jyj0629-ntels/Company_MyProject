@@ -563,15 +563,15 @@
             }
 
             const kayakUrl = tripType === 'ROUNDTRIP'
-                ? `https://www.kayak.co.kr/flights/${origin}-${dest}/${depDate}/${retDate}?fs=fdDir%3Dfalse&ucs=qcxs1v&sort=bestflight_a`
-                : `https://www.kayak.co.kr/flights/${origin}-${dest}/${depDate}?ucs=102bygw&sort=bestflight_a`;
+                ? `https://www.kayak.co.kr/flights/${origin}-${dest}/${depDate}/${retDate}?fs=stops%3D0&ucs=qcxs1v&sort=bestflight_a`
+                : `https://www.kayak.co.kr/flights/${origin}-${dest}/${depDate}?fs=stops%3D0&ucs=102bygw&sort=bestflight_a`;
             console.log('카약:', kayakUrl);
             if (selectedSites.kayak) {
                 openSite(kayakUrl);
             }
 
             const skyscannerUrl = tripType === 'ROUNDTRIP'
-                ? `https://www.skyscanner.co.kr/transport/flights/${origin.toLowerCase()}/${dest.toLowerCase()}/${depDateYYMMDD}/?adultsv2=1&cabinclass=economy&childrenv2=&inboundaltsenabled=false&outboundaltsenabled=false&preferdirects=true&rtn=1#/results`
+                ? `https://www.skyscanner.co.kr/transport/flights/${origin.toLowerCase()}/${dest.toLowerCase()}/${depDateYYMMDD}/${retDateYYYYMMDD.slice(2)}/?adultsv2=1&cabinclass=economy&childrenv2=&inboundaltsenabled=false&outboundaltsenabled=false&preferdirects=true&rtn=1#/results`
                 : `https://www.skyscanner.co.kr/transport/flights/${origin.toLowerCase()}/${dest.toLowerCase()}/${depDateYYMMDD}/?adultsv2=1&cabinclass=economy&childrenv2=&inboundaltsenabled=false&outboundaltsenabled=false&preferdirects=true&rtn=0#/results`;
             console.log('스카이스캐너:', skyscannerUrl);
             if (selectedSites.skyscanner) {
