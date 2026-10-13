@@ -2207,7 +2207,7 @@
           tbody.appendChild(makeCategoryTotalRow(prevCat, headers.length));
         }
 
-        if (isAllView && (idx === 0 || __ROWS[idx - 1].category !== cat)) {
+        if (isAllView && idx > 0 && __ROWS[idx - 1].category !== cat) {
           var repeatHeaderRow = buildHeaderRow();
           repeatHeaderRow.className = "repeatHeaderRow";
           tbody.appendChild(repeatHeaderRow);

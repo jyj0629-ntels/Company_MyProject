@@ -353,7 +353,7 @@ window.MyDCIRP_DATA = {
       "currentPrice": "2925",
       "currentCompare": "-55",
       "currentRate": "-1.85",
-      "buyPrice": "24,0003",
+      "buyPrice": "24,003",
       "quantity": "72",
       "type": "공격",
       "buyDate": "2026-07-29"
