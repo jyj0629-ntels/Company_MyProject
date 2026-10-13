@@ -155,7 +155,11 @@
 <body>
 
     <div class="container">
-        <H3><u> <center> <b> <font color="red" align="center">반드시 Chrome을 '시크릿 창'으로  띄우고 하기 값 진행.</font> </b> </center></u></H3>
+        <H3><u>
+                <center> <b>
+                        <font color="red" align="center">반드시 Chrome을 '시크릿 창'으로 띄우고 하기 값 진행.</font>
+                    </b> </center>
+            </u></H3>
         <h2>✈️ 항공권 통합 조회</h2>
 
         <div class="input-group">
@@ -205,18 +209,21 @@
             * 브라우저 팝업 차단 해제가 필요할 수 있습니다.</p>
     </div>
 
+    <script src="./airports-data.js"></script>
     <script>
-        const airports = [
+        const airports = globalThis.airportData?.airports ?? [
             { code: 'ICN', name: 'Incheon International Airport', koName: '인천국제공항', city: 'Seoul', koCity: '서울', country: 'South Korea' },
             { code: 'GMP', name: 'Gimpo International Airport', koName: '김포국제공항', city: 'Seoul', koCity: '서울', country: 'South Korea' },
             { code: 'PUS', name: 'Gimhae International Airport', koName: '김해국제공항', city: 'Busan', koCity: '부산', country: 'South Korea' },
             { code: 'CJU', name: 'Jeju International Airport', koName: '제주국제공항', city: 'Jeju', koCity: '제주', country: 'South Korea' },
+            { code: 'CJJ', name: 'Cheongju International Airport', koName: '청주국제공항', city: 'Cheongju', koCity: '청주', country: 'South Korea' },
             { code: 'NRT', name: 'Narita International Airport', koName: '나리타국제공항', city: 'Tokyo', koCity: '도쿄', country: 'Japan' },
             { code: 'HND', name: 'Tokyo Haneda Airport', koName: '하네다공항', city: 'Tokyo', koCity: '도쿄', country: 'Japan' },
             { code: 'HKG', name: 'Hong Kong International Airport', koName: '홍콩국제공항', city: 'Hong Kong', koCity: '홍콩', country: 'China' },
             { code: 'TPE', name: 'Taiwan Taoyuan International Airport', koName: '타이완 타오위안 국제공항', city: 'Taipei', koCity: '타이베이', country: 'Taiwan' },
             { code: 'SIN', name: 'Singapore Changi Airport', koName: '싱가포르 창이공항', city: 'Singapore', koCity: '싱가포르', country: 'Singapore' },
             { code: 'BKK', name: 'Suvarnabhumi Airport', koName: '수완나품공항', city: 'Bangkok', koCity: '방콕', country: 'Thailand' },
+            { code: 'DMK', name: 'Don Mueang International Airport', koName: '돈므앙 국제공항', city: 'Bangkok', koCity: '방콕', country: 'Thailand', koCountry: '태국' },
             { code: 'KUL', name: 'Kuala Lumpur International Airport', koName: '쿠알라룸푸르 국제공항', city: 'Kuala Lumpur', koCity: '쿠알라룸푸르', country: 'Malaysia' },
             { code: 'DXB', name: 'Dubai International Airport', koName: '두바이 국제공항', city: 'Dubai', koCity: '두바이', country: 'United Arab Emirates' },
             { code: 'DOH', name: 'Hamad International Airport', koName: '하마드 국제공항', city: 'Doha', koCity: '도하', country: 'Qatar' },
@@ -380,14 +387,13 @@
             if (!normalized) {
                 return airports.slice(0, 12);
             }
+            const terms = normalized.split(/[\s,]+/).filter(Boolean);
             return airports.filter(airport => {
-                return airport.code.includes(normalized)
-                    || airport.name.toUpperCase().includes(normalized)
-                    || airport.city.toUpperCase().includes(normalized)
-                    || airport.country.toUpperCase().includes(normalized)
-                    || (airport.koName && airport.koName.includes(query))
-                    || (airport.koCity && airport.koCity.includes(query));
-            }).slice(0, 20);
+                const searchable = [airport.code, airport.name, airport.city, airport.country,
+                airport.koName, airport.koCity, airport.koCountry].filter(Boolean).join(' ').toUpperCase();
+                return terms.every(term => searchable.includes(term));
+            }).sort((first, second) => Number(second.code === normalized) - Number(first.code === normalized))
+                .slice(0, 20);
         }
 
         function renderDropdown(inputId, dropdownId, query) {
@@ -407,12 +413,24 @@
             results.forEach(airport => {
                 const item = document.createElement('div');
                 item.className = 'airport-item';
-                const koInfo = airport.koName ? `<span style="color: #333;">${airport.koName} (${airport.koCity})</span><br>` : '';
-                const enInfo = `<span style="color: #666; font-size: 0.9em;">${airport.city}, ${airport.country} — ${airport.name}</span>`;
-                item.innerHTML = `
-                    <span class="airport-code">${airport.code}</span>
-                    <span class="airport-details">${koInfo}${enInfo}</span>
-                `;
+                const code = document.createElement('span');
+                code.className = 'airport-code';
+                code.textContent = airport.code;
+                const details = document.createElement('span');
+                details.className = 'airport-details';
+                if (airport.koName) {
+                    const koInfo = document.createElement('span');
+                    koInfo.style.color = '#333';
+                    koInfo.textContent = airport.koName + (airport.koCity ? ` (${airport.koCity})` : '')
+                        + (airport.koCountry ? ` · ${airport.koCountry}` : '');
+                    details.append(koInfo, document.createElement('br'));
+                }
+                const enInfo = document.createElement('span');
+                enInfo.style.color = '#666';
+                enInfo.style.fontSize = '0.9em';
+                enInfo.textContent = `${airport.city}, ${airport.country} — ${airport.name}`;
+                details.appendChild(enInfo);
+                item.append(code, details);
                 item.addEventListener('mousedown', function (event) {
                     event.preventDefault();
                     selectAirport(inputId, airport.code);
@@ -616,4 +634,5 @@
         });
     </script>
 </body>
+
 </html>
