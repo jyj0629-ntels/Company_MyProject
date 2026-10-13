@@ -131,6 +131,16 @@
       z-index: 2;
     }
 
+    tbody tr.repeatHeaderRow th {
+      background: #eaf0f9;
+      border: 1px solid #dfe6ef;
+      padding: 8px;
+      text-align: center;
+      white-space: nowrap;
+      font-weight: 700;
+      color: #333;
+    }
+
     tbody td {
       border: 1px solid #e5e5e5;
       padding: 7px 8px;
@@ -731,6 +741,7 @@
         "매수가",
         "현재가",
         "총 매입액",
+        "총 평가액",
         "총수익",
         "수익율"
       ].map(csvEscape).join(","));
@@ -743,6 +754,7 @@
         if (!totalInfo) return;
 
         var totalBuy = totalInfo.hasBuy ? totalInfo.totalBuy : 0;
+        var totalEval = totalInfo.hasEval ? totalInfo.totalEval : 0;
         var totalProfit = totalInfo.hasProfit ? totalInfo.totalProfit : 0;
 
         var safeAttackRatioText = buildSafeAttackRatioText(
@@ -751,6 +763,7 @@
         );
 
         var totalBuyText = totalInfo.hasBuy ? String(Math.round(totalBuy)) : "";
+        var totalEvalText = totalInfo.hasEval ? String(Math.round(totalEval)) : "";
         var totalProfitText = totalInfo.hasProfit ? String(Math.round(totalProfit)) : "";
         var totalRoiText = formatCsvRoiRatio(totalProfit, totalBuy);
 
@@ -763,6 +776,7 @@
           "",
           "",
           totalBuyText,
+          totalEvalText,
           totalProfitText,
           totalRoiText
         ].map(csvEscape).join(","));
@@ -790,6 +804,7 @@
         var qty = getQuantity(cat, it);
 
         var totalBuy = calculateTotalBuy(buy, qty);
+        var totalEval = calculateTotalEval(it.currentPrice || "", qty);
         var profit = calculateTotalProfit(it.currentPrice || "", buy, qty);
         var roi = calculateRoiPercent(profit, totalBuy);
         var hold = calculateHoldPercent(totalBuy, denomBuy);
@@ -803,6 +818,7 @@
         var nowText = isFinite(nowNum) ? String(Math.round(nowNum)) : "";
 
         var totalBuyText = isNaN(totalBuy) ? "" : String(Math.round(totalBuy));
+        var totalEvalText = isNaN(totalEval) ? "" : String(Math.round(totalEval));
         var profitText = isNaN(profit) ? "" : String(Math.round(profit));
 
         var roiText = "";
@@ -820,6 +836,7 @@
           buyText,
           nowText,
           totalBuyText,
+          totalEvalText,
           profitText,
           roiText
         ].map(csvEscape).join(","));
@@ -1061,6 +1078,15 @@
       if (isNaN(cur) || isNaN(buy) || isNaN(qty)) return NaN;
 
       return (cur - buy) * qty;
+    }
+
+    function calculateTotalEval(currentValue, qtyValue) {
+      var cur = toNumber(currentValue);
+      var qty = toNumber(qtyValue);
+
+      if (isNaN(cur) || isNaN(qty)) return NaN;
+
+      return cur * qty;
     }
 
     function calculatePriceDiff(currentValue, buyValue) {
@@ -1468,10 +1494,12 @@
 
     function computeTotalsForCategory(category, items) {
       var totalBuy = 0;
+      var totalEval = 0;
       var totalProfit = 0;
       var safeBuy = 0;
       var attackBuy = 0;
       var hasBuy = false;
+      var hasEval = false;
       var hasProfit = false;
 
       for (var i = 0; i < items.length; i++) {
@@ -1494,6 +1522,13 @@
           }
         }
 
+        var te = calculateTotalEval(it.currentPrice || "", qty);
+
+        if (!isNaN(te)) {
+          totalEval += te;
+          hasEval = true;
+        }
+
         var tp = calculateTotalProfit(it.currentPrice || "", buy, qty);
 
         if (!isNaN(tp)) {
@@ -1504,10 +1539,12 @@
 
       return {
         totalBuy: totalBuy,
+        totalEval: totalEval,
         totalProfit: totalProfit,
         safeBuy: safeBuy,
         attackBuy: attackBuy,
         hasBuy: hasBuy,
+        hasEval: hasEval,
         hasProfit: hasProfit
       };
     }
@@ -1559,6 +1596,7 @@
       var tdPriceDiff = document.getElementById(getCellId("priceDiff", k));
       var tdChange = document.getElementById(getCellId("change", k));
       var tdTotalBuy = document.getElementById(getCellId("totalBuy", k));
+      var tdTotalEval = document.getElementById(getCellId("totalEval", k));
       var tdProfit = document.getElementById(getCellId("profit", k));
       var tdHold = document.getElementById(getCellId("hold", k));
       var tdRoi = document.getElementById(getCellId("roi", k));
@@ -1569,6 +1607,7 @@
       var buy = getBuyPrice(cat, it);
       var qty = getQuantity(cat, it);
       var totalBuy = calculateTotalBuy(buy, qty);
+      var totalEval = calculateTotalEval(it.currentPrice || "", qty);
       var profit = calculateTotalProfit(it.currentPrice || "", buy, qty);
       var priceDiff = calculatePriceDiff(it.currentPrice || "", buy);
       var roi = calculateRoiPercent(profit, totalBuy);
@@ -1604,6 +1643,10 @@
 
       if (tdTotalBuy) {
         tdTotalBuy.innerHTML = formatWon(totalBuy);
+      }
+
+      if (tdTotalEval) {
+        tdTotalEval.innerHTML = (isError || isNaN(totalEval)) ? "-" : formatWon(totalEval);
       }
 
       if (tdProfit) {
@@ -1651,6 +1694,11 @@
           buyCell.textContent = formatWon(t.totalBuy);
         }
 
+        var evalCell = document.getElementById("catTotalEval__" + cat);
+        if (evalCell) {
+          evalCell.textContent = t.hasEval ? formatWon(t.totalEval) : "-";
+        }
+
         var profitCell = document.getElementById("catTotalProfit__" + cat);
         if (profitCell) {
           setMoneyCell(profitCell, t.totalProfit);
@@ -1676,10 +1724,12 @@
       }
 
       var gBuy = 0;
+      var gEval = 0;
       var gProfit = 0;
       var gSafe = 0;
       var gAtk = 0;
       var hasAny = false;
+      var hasAnyEval = false;
 
       for (var c in __CAT_TOTALS) {
         if (!__CAT_TOTALS.hasOwnProperty(c)) continue;
@@ -1687,9 +1737,12 @@
         hasAny = true;
 
         gBuy += (__CAT_TOTALS[c].hasBuy ? __CAT_TOTALS[c].totalBuy : 0);
+        gEval += (__CAT_TOTALS[c].hasEval ? __CAT_TOTALS[c].totalEval : 0);
         gProfit += (__CAT_TOTALS[c].hasProfit ? __CAT_TOTALS[c].totalProfit : 0);
         gSafe += (__CAT_TOTALS[c].safeBuy || 0);
         gAtk += (__CAT_TOTALS[c].attackBuy || 0);
+
+        if (__CAT_TOTALS[c].hasEval) hasAnyEval = true;
       }
 
       var gBreak = document.getElementById("grandTotalBreak");
@@ -1700,6 +1753,11 @@
       var gBuyCell = document.getElementById("grandTotalBuy");
       if (gBuyCell) {
         gBuyCell.textContent = hasAny ? formatWon(gBuy) : "-";
+      }
+
+      var gEvalCell = document.getElementById("grandTotalEval");
+      if (gEvalCell) {
+        gEvalCell.textContent = hasAnyEval ? formatWon(gEval) : "-";
       }
 
       var gProfitCell = document.getElementById("grandTotalProfit");
@@ -1835,7 +1893,7 @@
       var tr = document.createElement("tr");
       tr.className = "categoryTotalRow";
 
-      var tailCols = 6;
+      var tailCols = 7;
       var leftCols = colCount - tailCols;
 
       var tdBreak = document.createElement("td");
@@ -1856,6 +1914,12 @@
       buyCell.id = "catTotalBuy__" + category;
       buyCell.textContent = "-";
       tr.appendChild(buyCell);
+
+      var evalCell = document.createElement("td");
+      evalCell.className = "tdRight profitFlat";
+      evalCell.id = "catTotalEval__" + category;
+      evalCell.textContent = "-";
+      tr.appendChild(evalCell);
 
       var profitCell = document.createElement("td");
       profitCell.className = "tdRight profitFlat";
@@ -1889,7 +1953,7 @@
       var tr = document.createElement("tr");
       tr.className = "grandTotalRow";
 
-      var tailCols = 6;
+      var tailCols = 7;
       var leftCols = colCount - tailCols;
 
       var tdBreak = document.createElement("td");
@@ -1910,6 +1974,12 @@
       buyCell.id = "grandTotalBuy";
       buyCell.textContent = "-";
       tr.appendChild(buyCell);
+
+      var evalCell = document.createElement("td");
+      evalCell.className = "tdRight profitFlat";
+      evalCell.id = "grandTotalEval";
+      evalCell.textContent = "-";
+      tr.appendChild(evalCell);
 
       var profitCell = document.createElement("td");
       profitCell.className = "tdRight profitFlat";
@@ -2069,7 +2139,6 @@
 
       var table = document.createElement("table");
       var thead = document.createElement("thead");
-      var trh = document.createElement("tr");
       var headers = [
         { label: "구분" },
         { label: "타입" },
@@ -2082,6 +2151,7 @@
         { label: "이익/손실금" },
         { label: "전일대비 증감" },
         { label: "총 매입액" },
+        { label: "총 평가액" },
         { label: "총수익" },
         { label: "보유비율", field: "hold" },
         { label: "수익률" },
@@ -2089,27 +2159,33 @@
         { label: "저장" }
       ];
 
-      for (var i = 0; i < headers.length; i++) {
-        var header = headers[i];
-        var th = document.createElement("th");
+      function buildHeaderRow() {
+        var row = document.createElement("tr");
 
-        if (header.field) {
-          th.className = "sortableHeader";
-          th.innerHTML = header.label + buildSortArrow(header.field);
-          th.onclick = (function (field) {
-            return function () {
-              toggleSort(field);
-              render();
-            };
-          })(header.field);
-        } else {
-          th.textContent = header.label;
+        for (var i = 0; i < headers.length; i++) {
+          var header = headers[i];
+          var th = document.createElement("th");
+
+          if (header.field) {
+            th.className = "sortableHeader";
+            th.innerHTML = header.label + buildSortArrow(header.field);
+            th.onclick = (function (field) {
+              return function () {
+                toggleSort(field);
+                render();
+              };
+            })(header.field);
+          } else {
+            th.textContent = header.label;
+          }
+
+          row.appendChild(th);
         }
 
-        trh.appendChild(th);
+        return row;
       }
 
-      thead.appendChild(trh);
+      thead.appendChild(buildHeaderRow());
       table.appendChild(thead);
 
       var tbody = document.createElement("tbody");
@@ -2129,6 +2205,12 @@
 
         if (prevCat !== null && prevCat !== cat) {
           tbody.appendChild(makeCategoryTotalRow(prevCat, headers.length));
+        }
+
+        if (isAllView && (idx === 0 || __ROWS[idx - 1].category !== cat)) {
+          var repeatHeaderRow = buildHeaderRow();
+          repeatHeaderRow.className = "repeatHeaderRow";
+          tbody.appendChild(repeatHeaderRow);
         }
 
         prevCat = cat;
@@ -2285,6 +2367,12 @@
         tdTotalBuy.id = getCellId("totalBuy", k);
         tdTotalBuy.textContent = "-";
         tr.appendChild(tdTotalBuy);
+
+        var tdTotalEval = document.createElement("td");
+        tdTotalEval.className = "tdRight";
+        tdTotalEval.id = getCellId("totalEval", k);
+        tdTotalEval.textContent = "-";
+        tr.appendChild(tdTotalEval);
 
         var tdProfit = document.createElement("td");
         tdProfit.className = "tdRight profitFlat";
