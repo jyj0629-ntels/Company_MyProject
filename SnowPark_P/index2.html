@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>스키장 날씨/웹캠 (제안 2 · 클릭 펼침형)</title>
+    <style>
+        :root {
+            --navy: #1a3a5a;
+            --blue: #3498db;
+            --green: #2ecc71;
+        }
+
+        body { font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; background-color: #eef2f3; margin: 0; padding: 20px; color: #333; }
+        h1 { text-align: center; color: var(--navy); margin-bottom: 6px; }
+        .subtitle { text-align: center; color: #7f8c8d; margin: 0 0 24px; font-size: 0.9em; }
+        .container { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; max-width: 1200px; margin: 0 auto; }
+        .card { background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 10px 20px rgba(0,0,0,0.05); border: 1px solid #ddd; }
+        .card-header { background: var(--navy); color: white; padding: 15px; font-size: 1.2em; font-weight: bold; text-align: center; }
+        .card-body { padding: 20px; text-align: center; }
+
+        .btn-group { display: flex; flex-direction: column; gap: 10px; }
+        .btn { display: block; text-decoration: none; padding: 12px; border-radius: 8px; font-weight: bold; transition: 0.2s; text-align: center; border: none; cursor: pointer; font-size: 1em; }
+        .btn-weather { background: var(--blue); color: white; }
+        .btn-webcam { background: var(--green); color: white; }
+        .btn:hover { opacity: 0.88; transform: translateY(-2px); }
+
+        /* 펼쳐지는 날씨 패널 */
+        .weather-panel { max-height: 0; overflow: hidden; transition: max-height 0.35s ease; text-align: left; }
+        .weather-panel.open { max-height: 500px; }
+        .weather-inner { background: #f8f9fa; border-radius: 12px; padding: 16px; margin-bottom: 12px; }
+        .weather-top { display: flex; align-items: center; gap: 12px; }
+        .weather-icon { font-size: 2.4em; line-height: 1; }
+        .weather-temp { font-size: 2em; font-weight: 800; color: var(--navy); }
+        .weather-desc { color: #555; font-size: 0.9em; }
+        table.weather-table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 0.88em; }
+        table.weather-table th, table.weather-table td { padding: 8px 10px; border-bottom: 1px solid #e5e9ee; text-align: left; }
+        table.weather-table th { color: #7f8c8d; font-weight: 600; width: 45%; }
+        table.weather-table td { color: var(--navy); font-weight: 700; text-align: right; }
+        .loading { color: #95a5a6; font-size: 0.9em; padding: 16px 0; text-align: center; }
+        .error { color: #e74c3c; font-size: 0.85em; padding: 12px 0; text-align: center; }
+        .updated { font-size: 0.72em; color: #aab2bd; margin-top: 8px; text-align: right; }
+        .footer { text-align: center; margin-top: 40px; color: #7f8c8d; font-size: 0.9em; }
+    </style>
+</head>
+
+<body>
+    <h1>❄️ 스키장 날씨 / 웹캠</h1>
+    <p class="subtitle">제안 2 · 클릭 펼침형 — "날씨 보기"를 누르면 카드 안에서 펼쳐져 표시</p>
+
+    <div class="container" id="cards"></div>
+
+    <div class="footer">
+        <p>날씨는 Open-Meteo 무료 날씨 데이터(기상청 포함 다중 기상 모델 자동 조합)를 사용합니다. 웹캠 버튼은 각 스키장 공식 페이지로 연결됩니다.</p>
+        <p>© 2024 Ski Info Dashboard</p>
+    </div>
+
+    <script>
+        var RESORTS = [
+            { name: "모나 용평", lat: 37.6447, lon: 128.6811, webcam: "https://www.yongpyong.co.kr/kor/guide/realTimeNews/ypResortWebcam.do" },
+            { name: "웰리힐리파크", lat: 37.5086, lon: 128.2386, webcam: "https://www.wellihillipark.com/home/customer/webcam" },
+            { name: "하이원 리조트", lat: 37.2103, lon: 128.8258, webcam: "https://www.high1.com/ski/slopeView.do?key=748&mode=p" },
+            { name: "지산 포레스트", lat: 37.2297, lon: 127.4406, webcam: "https://www.jisanresort.co.kr/w/ski/slopes/webcam.asp" },
+            { name: "엘리시안 강촌", lat: 37.8469, lon: 127.6186, webcam: "https://www.elysian.co.kr/about-gangchon/sky#guide-to-using-slopes" }
+        ];
+
+        function describeWeather(code) {
+            var map = {
+                0: ["☀️", "맑음"],
+                1: ["🌤️", "대체로 맑음"], 2: ["⛅", "구름 조금"], 3: ["☁️", "흐림"],
+                45: ["🌫️", "안개"], 48: ["🌫️", "짙은 안개"],
+                51: ["🌦️", "약한 이슬비"], 53: ["🌦️", "이슬비"], 55: ["🌧️", "강한 이슬비"],
+                61: ["🌧️", "약한 비"], 63: ["🌧️", "비"], 65: ["🌧️", "강한 비"],
+                66: ["🌧️", "진눈깨비"], 67: ["🌧️", "강한 진눈깨비"],
+                71: ["🌨️", "약한 눈"], 73: ["🌨️", "눈"], 75: ["❄️", "강한 눈"], 77: ["🌨️", "싸락눈"],
+                80: ["🌦️", "약한 소나기"], 81: ["🌧️", "소나기"], 82: ["⛈️", "강한 소나기"],
+                85: ["🌨️", "약한 눈소나기"], 86: ["❄️", "강한 눈소나기"],
+                95: ["⛈️", "뇌우"], 96: ["⛈️", "뇌우(우박)"], 99: ["⛈️", "강한 뇌우(우박)"]
+            };
+            return map[code] || ["🌡️", "정보 없음"];
+        }
+
+        function buildApiUrl(lat, lon) {
+            var params = [
+                "latitude=" + lat,
+                "longitude=" + lon,
+                "current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m,snowfall,precipitation",
+                "daily=temperature_2m_max,temperature_2m_min,snowfall_sum",
+                "timezone=Asia%2FSeoul",
+                "forecast_days=1"
+            ];
+            return "https://api.open-meteo.com/v1/forecast?" + params.join("&");
+        }
+
+        function fmt(v, unit) {
+            if (v === null || v === undefined || isNaN(v)) return "-";
+            return v + (unit || "");
+        }
+
+        function renderWeather(panel, data) {
+            var cur = data.current || {};
+            var daily = data.daily || {};
+            var d = describeWeather(cur.weather_code);
+            var tMax = (daily.temperature_2m_max && daily.temperature_2m_max[0] !== undefined) ? daily.temperature_2m_max[0] : null;
+            var tMin = (daily.temperature_2m_min && daily.temperature_2m_min[0] !== undefined) ? daily.temperature_2m_min[0] : null;
+            var snowSum = (daily.snowfall_sum && daily.snowfall_sum[0] !== undefined) ? daily.snowfall_sum[0] : null;
+
+            panel.innerHTML =
+                '<div class="weather-inner">' +
+                    '<div class="weather-top">' +
+                        '<span class="weather-icon">' + d[0] + '</span>' +
+                        '<div>' +
+                            '<div class="weather-temp">' + fmt(cur.temperature_2m, "°") + '</div>' +
+                            '<div class="weather-desc">' + d[1] + '</div>' +
+                        '</div>' +
+                    '</div>' +
+                    '<table class="weather-table">' +
+                        '<tr><th>체감온도</th><td>' + fmt(cur.apparent_temperature, "°") + '</td></tr>' +
+                        '<tr><th>최고 / 최저</th><td>' + fmt(tMax, "°") + ' / ' + fmt(tMin, "°") + '</td></tr>' +
+                        '<tr><th>습도</th><td>' + fmt(cur.relative_humidity_2m, "%") + '</td></tr>' +
+                        '<tr><th>바람</th><td>' + fmt(cur.wind_speed_10m, " km/h") + '</td></tr>' +
+                        '<tr><th>강수</th><td>' + fmt(cur.precipitation, " mm") + '</td></tr>' +
+                        '<tr><th>적설(오늘)</th><td>' + fmt(snowSum, " cm") + '</td></tr>' +
+                    '</table>' +
+                    '<div class="updated">업데이트: ' + new Date().toLocaleTimeString("ko-KR") + '</div>' +
+                '</div>';
+        }
+
+        function loadWeather(resort, panel) {
+            panel.innerHTML = '<div class="loading">날씨 불러오는 중...</div>';
+            fetch(buildApiUrl(resort.lat, resort.lon))
+                .then(function (res) {
+                    if (!res.ok) throw new Error("HTTP " + res.status);
+                    return res.json();
+                })
+                .then(function (data) { renderWeather(panel, data); })
+                .catch(function (err) {
+                    panel.innerHTML = '<div class="error">날씨를 불러오지 못했습니다.<br>' + err.message + '</div>';
+                });
+        }
+
+        function buildCards() {
+            var container = document.getElementById("cards");
+
+            RESORTS.forEach(function (resort) {
+                var card = document.createElement("div");
+                card.className = "card";
+
+                var header = document.createElement("div");
+                header.className = "card-header";
+                header.textContent = resort.name;
+
+                var body = document.createElement("div");
+                body.className = "card-body";
+
+                var btnGroup = document.createElement("div");
+                btnGroup.className = "btn-group";
+
+                var weatherBtn = document.createElement("button");
+                weatherBtn.className = "btn btn-weather";
+                weatherBtn.textContent = "☀️ 실시간 날씨 보기";
+
+                var panel = document.createElement("div");
+                panel.className = "weather-panel";
+
+                var loadedOnce = false;
+                weatherBtn.onclick = function () {
+                    var willOpen = !panel.classList.contains("open");
+                    panel.classList.toggle("open");
+                    if (willOpen && !loadedOnce) {
+                        loadedOnce = true;
+                        loadWeather(resort, panel);
+                    }
+                    weatherBtn.textContent = willOpen ? "🔼 날씨 접기" : "☀️ 실시간 날씨 보기";
+                };
+
+                var webcamBtn = document.createElement("a");
+                webcamBtn.className = "btn btn-webcam";
+                webcamBtn.href = resort.webcam;
+                webcamBtn.target = "_blank";
+                webcamBtn.rel = "noopener";
+                webcamBtn.textContent = "📹 실시간 웹캠/슬로프";
+
+                btnGroup.appendChild(weatherBtn);
+                btnGroup.appendChild(panel);
+                btnGroup.appendChild(webcamBtn);
+
+                body.appendChild(btnGroup);
+                card.appendChild(header);
+                card.appendChild(body);
+                container.appendChild(card);
+            });
+        }
+
+        buildCards();
+    </script>
+</body>
+
+</html>
