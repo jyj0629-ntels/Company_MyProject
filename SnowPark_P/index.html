@@ -1,94 +1,276 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>스키장 날씨/웹캠</title>
     <style>
+        :root {
+            --navy: #1a3a5a;
+            --blue: #3498db;
+            --green: #2ecc71;
+            --sat: #2d6cdf;
+            --sun: #e74c3c;
+            --weekend-bg: #fff7f3;
+            --weekend-border: #f3c9bb;
+        }
+
         body { font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; background-color: #eef2f3; margin: 0; padding: 20px; color: #333; }
-        h1 { text-align: center; color: #1a3a5a; margin-bottom: 30px; }
-        .container { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; max-width: 1200px; margin: 0 auto; }
+        h1 { text-align: center; color: var(--navy); margin-bottom: 6px; }
+        .subtitle { text-align: center; color: #7f8c8d; margin: 0 0 24px; font-size: 0.9em; }
+        .container { display: flex; flex-direction: column; gap: 20px; max-width: 1000px; margin: 0 auto; }
         .card { background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 10px 20px rgba(0,0,0,0.05); border: 1px solid #ddd; }
-        .card-header { background: #1a3a5a; color: white; padding: 15px; font-size: 1.2em; font-weight: bold; text-align: center; }
-        .card-body { padding: 20px; text-align: center; }
-        .info-box { background: #f8f9fa; padding: 15px; border-radius: 10px; margin-bottom: 15px; font-size: 0.95em; line-height: 1.6; }
-        .btn-group { display: flex; flex-direction: column; gap: 10px; }
-        .btn { display: block; text-decoration: none; padding: 12px; border-radius: 8px; font-weight: bold; transition: 0.3s; text-align: center; }
-        .btn-weather { background: #3498db; color: white; }
-        .btn-webcam { background: #2ecc71; color: white; }
-        .btn:hover { opacity: 0.8; transform: translateY(-2px); }
+        .card-header { background: var(--navy); color: white; padding: 15px 20px; font-size: 1.15em; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
+        .card-header .range { font-size: 0.82em; font-weight: 500; opacity: 0.95; }
+        .card-body { padding: 18px 20px; }
+
+        /* 일별 타임라인 */
+        .timeline { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 6px; }
+        .day { flex: 1 1 0; min-width: 104px; background: #f8f9fa; border: 1px solid #e5e9ee; border-radius: 10px; padding: 12px 8px; text-align: center; cursor: pointer; transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s; position: relative; }
+        .day:hover { transform: translateY(-3px); box-shadow: 0 6px 14px rgba(0,0,0,0.1); border-color: var(--blue); }
+        .day .detail-hint { font-size: 0.66em; color: var(--blue); margin-top: 6px; opacity: 0; transition: opacity 0.15s; }
+        .day:hover .detail-hint { opacity: 1; }
+        .day.weekend { background: var(--weekend-bg); border-color: var(--weekend-border); }
+        .day.today { outline: 2px solid var(--navy); outline-offset: -2px; }
+        .day .dow { font-size: 0.82em; font-weight: 700; color: #555; }
+        .day.weekend.sat .dow { color: var(--sat); }
+        .day.weekend.sun .dow { color: var(--sun); }
+        .day .date { font-size: 0.72em; color: #95a5a6; margin-top: 1px; }
+        .day .ic { font-size: 1.9em; margin: 7px 0 4px; }
+        .day .desc { font-size: 0.72em; color: #7f8c8d; min-height: 2.2em; line-height: 1.1; }
+        .day .temp { font-weight: 800; color: var(--navy); font-size: 0.98em; margin-top: 5px; }
+        .day .temp .min { color: #7f8c8d; font-weight: 600; }
+        .day .meta { font-size: 0.7em; color: #8a94a0; margin-top: 5px; line-height: 1.35; }
+        .day .snow { color: var(--blue); font-weight: 700; }
+        .badge-weekend { display: inline-block; font-size: 0.64em; font-weight: 700; color: #fff; background: var(--sun); border-radius: 6px; padding: 1px 5px; margin-top: 4px; }
+
+        .btns { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+        .btn { flex: 1; min-width: 160px; text-decoration: none; padding: 12px; border-radius: 8px; font-weight: bold; transition: 0.2s; text-align: center; border: none; cursor: pointer; font-size: 1em; }
+        .btn-refresh { background: var(--blue); color: white; }
+        .btn-webcam { background: var(--green); color: white; }
+        .btn:hover { opacity: 0.88; transform: translateY(-2px); }
+
+        .loading { color: #95a5a6; font-size: 0.9em; padding: 20px 0; text-align: center; }
+        .error { color: #e74c3c; font-size: 0.85em; padding: 14px 0; text-align: center; }
         .footer { text-align: center; margin-top: 40px; color: #7f8c8d; font-size: 0.9em; }
     </style>
 </head>
+
 <body>
-    <!-- <h1>❄️스키장 날씨/웹캠</h1><div class="container"> -->
-    <div class="container">
-        <div class="compare>
-            <div class="card-header">거리 비교</div>
-            <div class="card-body">
-                <div class="btn-group">
-                     <a href="DistanceCompare.html">거리 비교 페이지로 이동 <target="_blank" class="btn btn-webcam">📹 실시간 웹캠/슬로프</a>
-                </div>
-            </div>
-        </div>
-        </div>
-        이게 되는건가?
-        <div class="card">
-            <div class="card-header">모나 용평</div>
-            <div class="card-body">
-                <div class="btn-group">
-                    <a href="https://search.naver.com/search.naver?query=모나용평+날씨" target="_blank" class="btn btn-weather">☀️ 실시간 날씨 보기</a>
-                    <a href="https://www.yongpyong.co.kr/kor/guide/realTimeNews/ypResortWebcam.do" target="_blank" class="btn btn-webcam">📹 실시간 웹캠/슬로프</a>
-                </div>
-            </div>
-        </div>
+    <h1>❄️ 스키장 날씨 / 웹캠</h1>
+    <p class="subtitle">오늘부터 이번 주 일요일까지 날짜별 예보 (주말 강조) · 날짜를 클릭하면 상세 날씨를 새 창으로 봅니다</p>
 
-        <div class="card">
-            <div class="card-header">웰리힐리파크</div>
-            <div class="card-body">
-                <div class="btn-group">
-                    <a href="https://search.naver.com/search.naver?query=웰리힐리파크+날씨" target="_blank" class="btn btn-weather">☀️ 실시간 날씨 보기</a>
-                    <a href="https://www.wellihillipark.com/home/customer/webcam" target="_blank" class="btn btn-webcam">📹 실시간 웹캠/슬로프</a>
-                </div>
-            </div>
-        </div>
-
-        <div class="card">
-            <div class="card-header">하이원 리조트</div>
-            <div class="card-body">
-                <div class="btn-group">
-                    <a href="https://search.naver.com/search.naver?query=하이원+날씨" target="_blank" class="btn btn-weather">☀️ 실시간 날씨 보기</a>
-                    <a href="https://www.high1.com/ski/slopeView.do?key=748&mode=p" target="_blank" class="btn btn-webcam">📹 실시간 웹캠/슬로프</a>
-                </div>
-            </div>
-        </div>
-
-        <div class="card">
-            <div class="card-header">지산 포레스트</div>
-            <div class="card-body">
-                <div class="btn-group">
-                    <a href="https://www.weatheri.co.kr/leisure/leisure05.php?rid=11B20701&k=5&a_name=%EC%A7%80%EC%82%B0%EB%A6%AC%EC%A1%B0%ED%8A%B8" target="_blank" class="btn btn-weather">☀️ 실시간 날씨 보기</a>
-                    <a href="https://www.jisanresort.co.kr/w/ski/slopes/webcam.asp" target="_blank" class="btn btn-webcam">📹 실시간 웹캠/슬로프</a>
-                </div>
-            </div>
-        </div>
-
-        <div class="card">
-            <div class="card-header">엘리시안 강촌</div>
-            <div class="card-body">
-                <div class="btn-group">
-                    <a href="https://search.naver.com/search.naver?query=엘리시안강촌+날씨" target="_blank" class="btn btn-weather">☀️ 실시간 날씨 보기</a>
-                    <a href="https://www.elysian.co.kr/about-gangchon/sky#guide-to-using-slopes" target="_blank" class="btn btn-webcam">📹 실시간 웹캠/슬로프</a>
-                </div>
-            </div>
-        </div>
-    </div>
+    <div class="container" id="cards"></div>
 
     <div class="footer">
-        <p>각 버튼을 클릭하면 해당 스키장의 실시간 네이버 날씨와 공식 웹캠 페이지로 연결됩니다.</p>
+        <p>날씨는 Open-Meteo 무료 날씨 데이터(기상청 포함 다중 기상 모델 자동 조합)를 사용합니다. 웹캠 버튼은 각 스키장 공식 페이지로 연결됩니다.</p>
         <p>© 2024 Ski Info Dashboard</p>
     </div>
 
+    <script>
+        var RESORTS = [
+            { name: "모나 용평", lat: 37.6447, lon: 128.6811, webcam: "https://www.yongpyong.co.kr/kor/guide/realTimeNews/ypResortWebcam.do" },
+            { name: "웰리힐리파크", lat: 37.5086, lon: 128.2386, webcam: "https://www.wellihillipark.com/home/customer/webcam" },
+            { name: "하이원 리조트", lat: 37.2103, lon: 128.8258, webcam: "https://www.high1.com/ski/slopeView.do?key=748&mode=p" },
+            { name: "지산 포레스트", lat: 37.2297, lon: 127.4406, webcam: "https://www.jisanresort.co.kr/w/ski/slopes/webcam.asp" },
+            { name: "엘리시안 강촌", lat: 37.8469, lon: 127.6186, webcam: "https://www.elysian.co.kr/about-gangchon/sky#guide-to-using-slopes" }
+        ];
+
+        var DOW_KO = ["일", "월", "화", "수", "목", "금", "토"];
+
+        // 오늘부터 이번 주 일요일까지 며칠인지 (오늘 포함).
+        // 일요일(getDay()===0)을 주의 마지막으로 본다. 오늘이 일요일이면 1일(오늘만).
+        function daysUntilSunday() {
+            var dow = new Date().getDay(); // 0=일 ... 6=토
+            // 월(1)~토(6): 일요일까지 남은 일수 = 7 - dow, 오늘 포함이므로 +1 → (7 - dow) + 1
+            // 일(0): 오늘만 → 1
+            if (dow === 0) return 1;
+            return (7 - dow) + 1;
+        }
+
+        function describeWeather(code) {
+            var map = {
+                0: ["☀️", "맑음"],
+                1: ["🌤️", "대체로 맑음"], 2: ["⛅", "구름 조금"], 3: ["☁️", "흐림"],
+                45: ["🌫️", "안개"], 48: ["🌫️", "짙은 안개"],
+                51: ["🌦️", "약한 이슬비"], 53: ["🌦️", "이슬비"], 55: ["🌧️", "강한 이슬비"],
+                61: ["🌧️", "약한 비"], 63: ["🌧️", "비"], 65: ["🌧️", "강한 비"],
+                66: ["🌧️", "진눈깨비"], 67: ["🌧️", "강한 진눈깨비"],
+                71: ["🌨️", "약한 눈"], 73: ["🌨️", "눈"], 75: ["❄️", "강한 눈"], 77: ["🌨️", "싸락눈"],
+                80: ["🌦️", "약한 소나기"], 81: ["🌧️", "소나기"], 82: ["⛈️", "강한 소나기"],
+                85: ["🌨️", "약한 눈소나기"], 86: ["❄️", "강한 눈소나기"],
+                95: ["⛈️", "뇌우"], 96: ["⛈️", "뇌우(우박)"], 99: ["⛈️", "강한 뇌우(우박)"]
+            };
+            return map[code] || ["🌡️", "정보 없음"];
+        }
+
+        function buildApiUrl(lat, lon, days) {
+            var params = [
+                "latitude=" + lat,
+                "longitude=" + lon,
+                "daily=weather_code,temperature_2m_max,temperature_2m_min,snowfall_sum,precipitation_probability_max,wind_speed_10m_max",
+                "timezone=Asia%2FSeoul",
+                "forecast_days=" + days
+            ];
+            return "https://api.open-meteo.com/v1/forecast?" + params.join("&");
+        }
+
+        function fmt(v, unit) {
+            if (v === null || v === undefined || isNaN(v)) return "-";
+            return v + (unit || "");
+        }
+
+        function fmtTemp(v) {
+            if (v === null || v === undefined || isNaN(v)) return "-";
+            return Math.round(v) + "°";
+        }
+
+        function renderWeather(body, data) {
+            var daily = data.daily || {};
+            var dates = daily.time || [];
+
+            if (!dates.length) {
+                body.innerHTML = '<div class="error">일별 예보 데이터가 없습니다.</div>' + buildBtns(body);
+                attachRefresh(body);
+                return;
+            }
+
+            var todayStr = new Date().toISOString().slice(0, 10);
+            var cells = "";
+
+            for (var i = 0; i < dates.length; i++) {
+                var dateObj = new Date(dates[i] + "T00:00:00");
+                var dow = dateObj.getDay();
+                var isSat = dow === 6;
+                var isSun = dow === 0;
+                var isWeekend = isSat || isSun;
+                var isToday = dates[i] === todayStr;
+
+                var d = describeWeather(daily.weather_code ? daily.weather_code[i] : null);
+                var tMax = daily.temperature_2m_max ? daily.temperature_2m_max[i] : null;
+                var tMin = daily.temperature_2m_min ? daily.temperature_2m_min[i] : null;
+                var snow = daily.snowfall_sum ? daily.snowfall_sum[i] : null;
+                var pop = daily.precipitation_probability_max ? daily.precipitation_probability_max[i] : null;
+                var wind = daily.wind_speed_10m_max ? daily.wind_speed_10m_max[i] : null;
+
+                var classes = "day";
+                if (isWeekend) classes += " weekend";
+                if (isSat) classes += " sat";
+                if (isSun) classes += " sun";
+                if (isToday) classes += " today";
+
+                var mm = dateObj.getMonth() + 1;
+                var dd = dateObj.getDate();
+
+                var snowLine = (snow && snow > 0)
+                    ? '<span class="snow">❄ ' + snow + 'cm</span>'
+                    : '강수 ' + fmt(pop, "%");
+
+                cells +=
+                    '<div class="' + classes + '" data-date="' + dates[i] + '" title="클릭하면 상세 날씨를 새 창으로 봅니다">' +
+                        '<div class="dow">' + DOW_KO[dow] + (isToday ? " (오늘)" : "") + '</div>' +
+                        '<div class="date">' + mm + '/' + dd + '</div>' +
+                        '<div class="ic">' + d[0] + '</div>' +
+                        '<div class="desc">' + d[1] + '</div>' +
+                        '<div class="temp">' + fmtTemp(tMax) + ' <span class="min">/ ' + fmtTemp(tMin) + '</span></div>' +
+                        '<div class="meta">' + snowLine + '<br>바람 ' + fmt(wind != null ? Math.round(wind) : null, "km/h") + '</div>' +
+                        (isWeekend ? '<div class="badge-weekend">주말</div>' : '') +
+                        '<div class="detail-hint">상세 ▸</div>' +
+                    '</div>';
+            }
+
+            body.innerHTML = '<div class="timeline">' + cells + '</div>' + buildBtns(body);
+            attachRefresh(body);
+            attachDayClick(body);
+        }
+
+        // 날짜 칸 클릭 -> 상세 페이지를 새 창으로
+        function attachDayClick(body) {
+            var days = body.querySelectorAll(".day");
+            for (var i = 0; i < days.length; i++) {
+                days[i].addEventListener("click", function () {
+                    var date = this.getAttribute("data-date");
+                    if (!date) return;
+                    var url = "detail.html?name=" + encodeURIComponent(body.dataset.name) +
+                        "&lat=" + encodeURIComponent(body.dataset.lat) +
+                        "&lon=" + encodeURIComponent(body.dataset.lon) +
+                        "&date=" + encodeURIComponent(date) +
+                        "&webcam=" + encodeURIComponent(body.dataset.webcam);
+                    window.open(url, "_blank", "width=900,height=760,scrollbars=yes,resizable=yes");
+                });
+            }
+        }
+
+        function buildBtns(body) {
+            return '<div class="btns">' +
+                '<button class="btn btn-refresh" type="button">🔄 날씨 새로고침</button>' +
+                '<a class="btn btn-webcam" href="' + body.dataset.webcam + '" target="_blank" rel="noopener">📹 실시간 웹캠/슬로프</a>' +
+            '</div>';
+        }
+
+        function attachRefresh(body) {
+            var btn = body.querySelector(".btn-refresh");
+            if (btn) {
+                btn.onclick = function () {
+                    loadWeather({
+                        name: body.dataset.name,
+                        lat: body.dataset.lat,
+                        lon: body.dataset.lon,
+                        webcam: body.dataset.webcam
+                    }, body);
+                };
+            }
+        }
+
+        function loadWeather(resort, body) {
+            body.innerHTML = '<div class="loading">날씨 불러오는 중...</div>';
+            var days = daysUntilSunday();
+
+            fetch(buildApiUrl(resort.lat, resort.lon, days))
+                .then(function (res) {
+                    if (!res.ok) throw new Error("HTTP " + res.status);
+                    return res.json();
+                })
+                .then(function (data) { renderWeather(body, data); })
+                .catch(function (err) {
+                    body.innerHTML =
+                        '<div class="error">날씨를 불러오지 못했습니다. ' + err.message + '</div>' +
+                        buildBtns(body);
+                    attachRefresh(body);
+                });
+        }
+
+        function buildCards() {
+            var container = document.getElementById("cards");
+            var days = daysUntilSunday();
+            var rangeText = (days === 1) ? "오늘(일요일)" : ("오늘 ~ 이번 주 일요일 (" + days + "일)");
+
+            RESORTS.forEach(function (resort) {
+                var card = document.createElement("div");
+                card.className = "card";
+
+                var header = document.createElement("div");
+                header.className = "card-header";
+                header.innerHTML = '<span>' + resort.name + '</span><span class="range">' + rangeText + '</span>';
+
+                var body = document.createElement("div");
+                body.className = "card-body";
+                body.dataset.name = resort.name;
+                body.dataset.lat = resort.lat;
+                body.dataset.lon = resort.lon;
+                body.dataset.webcam = resort.webcam;
+
+                card.appendChild(header);
+                card.appendChild(body);
+                container.appendChild(card);
+
+                loadWeather(resort, body);
+            });
+        }
+
+        buildCards();
+    </script>
 </body>
 
 </html>
