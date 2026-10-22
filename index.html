@@ -1,53 +1,55 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mr.Music · 나의 프로젝트 허브</title>
 <style>
-  html,
-  body {
-    margin: 0;
-    min-height: 100vh;
-  }
-
-  body {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 1rem;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    font-size: clamp(1.1rem, 2.5vw, 1.6rem);
-    line-height: 1.4;
-  }
-
-  .wrapper {
-    width: min(100%, 90vw);
-  }
-
-  h1 {
-    margin: 0 0 1.5rem;
-    font-size: clamp(2rem, 4vw, 3rem);
-  }
-
-  ul {
-    list-style: none;
-    padding: 0;
-    margin: 0 auto;
-  }
-
-  li {
-    margin: 0.85rem 0;
-    white-space: nowrap;
-  }
-
-  a {
-    color: #1a1a1a;
-    text-decoration: none;
-    font-size: clamp(1.2rem, 2.8vw, 1.9rem);
-  }
-</style>
-<div class="wrapper">
-  <h1>나의 프로젝트 목록</h1>
-  <ul>
-    <li><a href="./ETF_Stock_P/index.html">ETF Stock 프로젝트</a></li>
-    <li><a href="./SnowPark_P/index.html">SnowPark 프로젝트</a></li>
-    <li><a href="./AirTicket_P/index.html">항공권 검색 프로젝트</a></li>
-    <li><a href="./kiwoom/index.html">키움증권 자동 매매</a></li>
-  </ul>
-</div>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI','Malgun Gothic',sans-serif;color:#e2e8f0;min-height:100vh;
+    background:radial-gradient(60vw 60vh at 15% 5%,rgba(99,102,241,.55),transparent 60%),
+    radial-gradient(50vw 50vh at 90% 25%,rgba(236,72,153,.45),transparent 55%),
+    linear-gradient(135deg,#0f172a,#1e1b4b)}
+  .nav{position:sticky;top:16px;margin:16px auto 0;max-width:1120px;display:flex;align-items:center;
+    gap:18px;padding:14px 20px;border-radius:18px;background:rgba(255,255,255,.07);
+    backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.12)}
+  .logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:1.3rem}
+  .logo .dot{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;
+    background:linear-gradient(135deg,#6366f1,#a855f7)}
+  .links{margin-left:auto;display:flex;gap:22px;align-items:center;flex-wrap:wrap}
+  .nav a{color:#c7d2fe;text-decoration:none;font-size:.95rem;transition:.2s}.nav a:hover{color:#fff}
+  .cta{padding:8px 16px;border-radius:14px;color:#fff;background:linear-gradient(135deg,#6366f1,#a855f7)}
+  .hero{max-width:1120px;margin:48px auto 10px;padding:0 20px;text-align:center}
+  .hero h1{font-size:clamp(2rem,4vw,3rem);font-weight:800}
+  .hero p{color:#a5b4fc;margin-top:10px}
+  .grid{max-width:1120px;margin:34px auto;padding:0 20px;display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px}
+  .card{padding:24px;border-radius:20px;text-decoration:none;color:inherit;
+    background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);
+    backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);transition:.25s;display:block}
+  .card:hover{transform:translateY(-6px);border-color:rgba(168,85,247,.6);box-shadow:0 20px 40px rgba(0,0,0,.35)}
+  .ic{width:52px;height:52px;border-radius:14px;display:grid;place-items:center;font-size:26px;
+    background:rgba(99,102,241,.25);margin-bottom:16px}
+  .card h3{font-size:1.25rem}.card .desc{color:#cbd5e1;font-size:.9rem;margin-top:6px}
+  .go{margin-top:16px;display:inline-block;font-weight:700;color:#c4b5fd}
+  .foot{text-align:center;color:#64748b;font-size:.8rem;padding:20px}
+</style></head>
+<body>
+  <nav class="nav"><span class="logo"><span class="dot">♪</span> Mr.Music</span>
+    <span class="links">
+      <a href="./ETF_Stock_P/index.html">ETF</a>
+      <a href="./SnowPark_P/index.html">SnowPark</a>
+      <a href="./AirTicket_P/index.html">항공권</a>
+      <a href="./kiwoom/index.html">키움</a>
+      <a class="cta" href="./MyAI/index.html">MyAI</a>
+    </span></nav>
+  <header class="hero"><h1>나의 프로젝트 허브</h1><p>Mr.Music · 투자 · 날씨 · 여행 · 자동매매를 한 곳에서</p></header>
+  <main class="grid">
+    <a class="card" href="./ETF_Stock_P/index.html"><div class="ic">📈</div><h3>ETF Stock</h3><div class="desc">보유 현황·수익률 대시보드</div><span class="go">열기 →</span></a>
+    <a class="card" href="./SnowPark_P/index.html"><div class="ic">❄️</div><h3>SnowPark</h3><div class="desc">스키장 날씨·웹캠</div><span class="go">열기 →</span></a>
+    <a class="card" href="./AirTicket_P/index.html"><div class="ic">✈️</div><h3>항공권 검색</h3><div class="desc">최저가 항공권 비교</div><span class="go">열기 →</span></a>
+    <a class="card" href="./kiwoom/index.html"><div class="ic">🤖</div><h3>키움 자동매매</h3><div class="desc">자동 매수 전략 실행·모니터링</div><span class="go">열기 →</span></a>
+    <a class="card" href="./MyAI/index.html"><div class="ic">🎧</div><h3>MyAI</h3><div class="desc">AI 질문 비교 어시스턴트</div><span class="go">열기 →</span></a>
+  </main>
+  <div class="foot">© Mr.Music · Aurora Glass Theme</div>
+</body></html>

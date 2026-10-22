@@ -7,57 +7,75 @@
     <title>스키장 날씨/웹캠</title>
     <style>
         :root {
-            --navy: #1a3a5a;
-            --blue: #3498db;
-            --green: #2ecc71;
-            --sat: #2d6cdf;
-            --sun: #e74c3c;
-            --weekend-bg: #fff7f3;
-            --weekend-border: #f3c9bb;
+            --indigo: #6366f1;
+            --purple: #a855f7;
+            --blue: #93c5fd;
+            --green: #10b981;
+            --sat: #60a5fa;
+            --sun: #f87171;
+            --weekend-bg: rgba(236,72,153,.12);
+            --weekend-border: rgba(236,72,153,.4);
         }
 
-        body { font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; background-color: #eef2f3; margin: 0; padding: 20px; color: #333; }
-        h1 { text-align: center; color: var(--navy); margin-bottom: 6px; }
-        .subtitle { text-align: center; color: #7f8c8d; margin: 0 0 24px; font-size: 0.9em; }
+        * { box-sizing: border-box; }
+        body { font-family: 'Segoe UI', 'Malgun Gothic', sans-serif; margin: 0; padding: 20px; color: #e2e8f0; min-height: 100vh;
+            background: radial-gradient(60vw 60vh at 15% 5%, rgba(99,102,241,.55), transparent 60%),
+                radial-gradient(50vw 50vh at 90% 25%, rgba(236,72,153,.45), transparent 55%),
+                linear-gradient(135deg, #0f172a, #1e1b4b);
+            background-attachment: fixed; }
+        h1 { text-align: center; color: #fff; margin-bottom: 6px; font-weight: 800; }
+        .subtitle { text-align: center; color: #a5b4fc; margin: 0 0 24px; font-size: 0.9em; }
         .container { display: flex; flex-direction: column; gap: 20px; max-width: 1000px; margin: 0 auto; }
-        .card { background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 10px 20px rgba(0,0,0,0.05); border: 1px solid #ddd; }
-        .card-header { background: var(--navy); color: white; padding: 15px 20px; font-size: 1.15em; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
+        .card { background: rgba(255,255,255,.08); border-radius: 18px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,.14);
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+        .card-header { background: linear-gradient(135deg, rgba(99,102,241,.55), rgba(168,85,247,.45)); color: white; padding: 15px 20px; font-size: 1.15em; font-weight: bold; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,.12); }
         .card-header .range { font-size: 0.82em; font-weight: 500; opacity: 0.95; }
         .card-body { padding: 18px 20px; }
 
         /* 일별 타임라인 */
         .timeline { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 6px; }
-        .day { flex: 1 1 0; min-width: 104px; background: #f8f9fa; border: 1px solid #e5e9ee; border-radius: 10px; padding: 12px 8px; text-align: center; cursor: pointer; transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s; position: relative; }
-        .day:hover { transform: translateY(-3px); box-shadow: 0 6px 14px rgba(0,0,0,0.1); border-color: var(--blue); }
-        .day .detail-hint { font-size: 0.66em; color: var(--blue); margin-top: 6px; opacity: 0; transition: opacity 0.15s; }
+        .day { flex: 1 1 0; min-width: 104px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12); border-radius: 12px; padding: 12px 8px; text-align: center; cursor: pointer; transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s; position: relative; }
+        .day:hover { transform: translateY(-3px); box-shadow: 0 10px 22px rgba(0,0,0,0.35); border-color: rgba(168,85,247,.7); }
+        .day .detail-hint { font-size: 0.66em; color: #c4b5fd; margin-top: 6px; opacity: 0; transition: opacity 0.15s; }
         .day:hover .detail-hint { opacity: 1; }
         .day.weekend { background: var(--weekend-bg); border-color: var(--weekend-border); }
-        .day.today { outline: 2px solid var(--navy); outline-offset: -2px; }
-        .day .dow { font-size: 0.82em; font-weight: 700; color: #555; }
+        .day.today { outline: 2px solid #c4b5fd; outline-offset: -2px; }
+        .day .dow { font-size: 0.82em; font-weight: 700; color: #cbd5e1; }
         .day.weekend.sat .dow { color: var(--sat); }
         .day.weekend.sun .dow { color: var(--sun); }
-        .day .date { font-size: 0.72em; color: #95a5a6; margin-top: 1px; }
+        .day .date { font-size: 0.72em; color: #94a3b8; margin-top: 1px; }
         .day .ic { font-size: 1.9em; margin: 7px 0 4px; }
-        .day .desc { font-size: 0.72em; color: #7f8c8d; min-height: 2.2em; line-height: 1.1; }
-        .day .temp { font-weight: 800; color: var(--navy); font-size: 0.98em; margin-top: 5px; }
-        .day .temp .min { color: #7f8c8d; font-weight: 600; }
-        .day .meta { font-size: 0.7em; color: #8a94a0; margin-top: 5px; line-height: 1.35; }
+        .day .desc { font-size: 0.72em; color: #94a3b8; min-height: 2.2em; line-height: 1.1; }
+        .day .temp { font-weight: 800; color: #fff; font-size: 0.98em; margin-top: 5px; }
+        .day .temp .min { color: #94a3b8; font-weight: 600; }
+        .day .meta { font-size: 0.7em; color: #94a3b8; margin-top: 5px; line-height: 1.35; }
         .day .snow { color: var(--blue); font-weight: 700; }
-        .badge-weekend { display: inline-block; font-size: 0.64em; font-weight: 700; color: #fff; background: var(--sun); border-radius: 6px; padding: 1px 5px; margin-top: 4px; }
+        .badge-weekend { display: inline-block; font-size: 0.64em; font-weight: 700; color: #fff; background: #ec4899; border-radius: 6px; padding: 1px 5px; margin-top: 4px; }
 
         .btns { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
-        .btn { flex: 1; min-width: 160px; text-decoration: none; padding: 12px; border-radius: 8px; font-weight: bold; transition: 0.2s; text-align: center; border: none; cursor: pointer; font-size: 1em; }
-        .btn-refresh { background: var(--blue); color: white; }
+        .btn { flex: 1; min-width: 160px; text-decoration: none; padding: 12px; border-radius: 12px; font-weight: bold; transition: 0.2s; text-align: center; border: none; cursor: pointer; font-size: 1em; }
+        .btn-refresh { background: linear-gradient(135deg, var(--indigo), var(--purple)); color: white; }
         .btn-webcam { background: var(--green); color: white; }
-        .btn:hover { opacity: 0.88; transform: translateY(-2px); }
+        .btn:hover { opacity: 0.88; transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0,0,0,.3); }
 
-        .loading { color: #95a5a6; font-size: 0.9em; padding: 20px 0; text-align: center; }
-        .error { color: #e74c3c; font-size: 0.85em; padding: 14px 0; text-align: center; }
-        .footer { text-align: center; margin-top: 40px; color: #7f8c8d; font-size: 0.9em; }
+        .loading { color: #94a3b8; font-size: 0.9em; padding: 20px 0; text-align: center; }
+        .error { color: #f87171; font-size: 0.85em; padding: 14px 0; text-align: center; }
+        .footer { text-align: center; margin-top: 40px; color: #64748b; font-size: 0.9em; }
     </style>
 </head>
 
 <body>
+    <nav style="position:sticky;top:0;z-index:9999;display:flex;align-items:center;gap:16px;padding:12px 22px;background:linear-gradient(135deg,#0f172a,#1e1b4b);border-bottom:1px solid rgba(255,255,255,.12);font-family:'Segoe UI','Malgun Gothic',sans-serif;margin:-20px -20px 16px">
+      <span style="display:flex;align-items:center;gap:9px;font-weight:800;font-size:1.15rem;color:#fff"><span style="width:28px;height:28px;border-radius:8px;display:grid;place-items:center;background:linear-gradient(135deg,#6366f1,#a855f7)">♪</span> Mr.Music</span>
+      <span style="margin-left:auto;display:flex;gap:16px;align-items:center;flex-wrap:wrap">
+        <a href="../ETF_Stock_P/index.html" style="color:#c7d2fe;text-decoration:none;font-size:.9rem">ETF</a>
+        <a href="../SnowPark_P/index.html" style="color:#c7d2fe;text-decoration:none;font-size:.9rem">SnowPark</a>
+        <a href="../AirTicket_P/index.html" style="color:#c7d2fe;text-decoration:none;font-size:.9rem">항공권</a>
+        <a href="../kiwoom/index.html" style="color:#c7d2fe;text-decoration:none;font-size:.9rem">키움</a>
+        <a href="../MyAI/index.html" style="color:#c7d2fe;text-decoration:none;font-size:.9rem">MyAI</a>
+        <a href="../index.html" style="color:#c7d2fe;text-decoration:none;font-size:.9rem">← 허브</a>
+      </span>
+    </nav>
     <h1>❄️ 스키장 날씨 / 웹캠</h1>
     <p class="subtitle">오늘부터 이번 주 일요일까지 날짜별 예보 (주말 강조) · 날짜를 클릭하면 상세 날씨를 새 창으로 봅니다</p>
 

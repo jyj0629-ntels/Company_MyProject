@@ -6,19 +6,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>항공권 통합 조회 도구</title>
     <style>
+        * { box-sizing: border-box; }
+
         body {
-            font-family: sans-serif;
-            padding: 20px;
+            font-family: 'Segoe UI', 'Malgun Gothic', sans-serif;
+            margin: 0;
+            padding: 0 20px 20px;
             line-height: 1.6;
+            color: #e2e8f0;
+            min-height: 100vh;
+            background: radial-gradient(60vw 60vh at 15% 5%, rgba(99,102,241,.55), transparent 60%),
+                radial-gradient(50vw 50vh at 90% 25%, rgba(236,72,153,.45), transparent 55%),
+                linear-gradient(135deg, #0f172a, #1e1b4b);
+            background-attachment: fixed;
         }
 
         .container {
             max-width: 650px;
-            margin: auto;
-            border: 1px solid #ccc;
-            padding: 20px;
-            border-radius: 10px;
+            margin: 24px auto;
+            border: 1px solid rgba(255,255,255,.14);
+            padding: 24px;
+            border-radius: 18px;
+            background: rgba(255,255,255,.08);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: 0 10px 25px rgba(0,0,0,.3);
         }
+
+        .container h2 { color: #fff; }
 
         .input-group {
             margin-bottom: 15px;
@@ -47,41 +62,54 @@
             display: block;
             margin-bottom: 5px;
             font-weight: bold;
+            color: #c7d2fe;
         }
 
         input {
             width: 100%;
             padding: 8px;
             box-sizing: border-box;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+            border: 1px solid rgba(255,255,255,.2);
+            border-radius: 8px;
+            background: rgba(15,23,42,.6);
+            color: #e2e8f0;
         }
+
+        input::placeholder { color: #64748b; }
+        input:focus { outline: none; border-color: rgba(168,85,247,.7); }
+        input[type="date"] { color-scheme: dark; }
+        input[type="checkbox"] { accent-color: #6366f1; }
 
         button {
             width: 100%;
             padding: 12px;
-            background-color: #007bff;
+            background: linear-gradient(135deg, #6366f1, #a855f7);
             color: white;
             border: none;
-            border-radius: 4px;
+            border-radius: 12px;
             cursor: pointer;
             font-size: 16px;
+            font-weight: 700;
+            transition: .2s;
         }
 
         button:hover {
-            background-color: #0056b3;
+            opacity: .88;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,.3);
         }
 
         .airport-dropdown {
             position: relative;
             max-height: 240px;
             overflow-y: auto;
-            border: 1px solid #ddd;
+            border: 1px solid rgba(255,255,255,.2);
             border-top: none;
-            background-color: #fff;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+            background-color: #1e1b4b;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.45);
             z-index: 100;
             display: none;
+            border-radius: 0 0 8px 8px;
         }
 
         .airport-dropdown.visible {
@@ -90,7 +118,7 @@
 
         .airport-item {
             padding: 10px;
-            border-bottom: 1px solid #f1f1f1;
+            border-bottom: 1px solid rgba(255,255,255,.08);
             cursor: pointer;
         }
 
@@ -99,36 +127,38 @@
         }
 
         .airport-item:hover {
-            background-color: #f0f8ff;
+            background-color: rgba(99,102,241,.25);
         }
 
         .airport-code {
             font-weight: 700;
             margin-right: 8px;
+            color: #c4b5fd;
         }
 
         .airport-details {
-            color: #555;
+            color: #94a3b8;
             font-size: 0.95em;
         }
 
         .info {
             font-size: 0.85em;
-            color: #666;
+            color: #94a3b8;
             margin-top: 10px;
         }
 
         .site-options {
             margin-bottom: 15px;
             padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            background-color: #fafafa;
+            border: 1px solid rgba(255,255,255,.14);
+            border-radius: 10px;
+            background-color: rgba(255,255,255,.05);
         }
 
         .site-options-title {
             font-weight: bold;
             margin-bottom: 8px;
+            color: #c7d2fe;
         }
 
         .site-options-group {
@@ -143,6 +173,7 @@
             gap: 6px;
             font-weight: normal;
             margin-bottom: 0;
+            color: #e2e8f0;
         }
 
         .site-options-group input[type="checkbox"] {
@@ -153,18 +184,29 @@
 </head>
 
 <body>
+    <nav style="position:sticky;top:0;z-index:9999;display:flex;align-items:center;gap:16px;padding:12px 22px;background:linear-gradient(135deg,#0f172a,#1e1b4b);border-bottom:1px solid rgba(255,255,255,.12);font-family:'Segoe UI','Malgun Gothic',sans-serif">
+      <span style="display:flex;align-items:center;gap:9px;font-weight:800;font-size:1.15rem;color:#fff"><span style="width:28px;height:28px;border-radius:8px;display:grid;place-items:center;background:linear-gradient(135deg,#6366f1,#a855f7)">♪</span> Mr.Music</span>
+      <span style="margin-left:auto;display:flex;gap:16px;align-items:center;flex-wrap:wrap">
+        <a href="../ETF_Stock_P/index.html" style="color:#c7d2fe;text-decoration:none;font-size:.9rem">ETF</a>
+        <a href="../SnowPark_P/index.html" style="color:#c7d2fe;text-decoration:none;font-size:.9rem">SnowPark</a>
+        <a href="../AirTicket_P/index.html" style="color:#c7d2fe;text-decoration:none;font-size:.9rem">항공권</a>
+        <a href="../kiwoom/index.html" style="color:#c7d2fe;text-decoration:none;font-size:.9rem">키움</a>
+        <a href="../MyAI/index.html" style="color:#c7d2fe;text-decoration:none;font-size:.9rem">MyAI</a>
+        <a href="../index.html" style="color:#c7d2fe;text-decoration:none;font-size:.9rem">← 허브</a>
+      </span>
+    </nav>
 
     <div class="container">
         <H3><u>
                 <center> <b>
-                        <font color="red" align="center">반드시 Chrome을 '시크릿 창'으로 띄우고 하기 값 진행.</font>
+                        <font color="#f87171" align="center">반드시 Chrome을 '시크릿 창'으로 띄우고 하기 값 진행.</font>
                     </b> </center>
             </u></H3>
         <h2>✈️ 항공권 통합 조회</h2>
 
         <div class="input-group">
             <label>출발지 (IATA 코드 또는 공항명 검색) <br>
-                <font size='2' color='red'> >> 주) 청주공항 : 다낭, 나트랑, 방콕, 클라크, 마닐라 항공편만 존재 </font>
+                <font size='2' color='#f87171'> >> 주) 청주공항 : 다낭, 나트랑, 방콕, 클라크, 마닐라 항공편만 존재 </font>
             </label>
             <input type="text" id="origin" placeholder="공항명, 도시, IATA 코드로 검색" autocomplete="off" value="SEL">
             <div class="airport-dropdown" id="originDropdown"></div>
@@ -422,13 +464,13 @@
                 details.className = 'airport-details';
                 if (airport.koName) {
                     const koInfo = document.createElement('span');
-                    koInfo.style.color = '#333';
+                    koInfo.style.color = '#e2e8f0';
                     koInfo.textContent = airport.koName + (airport.koCity ? ` (${airport.koCity})` : '')
                         + (airport.koCountry ? ` · ${airport.koCountry}` : '');
                     details.append(koInfo, document.createElement('br'));
                 }
                 const enInfo = document.createElement('span');
-                enInfo.style.color = '#666';
+                enInfo.style.color = '#94a3b8';
                 enInfo.style.fontSize = '0.9em';
                 enInfo.textContent = `${airport.city}, ${airport.country} — ${airport.name}`;
                 details.appendChild(enInfo);

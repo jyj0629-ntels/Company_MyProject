@@ -3,10 +3,38 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Multi AI Compare</title>
+    <title>Mr.Music · Multi AI Compare</title>
     <link rel="stylesheet" href="styles.css" />
+    <style>
+      .mm-nav{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:16px;
+        padding:12px 22px;background:linear-gradient(135deg,#0f172a,#1e1b4b);
+        border-bottom:1px solid rgba(255,255,255,.12);font-family:'Segoe UI','Malgun Gothic',sans-serif}
+      .mm-logo{display:flex;align-items:center;gap:9px;font-weight:800;font-size:1.15rem;color:#fff}
+      .mm-logo .dot{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;
+        background:linear-gradient(135deg,#6366f1,#a855f7)}
+      .mm-links{margin-left:auto;display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+      .mm-links a{color:#c7d2fe;text-decoration:none;font-size:.9rem}
+      .mm-links a:hover{color:#fff}
+      /* Aurora Glass 테마 오버라이드 (허브 index.html 공통 테마) */
+      :root{--primary:#6366f1;--primary-dark:#7c3aed}
+      html,body{background:radial-gradient(60vw 60vh at 15% 5%,rgba(99,102,241,.55),transparent 60%),
+        radial-gradient(50vw 50vh at 90% 25%,rgba(236,72,153,.45),transparent 55%),
+        linear-gradient(135deg,#0f172a,#1e1b4b);background-attachment:fixed}
+      .sidebar{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);
+        backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+      .primary-btn{background:linear-gradient(135deg,#6366f1,#a855f7)}
+    </style>
   </head>
   <body>
+    <nav class="mm-nav"><span class="mm-logo"><span class="dot">♪</span> Mr.Music</span>
+      <span class="mm-links">
+        <a href="../ETF_Stock_P/index.html">ETF</a>
+        <a href="../SnowPark_P/index.html">SnowPark</a>
+        <a href="../AirTicket_P/index.html">항공권</a>
+        <a href="../kiwoom/index.html">키움</a>
+        <a href="../MyAI/index.html">MyAI</a>
+        <a href="../index.html">← 허브</a>
+      </span></nav>
     <div class="app-shell">
       <aside class="sidebar">
         <div class="panel-header">

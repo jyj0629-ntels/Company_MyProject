@@ -7,41 +7,60 @@
   <title>ETF 주가 현황</title>
 
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: Arial, "맑은 고딕", sans-serif;
+      font-family: 'Segoe UI', 'Malgun Gothic', Arial, sans-serif;
       margin: 20px;
-      background: #f7f8fa;
-      color: #222;
+      color: #e2e8f0;
+      min-height: 100vh;
+      background: radial-gradient(60vw 60vh at 15% 5%, rgba(99, 102, 241, .55), transparent 60%),
+        radial-gradient(50vw 50vh at 90% 25%, rgba(236, 72, 153, .45), transparent 55%),
+        linear-gradient(135deg, #0f172a, #1e1b4b);
+      background-attachment: fixed;
     }
 
     #stickyHeader {
       position: sticky;
       top: 0;
       z-index: 999;
-      background: #f7f8fa;
+      background: rgba(15, 23, 42, .85);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
       padding-top: 10px;
       padding-bottom: 10px;
       margin: -20px -20px 0 -20px;
       padding-left: 20px;
       padding-right: 20px;
-      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.04);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+      border-bottom: 1px solid rgba(255, 255, 255, .1);
     }
 
     h2 {
       margin: 0 0 12px 0;
+      color: #fff;
+      font-weight: 800;
     }
 
     .toolbar {
-      background: #fff;
-      border: 1px solid #ddd;
-      border-radius: 10px;
+      background: rgba(255, 255, 255, .08);
+      border: 1px solid rgba(255, 255, 255, .14);
+      border-radius: 14px;
       padding: 12px;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
     }
 
     select {
       padding: 7px;
       font-size: 14px;
       margin-right: 12px;
+      background: rgba(15, 23, 42, .8);
+      color: #e2e8f0;
+      border: 1px solid rgba(255, 255, 255, .2);
+      border-radius: 8px;
     }
 
     button {
@@ -49,27 +68,36 @@
       font-size: 14px;
       cursor: pointer;
       margin-right: 8px;
+      background: rgba(99, 102, 241, .3);
+      color: #e2e8f0;
+      border: 1px solid rgba(255, 255, 255, .2);
+      border-radius: 8px;
+      transition: background 0.2s ease, transform 0.2s ease;
+    }
+
+    button:hover {
+      background: rgba(99, 102, 241, .5);
     }
 
     .csvBtn {
       border-radius: 999px;
-      border: 1px solid #1d72b8;
-      background: #1d72b8;
+      border: none;
+      background: linear-gradient(135deg, #6366f1, #a855f7);
       color: #fff;
       padding: 5px 12px;
       font-size: 13px;
       line-height: 1.4;
-      box-shadow: 0 3px 8px rgba(29, 114, 184, 0.16);
-      transition: background 0.2s ease, transform 0.2s ease;
+      box-shadow: 0 3px 8px rgba(99, 102, 241, 0.3);
+      transition: opacity 0.2s ease, transform 0.2s ease;
     }
 
     .csvBtn:hover {
-      background: #145a97;
+      opacity: .85;
       transform: translateY(-1px);
     }
 
     .hint {
-      color: #666;
+      color: #94a3b8;
       font-size: 12px;
       margin-top: 8px;
       line-height: 1.5;
@@ -78,16 +106,18 @@
     .status {
       margin: 10px 0 12px 0;
       font-size: 13px;
-      color: #333;
+      color: #cbd5e1;
       min-height: 18px;
     }
 
     .tableWrap {
-      background: #fff;
-      border: 1px solid #ddd;
-      border-radius: 12px;
+      background: rgba(255, 255, 255, .08);
+      border: 1px solid rgba(255, 255, 255, .14);
+      border-radius: 16px;
       padding: 12px;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       overflow-x: auto;
       margin-bottom: 16px;
     }
@@ -104,6 +134,7 @@
       font-size: 15px;
       font-weight: bold;
       margin: 0;
+      color: #fff;
     }
 
     .titleActions {
@@ -121,28 +152,29 @@
     }
 
     thead th {
-      background: #f3f6fb;
-      border: 1px solid #dfe6ef;
+      background: #312e81;
+      border: 1px solid rgba(255, 255, 255, .18);
       padding: 8px;
       text-align: center;
       white-space: nowrap;
       position: sticky;
       top: 0;
       z-index: 2;
+      color: #e2e8f0;
     }
 
     tbody tr.repeatHeaderRow th {
-      background: #eaf0f9;
-      border: 1px solid #dfe6ef;
+      background: rgba(99, 102, 241, .25);
+      border: 1px solid rgba(255, 255, 255, .18);
       padding: 8px;
       text-align: center;
       white-space: nowrap;
       font-weight: 700;
-      color: #333;
+      color: #e2e8f0;
     }
 
     tbody td {
-      border: 1px solid #e5e5e5;
+      border: 1px solid rgba(255, 255, 255, .12);
       padding: 7px 8px;
       white-space: nowrap;
       vertical-align: middle;
@@ -159,8 +191,8 @@
     td.tdCategory {
       text-align: center;
       font-weight: 700;
-      color: #444;
-      background: #fafafa;
+      color: #cbd5e1;
+      background: rgba(255, 255, 255, .05);
       vertical-align: middle;
     }
 
@@ -170,7 +202,7 @@
     }
 
     .catNavLink {
-      color: #0066cc;
+      color: #c4b5fd;
       cursor: pointer;
       text-decoration: none;
       font-weight: 700;
@@ -182,50 +214,53 @@
     }
 
     .typeSafe {
-      color: #0054d6;
+      color: #93c5fd;
       font-style: italic;
       font-weight: 600;
     }
 
     .typeAttack {
-      color: #b8860b;
+      color: #fbbf24;
       font-weight: 800;
     }
 
     .typeSelect {
       padding: 5px 6px;
       font-size: 13px;
-      border: 1px solid #ccc;
+      border: 1px solid rgba(255, 255, 255, .2);
       border-radius: 6px;
-      background: #fff;
+      background: rgba(15, 23, 42, .8);
+      color: #e2e8f0;
       margin-left: 6px;
     }
 
     .dateInput {
       padding: 5px 6px;
       font-size: 13px;
-      border: 1px solid #ccc;
+      border: 1px solid rgba(255, 255, 255, .2);
       border-radius: 6px;
-      background: #fff;
+      background: rgba(15, 23, 42, .8);
+      color: #e2e8f0;
+      color-scheme: dark;
     }
 
     .categoryTotalRow td {
-      background: #f7fbff;
-      border-top: 2px solid #b7cbe6;
+      background: rgba(99, 102, 241, .18);
+      border-top: 2px solid #818cf8;
       font-weight: 700;
       font-size: 14px;
     }
 
     .grandTotalRow td {
-      background: #fffaf0;
-      border-top: 2px solid #d9b86c;
+      background: rgba(251, 191, 36, .12);
+      border-top: 2px solid #fbbf24;
       font-weight: 700;
       font-size: 14px;
     }
 
     .totalLabel {
       text-align: right;
-      color: #333;
+      color: #e2e8f0;
     }
 
     .totalBlank {
@@ -235,53 +270,58 @@
     .buyInput {
       width: 90px;
       padding: 6px;
-      border: 1px solid #ccc;
+      border: 1px solid rgba(255, 255, 255, .2);
       border-radius: 6px;
       font-size: 13px;
       text-align: right;
+      background: rgba(15, 23, 42, .8);
+      color: #e2e8f0;
     }
 
     .qtyInput {
       width: 65px;
       padding: 6px;
-      border: 1px solid #ccc;
+      border: 1px solid rgba(255, 255, 255, .2);
       border-radius: 6px;
       font-size: 13px;
       text-align: right;
+      background: rgba(15, 23, 42, .8);
+      color: #e2e8f0;
     }
 
     .saveBtn {
       padding: 6px 10px;
       font-size: 12px;
-      border: 1px solid #bbb;
+      border: 1px solid rgba(255, 255, 255, .25);
       border-radius: 6px;
-      background: #fff;
+      background: rgba(255, 255, 255, .1);
+      color: #e2e8f0;
       cursor: pointer;
     }
 
     .saveBtn:hover {
-      background: #f2f2f2;
+      background: rgba(255, 255, 255, .2);
     }
 
     .saveStatus {
       display: inline-block;
       margin-left: 6px;
       font-size: 12px;
-      color: #0b66c3;
+      color: #93c5fd;
     }
 
     .profitPlus {
-      color: #d60000;
+      color: #f87171;
       font-weight: 700;
     }
 
     .profitMinus {
-      color: #0054d6;
+      color: #60a5fa;
       font-weight: 700;
     }
 
     .profitFlat {
-      color: #555;
+      color: #94a3b8;
       font-weight: 700;
     }
 
@@ -294,30 +334,30 @@
     .sortArrow {
       margin-left: 6px;
       font-size: 0.85em;
-      color: #555;
+      color: #a5b4fc;
     }
 
     .compareUp {
-      color: #d60000;
+      color: #f87171;
       font-weight: 700;
     }
 
     .compareDown {
-      color: #0054d6;
+      color: #60a5fa;
       font-weight: 700;
     }
 
     .compareFlat {
-      color: #555;
+      color: #94a3b8;
       font-weight: 700;
     }
 
     .loading {
-      color: #777;
+      color: #94a3b8;
     }
 
     .error {
-      color: #c00000;
+      color: #f87171;
       font-weight: 700;
     }
 
@@ -329,7 +369,7 @@
     }
 
     .nameScrollLink {
-      color: #0066cc;
+      color: #c4b5fd;
       cursor: pointer;
       text-decoration: none;
       font-weight: 700;
@@ -342,11 +382,13 @@
 
     #cardsWrap {
       display: none;
-      background: #fff;
-      border: 1px solid #ddd;
-      border-radius: 12px;
+      background: rgba(255, 255, 255, .08);
+      border: 1px solid rgba(255, 255, 255, .14);
+      border-radius: 16px;
       padding: 12px;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       margin-bottom: 16px;
     }
 
@@ -357,29 +399,30 @@
     }
 
     .card {
-      background: #fff;
-      border: 1px solid #ddd;
-      border-radius: 12px;
+      background: rgba(255, 255, 255, .08);
+      border: 1px solid rgba(255, 255, 255, .14);
+      border-radius: 14px;
       padding: 12px;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
       transition: all 0.15s ease;
     }
 
     .card:hover {
-      border-color: #0b66c3;
-      box-shadow: 0 4px 12px rgba(0, 102, 204, 0.18);
+      border-color: rgba(168, 85, 247, .6);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
       transform: translateY(-2px);
     }
 
     .cardFocus {
-      border-color: #d9a600 !important;
-      box-shadow: 0 0 0 3px rgba(217, 166, 0, 0.22), 0 4px 12px rgba(0, 102, 204, 0.18) !important;
+      border-color: #fbbf24 !important;
+      box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.25), 0 10px 25px rgba(0, 0, 0, 0.4) !important;
     }
 
     .cardTitle {
       font-weight: 800;
       font-size: 15px;
       margin-bottom: 6px;
+      color: #fff;
     }
 
     .cardMeta {
@@ -389,12 +432,12 @@
       gap: 10px;
       margin-bottom: 10px;
       font-size: 12px;
-      color: #666;
+      color: #94a3b8;
     }
 
     .detailLink {
       font-size: 12px;
-      color: #0066cc;
+      color: #c4b5fd;
       text-decoration: none;
       white-space: nowrap;
     }
@@ -405,9 +448,9 @@
 
     .chart {
       width: 100%;
-      border: 1px solid #eee;
+      border: 1px solid rgba(255, 255, 255, .2);
       border-radius: 8px;
-      background: #fafafa;
+      background: #f8fafc;
       display: block;
       cursor: pointer;
     }
@@ -422,6 +465,17 @@
 </head>
 
 <body>
+  <nav style="position:sticky;top:0;z-index:9999;display:flex;align-items:center;gap:16px;padding:12px 22px;background:linear-gradient(135deg,#0f172a,#1e1b4b);border-bottom:1px solid rgba(255,255,255,.12);font-family:'Segoe UI','Malgun Gothic',sans-serif">
+    <span style="display:flex;align-items:center;gap:9px;font-weight:800;font-size:1.15rem;color:#fff"><span style="width:28px;height:28px;border-radius:8px;display:grid;place-items:center;background:linear-gradient(135deg,#6366f1,#a855f7)">♪</span> Mr.Music</span>
+    <span style="margin-left:auto;display:flex;gap:16px;align-items:center;flex-wrap:wrap">
+      <a href="../ETF_Stock_P/index.html" style="color:#c7d2fe;text-decoration:none;font-size:.9rem">ETF</a>
+      <a href="../SnowPark_P/index.html" style="color:#c7d2fe;text-decoration:none;font-size:.9rem">SnowPark</a>
+      <a href="../AirTicket_P/index.html" style="color:#c7d2fe;text-decoration:none;font-size:.9rem">항공권</a>
+      <a href="../kiwoom/index.html" style="color:#c7d2fe;text-decoration:none;font-size:.9rem">키움</a>
+      <a href="../MyAI/index.html" style="color:#c7d2fe;text-decoration:none;font-size:.9rem">MyAI</a>
+      <a href="../index.html" style="color:#c7d2fe;text-decoration:none;font-size:.9rem">← 허브</a>
+    </span>
+  </nav>
   <div id="stickyHeader">
     <h2>ETF 주가 현황</h2>
 
@@ -465,7 +519,7 @@
   <div id="cardsWrap">
     <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:10px;">
       <div style="font-weight:800;">종목별 그래프</div>
-      <div style="font-size:12px; color:#666;">종목명을 클릭하면 해당 그래프로 이동합니다.</div>
+      <div style="font-size:12px; color:#94a3b8;">종목명을 클릭하면 해당 그래프로 이동합니다.</div>
     </div>
     <div id="cardsGrid" class="grid"></div>
   </div>
@@ -1808,13 +1862,13 @@
 
       if (buyValue !== "" && (isNaN(buyNum) || buyNum < 0 || buyNum > 100000)) {
         status.textContent = "매수가는 100,000 이하만";
-        status.style.color = "#c00000";
+        status.style.color = "#f87171";
         return;
       }
 
       if (qtyValue !== "" && (isNaN(qtyNum) || qtyNum < 0 || qtyNum > 9999)) {
         status.textContent = "주식수는 9,999 이하만";
-        status.style.color = "#c00000";
+        status.style.color = "#f87171";
         return;
       }
 
@@ -1833,7 +1887,7 @@
       updateTotalsRow();
 
       status.textContent = "저장 중...";
-      status.style.color = "#0b66c3";
+      status.style.color = "#93c5fd";
 
       (async function () {
         var res = await writeMyDataFileAlways();
