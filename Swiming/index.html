@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>자유수영 정보</title>
+    <style>
+        :root {
+            --indigo: #6366f1;
+            --purple: #a855f7;
+            --blue: #93c5fd;
+            --sat: #60a5fa;
+            --sun: #f87171;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Segoe UI', 'Malgun Gothic', sans-serif;
+            color: #e2e8f0;
+            min-height: 100vh;
+            padding: 20px;
+            background: radial-gradient(60vw 60vh at 15% 5%, rgba(99,102,241,.55), transparent 60%),
+                radial-gradient(50vw 50vh at 90% 25%, rgba(236,72,153,.45), transparent 55%),
+                linear-gradient(135deg, #0f172a, #1e1b4b);
+            background-attachment: fixed;
+        }
+
+        nav {
+            position: sticky; top: 0; z-index: 9999;
+            display: flex; align-items: center; gap: 16px;
+            padding: 12px 22px;
+            background: linear-gradient(135deg, #0f172a, #1e1b4b);
+            border-bottom: 1px solid rgba(255,255,255,.12);
+            margin: -20px -20px 16px;
+        }
+
+        nav .logo {
+            display: flex; align-items: center; gap: 9px;
+            font-weight: 800; font-size: 1.15rem; color: #fff;
+        }
+
+        nav .logo .dot {
+            width: 28px; height: 28px; border-radius: 8px;
+            display: grid; place-items: center;
+            background: linear-gradient(135deg, #6366f1, #a855f7);
+        }
+
+        nav .links {
+            margin-left: auto; display: flex; gap: 16px;
+            align-items: center; flex-wrap: wrap;
+        }
+
+        nav a { color: #c7d2fe; text-decoration: none; font-size: .9rem; transition: .2s; }
+        nav a:hover { color: #fff; }
+
+        h1 { text-align: center; color: #fff; margin-bottom: 6px; font-weight: 800; }
+        .subtitle { text-align: center; color: #a5b4fc; margin: 0 0 24px; font-size: 0.9em; }
+
+        .container { max-width: 1000px; margin: 0 auto; }
+
+        .card {
+            background: rgba(255,255,255,.08);
+            border-radius: 18px; overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,.14);
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+        }
+
+        table { width: 100%; border-collapse: collapse; }
+
+        thead th {
+            background: linear-gradient(135deg, rgba(99,102,241,.55), rgba(168,85,247,.45));
+            color: #fff; font-weight: 700; font-size: 0.95em;
+            padding: 14px 16px; text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,.12);
+            white-space: nowrap;
+        }
+
+        tbody td {
+            padding: 14px 16px;
+            border-bottom: 1px solid rgba(255,255,255,.08);
+            font-size: 0.9em; color: #e2e8f0; vertical-align: top;
+        }
+
+        tbody tr:last-child td { border-bottom: none; }
+        tbody tr:hover { background: rgba(255,255,255,.05); }
+
+        .region { font-weight: 700; color: #c4b5fd; white-space: nowrap; }
+        .place { font-weight: 600; color: #fff; }
+        .time { color: #93c5fd; line-height: 1.5; }
+        .tbd { color: #94a3b8; font-style: italic; }
+
+        .link-btn {
+            display: inline-block; text-decoration: none;
+            padding: 7px 14px; border-radius: 10px;
+            font-size: 0.85em; font-weight: 700;
+            color: #fff;
+            background: linear-gradient(135deg, var(--indigo), var(--purple));
+            transition: 0.2s; white-space: nowrap;
+        }
+
+        .link-btn:hover { opacity: 0.88; transform: translateY(-2px); box-shadow: 0 8px 18px rgba(0,0,0,.3); }
+
+        .footer { text-align: center; margin-top: 30px; color: #64748b; font-size: 0.85em; line-height: 1.6; }
+
+        @media (max-width: 640px) {
+            thead { display: none; }
+            table, tbody, tr, td { display: block; width: 100%; }
+            tbody tr { border-bottom: 1px solid rgba(255,255,255,.12); padding: 6px 0; }
+            tbody td { border: none; padding: 6px 16px; }
+            tbody td::before { content: attr(data-label); display: block; font-size: 0.72em; color: #a5b4fc; margin-bottom: 2px; }
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <span class="logo"><span class="dot">🏊</span> Mr.Music</span>
+        <span class="links">
+            <a href="../ETF_Stock_P/index.html">ETF</a>
+            <a href="../SnowPark_P/index.html">SnowPark</a>
+            <a href="../Swiming/index.html">자유수영</a>
+            <a href="../AirTicket_P/index.html">항공권</a>
+            <a href="../kiwoom/index.html">키움</a>
+            <a href="../MyAI/index.html">MyAI</a>
+            <a href="../index.html">← 허브</a>
+        </span>
+    </nav>
+
+    <h1>🏊 자유수영 정보</h1>
+    <p class="subtitle">지역별 자유수영 가능 시간 안내 · 자세한 일정은 각 시설 홈페이지에서 확인하세요</p>
+
+    <div class="container">
+        <div class="card">
+            <table>
+                <thead>
+                    <tr>
+                        <th>지역</th>
+                        <th>수영장명</th>
+                        <th>자유수영 가능 시간</th>
+                        <th>홈페이지</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td data-label="지역"><span class="region">목동</span></td>
+                        <td data-label="수영장명"><span class="place">목동청소년센터 (tel : 02-2642-1318)</span></td>
+                        <td data-label="자유수영 가능 시간"><span class="time">월~금 : 19:00 ~ 20:50</span></td>
+                        <td data-label="홈페이지"><a class="link-btn" href="https://www.wawa.or.kr/sub04/sub03.php" target="this" rel="noopener">바로가기 ▸</a></td>
+                    </tr>
+                    <tr>
+                        <td data-label="지역"><span class="region">목동</span></td>
+                        <td data-label="수영장명"><span class="place">미진스포츠센터 (tel : 02-2646-6096)</span></td>
+                        <td data-label="자유수영 가능 시간"><span class="time">화, 목 : 19:00 ~ 21:50<br>토 : 12:00 ~ 18:50</span></td>
+                        <td data-label="홈페이지"><a class="link-btn" href="https://suwimi.com/poolinfo/poolinfoDetail?pbid=130" target="this" rel="noopener">바로가기 ▸</a></td>
+                    </tr>
+                    <tr>
+                        <td data-label="지역"><span class="region">목동</span></td>
+                        <td data-label="수영장명"><span class="place">KBS 스포츠월드 (tel : 02-2600-8808)</span></td>
+                        <td data-label="자유수영 가능 시간"><span class="time">일 : 13:30 ~ 17:00</span></td>
+                        <td data-label="홈페이지"><a class="link-btn" href="https://kbssw.co.kr/sports/iteminfo/detail?clss_code=1001&fclt_code=SPWD" target="this" rel="noopener">바로가기 ▸</a></td>
+                    </tr>
+                    <tr>
+                        <td data-label="지역"><span class="region">웰리힐리,모나용평(용평)</span></td>
+                        <td data-label="수영장명"><span class="place">횡성국민체육센터 (tel : </span></td>
+                        <td data-label="자유수영 가능 시간"><span class="time tbd">월~금 : 13:00 ~ 20:00<br>토 : 08:00 ~ 12:00</span></td>
+                        <td data-label="홈페이지"><a class="link-btn" href="https://www.hsg.go.kr/www/contents.do?key=1356" target="this" rel="noopener">바로가기 ▸</a></td>
+                    </tr>
+                    <tr>
+                        <td data-label="지역"><span class="region">하이원(태백)</span></td>
+                        <td data-label="수영장명"><span class="place">태백국민체육센터 (Tel : </span></td>
+                        <td data-label="자유수영 가능 시간"><span class="time tbd">월~금 : 13:00 ~ 15:00, 18:30 ~ 21:30 <br>토 : 06:00 ~ 12:00, 13:00 ~ 17:30</span></td>
+                        <td data-label="홈페이지"><a class="link-btn" href="https://www.tfmc.or.kr/www/contents/WWW030504.do" target="this" rel="noopener">바로가기 ▸</a></td>
+                    </tr>
+                    <tr>
+                        <td data-label="지역"><span class="region">하이원(태백)</span></td>
+                        <td data-label="수영장명"><span class="place">정선국민체육센터 (Tel : 033-560-3440)</span></td>
+                        <td data-label="자유수영 가능 시간"><span class="time tbd">화~토 : 06:00 21:00<br>일 : 06:00 ~ 17:00</span></td>
+                        <td data-label="홈페이지"><a class="link-btn" href="https://jsimc.or.kr/layout/basic/page/page2/page04.html" target="this" rel="noopener">바로가기 ▸</a></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="footer">
+            <p>※ 자유수영 시간은 시설 사정에 따라 변경될 수 있으니, 방문 전 각 시설 홈페이지나 전화로 확인하시기 바랍니다.</p>
+            <p>© Mr.Music · Aurora Glass Theme</p>
+        </div>
+    </div>
+</body>
+
+</html>
