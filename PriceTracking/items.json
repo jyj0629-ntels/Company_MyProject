@@ -1,0 +1,8 @@
+{
+  "items": [
+    { "id": "sample1", "name": "깐멍게 500g", "memo": "거제 산지 직송 선호" },
+    { "id": "sample2", "name": "활전복 1kg", "memo": "중 사이즈 20미" },
+    { "id": "sample3", "name": "손질새우 1kg", "memo": "" },
+    { "id": "sample4", "name": "모둠조개 2kg", "memo": "" }
+  ]
+}

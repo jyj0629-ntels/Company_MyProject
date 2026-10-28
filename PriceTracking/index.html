@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>식재료 최저가 트래커</title>
+    <style>
+        :root {
+            --indigo: #6366f1;
+            --purple: #a855f7;
+            --green: #10b981;
+            --red: #f87171;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Segoe UI', 'Malgun Gothic', sans-serif;
+            color: #e2e8f0;
+            min-height: 100vh;
+            padding: 20px;
+            background: radial-gradient(60vw 60vh at 15% 5%, rgba(99,102,241,.55), transparent 60%),
+                radial-gradient(50vw 50vh at 90% 25%, rgba(236,72,153,.45), transparent 55%),
+                linear-gradient(135deg, #0f172a, #1e1b4b);
+            background-attachment: fixed;
+        }
+
+        nav {
+            position: sticky; top: 0; z-index: 9999;
+            display: flex; align-items: center; gap: 16px;
+            padding: 12px 22px;
+            background: linear-gradient(135deg, #0f172a, #1e1b4b);
+            border-bottom: 1px solid rgba(255,255,255,.12);
+            margin: -20px -20px 16px;
+        }
+
+        nav .logo { display: flex; align-items: center; gap: 9px; font-weight: 800; font-size: 1.15rem; color: #fff; }
+        nav .logo .dot { width: 28px; height: 28px; border-radius: 8px; display: grid; place-items: center; background: linear-gradient(135deg, #6366f1, #a855f7); }
+        nav .links { margin-left: auto; display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+        nav a { color: #c7d2fe; text-decoration: none; font-size: .9rem; transition: .2s; }
+        nav a:hover { color: #fff; }
+
+        h1 { text-align: center; color: #fff; margin-bottom: 6px; font-weight: 800; }
+        .subtitle { text-align: center; color: #a5b4fc; margin: 0 0 24px; font-size: 0.9em; }
+
+        .container { max-width: 880px; margin: 0 auto; }
+
+        .card {
+            background: rgba(255,255,255,.08);
+            border-radius: 18px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,.14);
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            padding: 20px; margin-bottom: 18px;
+        }
+
+        .panel-title { font-size: 1.05em; font-weight: 700; color: #fff; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; }
+        .panel-title .count { font-size: 0.78em; font-weight: 500; color: #a5b4fc; }
+
+        .form-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+        input[type="text"] {
+            flex: 1; min-width: 160px;
+            padding: 11px 14px; border-radius: 10px;
+            border: 1px solid rgba(255,255,255,.18);
+            background: rgba(255,255,255,.06); color: #fff; font-size: 0.95em;
+        }
+        input[type="text"]::placeholder { color: #94a3b8; }
+        input[type="text"]:focus { outline: none; border-color: rgba(168,85,247,.7); }
+
+        .btn {
+            padding: 11px 18px; border-radius: 10px; border: none; cursor: pointer;
+            font-weight: 700; font-size: 0.9em; color: #fff; transition: 0.2s; white-space: nowrap;
+        }
+        .btn-add { background: linear-gradient(135deg, var(--indigo), var(--purple)); }
+        .btn-ghost { background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.18); }
+        .btn-naver { background: linear-gradient(135deg, #16a34a, #22c55e); text-decoration: none; display: inline-block; }
+        .btn:hover, .btn-naver:hover { opacity: 0.9; transform: translateY(-2px); box-shadow: 0 8px 18px rgba(0,0,0,.3); }
+
+        .item {
+            border: 1px solid rgba(255,255,255,.12);
+            border-radius: 14px; padding: 16px; margin-bottom: 12px;
+            background: rgba(255,255,255,.04);
+        }
+        .item-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+        .item-name { font-size: 1.1em; font-weight: 700; color: #fff; }
+        .item-memo { font-size: 0.85em; color: #94a3b8; margin-bottom: 12px; }
+        .item-price { font-size: 0.9em; color: #cbd5e1; margin-bottom: 12px; }
+        .item-price b { color: #4ade80; font-size: 1.15em; }
+        .item-price .stamp { color: #64748b; font-size: 0.85em; margin-left: 8px; }
+        .item-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+        .del-btn { background: none; border: none; color: var(--red); cursor: pointer; font-size: 0.85em; font-weight: 600; }
+        .del-btn:hover { text-decoration: underline; }
+
+        .empty { text-align: center; color: #94a3b8; padding: 24px 0; font-size: 0.9em; }
+        .notice { font-size: 0.82em; color: #a5b4fc; background: rgba(99,102,241,.12); border: 1px solid rgba(99,102,241,.3); border-radius: 10px; padding: 10px 14px; margin-bottom: 16px; line-height: 1.55; }
+        .footer { text-align: center; margin-top: 24px; color: #64748b; font-size: 0.82em; line-height: 1.6; }
+
+        @media (max-width: 560px) {
+            .form-row { flex-direction: column; }
+            input[type="text"] { min-width: 0; }
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <span class="logo"><span class="dot">🛒</span> Mr.Music</span>
+        <span class="links">
+            <a href="../ETF_Stock_P/index.html">ETF</a>
+            <a href="../PriceTracking/index.html">최저가</a>
+            <a href="../SnowPark_P/index.html">SnowPark</a>
+            <a href="../Swiming/index.html">자유수영</a>
+            <a href="../AirTicket_P/index.html">항공권</a>
+            <a href="../Kiwoom/index.html">키움</a>
+            <a href="../MyAI/index.html">MyAI</a>
+            <a href="../index.html">← 허브</a>
+        </span>
+    </nav>
+
+    <h1>🛒 식재료 최저가 트래커</h1>
+    <p class="subtitle">자주 사는 식재료를 등록하면 네이버 쇼핑 낮은가격순으로 바로 확인 · 매일 자동 수집</p>
+
+    <div class="container">
+        <div class="notice">
+            💡 가격 자동 수집은 Windows 작업 스케줄러 + PowerShell(<b>FetchPrices.ps1</b>)이 담당하며, 수집 결과는 <b>prices.json</b>에 저장됩니다.
+            이 화면의 식재료 목록은 브라우저에 저장되고, <b>내보내기</b>로 받은 <b>items.json</b>을 PowerShell이 읽어 수집합니다.
+        </div>
+
+        <!-- 식재료 등록 -->
+        <div class="card">
+            <div class="panel-title">
+                <span>식재료 리스트</span>
+                <span class="count" id="itemCount">0개 등록</span>
+            </div>
+            <div class="form-row">
+                <input type="text" id="nameInput" placeholder="예: 깐멍게 500g">
+                <input type="text" id="memoInput" placeholder="메모 (선택): 예) 산지 직송 선호">
+                <button class="btn btn-add" id="addBtn">+ 추가</button>
+            </div>
+            <div class="form-row">
+                <input type="text" id="filterInput" placeholder="검색 필터: 이름 / 메모">
+            </div>
+            <div class="form-row">
+                <button class="btn btn-ghost" id="exportBtn">items.json 내보내기</button>
+                <button class="btn btn-ghost" id="importBtn">items.json 가져오기</button>
+                <button class="btn btn-ghost" id="loadPriceBtn">prices.json 불러오기</button>
+                <input type="file" id="importFile" accept="application/json" style="display:none">
+                <input type="file" id="priceFile" accept="application/json" style="display:none">
+            </div>
+        </div>
+
+        <!-- 식재료 목록 -->
+        <div id="list"></div>
+
+        <div class="footer">
+            <p>※ 네이버 쇼핑 정책상 브라우저에서 직접 가격을 읽어올 수 없어, 수집은 PowerShell이 수행합니다.</p>
+            <p>© Mr.Music · Aurora Glass Theme</p>
+        </div>
+    </div>
+
+    <script>
+        var STORAGE_KEY = "priceTracking.items";
+        var items = [];
+        var prices = {};   // { itemName: { price: number, updatedAt: string } }
+
+        function uid() { return "id" + Date.now() + Math.floor(Math.random() * 1000); }
+
+        // 네이버 쇼핑 낮은가격순 검색 URL 생성
+        function naverUrl(name) {
+            var q = encodeURIComponent(name);
+            return "https://search.shopping.naver.com/search/all" +
+                "?query=" + q + "&origQuery=" + q + "&adQuery=" + q +
+                "&frm=NVSCPRO&pagingIndex=1&pagingSize=40" +
+                "&productSet=total&sort=price_asc&viewType=list";
+        }
+
+        function fmtPrice(n) {
+            if (n === null || n === undefined || isNaN(n)) return "-";
+            return Number(n).toLocaleString("ko-KR") + "원";
+        }
+
+        function save() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify({ items: items }));
+        }
+
+        function load() {
+            var raw = localStorage.getItem(STORAGE_KEY);
+            if (raw) {
+                try { items = (JSON.parse(raw).items) || []; return; } catch (e) {}
+            }
+            // 최초 실행: items.json 시드 로드 시도
+            fetch("./items.json", { cache: "no-store" })
+                .then(function (r) { return r.ok ? r.json() : null; })
+                .then(function (j) {
+                    if (j && j.items) { items = j.items; save(); render(); }
+                })
+                .catch(function () {});
+            loadPrices();
+        }
+
+        function loadPrices() {
+            fetch("./prices.json", { cache: "no-store" })
+                .then(function (r) { return r.ok ? r.json() : null; })
+                .then(function (j) { if (j && j.prices) { prices = j.prices; render(); } })
+                .catch(function () {});
+        }
+
+        function render() {
+            var filter = (document.getElementById("filterInput").value || "").trim().toLowerCase();
+            var list = document.getElementById("list");
+            document.getElementById("itemCount").textContent = items.length + "개 등록";
+
+            var shown = items.filter(function (it) {
+                if (!filter) return true;
+                return (it.name + " " + (it.memo || "")).toLowerCase().indexOf(filter) !== -1;
+            });
+
+            if (shown.length === 0) {
+                list.innerHTML = '<div class="card"><div class="empty">' +
+                    (items.length === 0 ? "등록된 식재료가 없습니다. 위에서 추가하세요." : "검색 결과가 없습니다.") +
+                    '</div></div>';
+                return;
+            }
+
+            var html = "";
+            shown.forEach(function (it) {
+                var p = prices[it.name];
+                var priceLine = p
+                    ? '현재 최저가 <b>' + fmtPrice(p.price) + '</b><span class="stamp">' + (p.updatedAt || "") + '</span>'
+                    : '현재 최저가 <span class="stamp">아직 수집 전</span>';
+
+                html +=
+                    '<div class="item">' +
+                        '<div class="item-head">' +
+                            '<span class="item-name">' + escapeHtml(it.name) + '</span>' +
+                            '<button class="del-btn" data-id="' + it.id + '">삭제</button>' +
+                        '</div>' +
+                        (it.memo ? '<div class="item-memo">' + escapeHtml(it.memo) + '</div>' : '') +
+                        '<div class="item-price">' + priceLine + '</div>' +
+                        '<div class="item-actions">' +
+                            '<a class="btn btn-naver" href="' + naverUrl(it.name) + '" target="_blank" rel="noopener">네이버 최저가 보기 ↗</a>' +
+                        '</div>' +
+                    '</div>';
+            });
+            list.innerHTML = html;
+
+            var dels = list.querySelectorAll(".del-btn");
+            for (var i = 0; i < dels.length; i++) {
+                dels[i].addEventListener("click", function () { removeItem(this.getAttribute("data-id")); });
+            }
+        }
+
+        function escapeHtml(s) {
+            return String(s).replace(/[&<>"']/g, function (c) {
+                return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+            });
+        }
+
+        function addItem() {
+            var name = document.getElementById("nameInput").value.trim();
+            var memo = document.getElementById("memoInput").value.trim();
+            if (!name) { alert("식재료명을 입력하세요."); return; }
+            if (items.some(function (it) { return it.name === name; })) {
+                alert("이미 등록된 식재료입니다: " + name); return;
+            }
+            items.push({ id: uid(), name: name, memo: memo });
+            save();
+            document.getElementById("nameInput").value = "";
+            document.getElementById("memoInput").value = "";
+            render();
+        }
+
+        function removeItem(id) {
+            var it = items.find(function (x) { return x.id === id; });
+            if (it && !confirm('"' + it.name + '" 을(를) 삭제할까요?')) return;
+            items = items.filter(function (x) { return x.id !== id; });
+            save();
+            render();
+        }
+
+        function exportItems() {
+            var blob = new Blob([JSON.stringify({ items: items }, null, 2)], { type: "application/json" });
+            var a = document.createElement("a");
+            a.href = URL.createObjectURL(blob);
+            a.download = "items.json";
+            a.click();
+            URL.revokeObjectURL(a.href);
+        }
+
+        function importItems(file) {
+            var reader = new FileReader();
+            reader.onload = function () {
+                try {
+                    var j = JSON.parse(reader.result);
+                    if (j && j.items) { items = j.items; save(); render(); alert("불러왔습니다: " + items.length + "개"); }
+                    else alert("items 배열이 없는 파일입니다.");
+                } catch (e) { alert("JSON 파싱 오류: " + e.message); }
+            };
+            reader.readAsText(file);
+        }
+
+        function importPrices(file) {
+            var reader = new FileReader();
+            reader.onload = function () {
+                try {
+                    var j = JSON.parse(reader.result);
+                    if (j && j.prices) { prices = j.prices; render(); alert("가격 정보를 불러왔습니다."); }
+                    else alert("prices 객체가 없는 파일입니다.");
+                } catch (e) { alert("JSON 파싱 오류: " + e.message); }
+            };
+            reader.readAsText(file);
+        }
+
+        // 이벤트 바인딩
+        document.getElementById("addBtn").addEventListener("click", addItem);
+        document.getElementById("nameInput").addEventListener("keydown", function (e) { if (e.key === "Enter") addItem(); });
+        document.getElementById("memoInput").addEventListener("keydown", function (e) { if (e.key === "Enter") addItem(); });
+        document.getElementById("filterInput").addEventListener("input", render);
+        document.getElementById("exportBtn").addEventListener("click", exportItems);
+        document.getElementById("importBtn").addEventListener("click", function () { document.getElementById("importFile").click(); });
+        document.getElementById("importFile").addEventListener("change", function () { if (this.files[0]) importItems(this.files[0]); });
+        document.getElementById("loadPriceBtn").addEventListener("click", function () { document.getElementById("priceFile").click(); });
+        document.getElementById("priceFile").addEventListener("change", function () { if (this.files[0]) importPrices(this.files[0]); });
+
+        load();
+        render();
+    </script>
+</body>
+
+</html>
