@@ -65,7 +65,7 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 작업 스케줄러(GUI) 또는 아래 `schtasks` 명령으로 등록할 수 있습니다. 매일 08:40에 실행하는 예시입니다.
 
 ```powershell
-schtasks /Create /TN "KiwoomAutoBuy" /TR "powershell.exe -NoProfile -ExecutionPolicy Bypass -File `"C:\00.DEV_SRC\Company_MyProject\kiwoom\AutoBuy.ps1`"" /SC WEEKLY /D MON,TUE,WED,THU,FRI /ST 08:40 /RL HIGHEST
+schtasks /Create /TN "KiwoomAutoBuy" /TR "powershell.exe -NoProfile -ExecutionPolicy Bypass -File `"C:\00.DEV_SRC\Company_MyProject\Kiwoom\AutoBuy.ps1`"" /SC WEEKLY /D MON,TUE,WED,THU,FRI /ST 08:40 /RL HIGHEST
 ```
 
 - `/SC WEEKLY /D MON,TUE,WED,THU,FRI`: 평일에만 트리거 (스크립트 내부에도 주말 방어 로직이 있어 이중 안전장치)

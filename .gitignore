@@ -1,4 +1,9 @@
 # Kiwoom Windows 자동 매수 - 비밀값/상태 파일 제외
-kiwoom/config.json
-kiwoom/state.json
-kiwoom/autobuy.log
+Kiwoom/config.json
+Kiwoom/state.json
+Kiwoom/autobuy.log
+
+# PriceTracking - 비밀값/생성 파일 제외
+PriceTracking/config.json
+PriceTracking/prices.json
+PriceTracking/fetch.log
